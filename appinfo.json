@@ -1,0 +1,23 @@
+{
+    "appKeys": {},
+    "capabilities": [
+        ""
+    ],
+    "companyName": "timboe@gmail.com",
+    "longName": "TimeSieve",
+    "projectType": "native",
+    "resources": {
+        "media": []
+    },
+    "sdkVersion": "3",
+    "shortName": "TimeSieve",
+    "targetPlatforms": [
+        "basalt"
+    ],
+    "uuid": "77551ac3-30ef-444e-b3fd-0b57418919de",
+    "versionCode": 1,
+    "versionLabel": "1.0",
+    "watchapp": {
+        "watchface": false
+    }
+}
