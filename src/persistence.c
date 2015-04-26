@@ -6,9 +6,9 @@ static struct userData_v1* s_userData;
 void init_persistence() {
 
   //Creaet new
-  s_userData = malloc(sizeof(struct userData_v1));
+  //s_userData = malloc(sizeof(struct userData_v1));
   // Zero evertyhing
-  memset(&s_userData, 0, sizeof(struct userData_v1));
+  //memset(&s_userData, 0, sizeof(struct userData_v1));
   
   // set some defaults
   setUserTime(30);
@@ -16,11 +16,15 @@ void init_persistence() {
 }
 
 void destroy_persistence() { // Save
-  free(s_userData);
+  //free(s_userData);
   s_userData = 0;
 }
 
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
+  return 0;
+  
+  
+  
   if (resourceID >= MAX_UPGRADES) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "getUserOwnsUpgrades resourceID overflow");
     return 0;
@@ -39,17 +43,19 @@ uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
 }
 
 void setUserTime(uint64_t newTime) {
-  s_userData->currentTime = newTime;
+//   s_userData->currentTime = newTime;
 }
 
 void setUserTimeCapacity(uint64_t newTime) {
-  s_userData->timeCapacity = newTime;
+//   s_userData->timeCapacity = newTime;
 }
 
 uint64_t getUserTime() {
+  return 0;
   return s_userData->currentTime;
 }
 
 uint64_t getUserTimeCapacity() {
+  return 0;
   return s_userData->timeCapacity;
 }
