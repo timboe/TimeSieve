@@ -24,6 +24,7 @@ void init_timeStore() {
   s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
 
   // Populate the buffer. This could take a little time, do it at the start
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Start Buffer");
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
     uint16_t nOwned = getUserOwnsUpgrades(REFINERY_ID, upgrade);
     uint64_t currentPrice = INITIAL_PRICE_REFINERY[upgrade];
@@ -45,6 +46,7 @@ void init_timeStore() {
     for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
     s_bufferWatcherPrice[upgrade] = currentPrice;
   }
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "Fin Buffer");
 
   updateTimePerMin();
   updateTankCapacity();
@@ -114,73 +116,113 @@ void multiplyTime(uint64_t factor) {
   setUserTime( getUserTime() * factor );
 }
 
-void time_to_string(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
+/**
+ * Check that the desired item can be afforded, and buy it if so
+ */
+bool doPurchase(const unsigned typeID, const unsigned resourceID) {
+  uint64_t cost = getPriceOfUpgrade(typeID, resourceID);
+  if (cost > getUserTime()) return false;
+  removeTime( cost ); // Debit the user
+  addUpgrade(typeID, resourceID); // Give them their upgrade
+  // Update the price in the buffer so the next one becomes more expensive
+  // And recalculate factors
+  if (typeID == REFINERY_ID) {
+    s_bufferRefineryPrice[resourceID] = cost;
+    updateTimePerMin();
+  } else if (typeID == TANK_ID) {
+    s_bufferTankPrice[resourceID] = cost;
+    updateTankCapacity();
+  } else if (typeID == SIEVE_ID) {
+    s_bufferSievePrice[resourceID] = cost;
+  } else if (typeID == WATCHER_ID) {
+    s_bufferWatcherPrice[resourceID] = cost;
+  }
+  return true;
+}
+
+
+void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   
-  int _eons = time / SEC_IN_EON;
-  int _eras = (time % SEC_IN_EON) / SEC_IN_ERA;
+  int eons = time / SEC_IN_EON;
+  int eras = (time % SEC_IN_EON) / SEC_IN_ERA;
   
-  if (brief && _eons) {
-    snprintf(buffer, buffer_size, "%iEon %iEra", _eons, _eras);
+  if (brief && eons) {
+    snprintf(buffer, buffer_size, "%iEon %iEra", eons, eras);
     return;
   }  
   
-  int _epochs = (time % SEC_IN_ERA) / SEC_IN_EPOCH;
+  int epochs = (time % SEC_IN_ERA) / SEC_IN_EPOCH;
   
-  if (brief && _eras) {
-    snprintf(buffer, buffer_size, "%iEra %iEpoch", _eras, _epochs);
+  if (brief && eras) {
+    snprintf(buffer, buffer_size, "%iEra %iEpoch", eras, epochs);
     return;
   }  
     
-  int _ages = (time % SEC_IN_EPOCH) / SEC_IN_AGE;
+  int ages = (time % SEC_IN_EPOCH) / SEC_IN_AGE;
   
-  if (brief && _epochs) {
-    snprintf(buffer, buffer_size, "%iEpoch %iAge", _epochs, _ages);
+  if (brief && epochs) {
+    snprintf(buffer, buffer_size, "%iEpoch %iAge", epochs, ages);
     return;
   }   
   
-  int _mils  =  (time % SEC_IN_AGE) / SEC_IN_MILLENIUM;
+  int mills  =  (time % SEC_IN_AGE) / SEC_IN_MILLENIUM;
   
-  if (brief && _ages) {
-    snprintf(buffer, buffer_size, "%iAge %iM", _ages, _mils);
+  if (brief && ages) {
+    snprintf(buffer, buffer_size, "%iAge %iM", ages, mills);
     return;
   }  
   
-  int _years = (time % SEC_IN_MILLENIUM) / SEC_IN_YEAR;
+  int years = (time % SEC_IN_MILLENIUM) / SEC_IN_YEAR;
   
-  if (brief && _mils) {
-    snprintf(buffer, buffer_size, "%iM %iy", _mils, _years);
+  if (brief && mills) {
+    snprintf(buffer, buffer_size, "%iM %iy", mills, years);
     return;
   }
   
-  int _days  = (time % SEC_IN_YEAR) / SEC_IN_DAY;
-  int _hours = (time % SEC_IN_DAY) / SEC_IN_HOUR;
+  int days  = (time % SEC_IN_YEAR) / SEC_IN_DAY;
+  int hours = (time % SEC_IN_DAY) / SEC_IN_HOUR;
   
-  if (brief && _years) {
-    snprintf(buffer, buffer_size, "%iy %id %ih", _years, _days, _hours);
+  if (brief && years) {
+    snprintf(buffer, buffer_size, "%iy %id %ih", years, days, hours);
     return;
   } 
   
-  int _mins  = (time % SEC_IN_HOUR) / SEC_IN_MIN;
+  int mins = (time % SEC_IN_HOUR) / SEC_IN_MIN;
   
-  if (brief && _days) {
-    snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im", _days, _hours, _mins);
+  if (brief && days) {
+    snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im", days, hours, mins);
     return;
   } 
   
-  int _secs  = time % SEC_IN_MIN;
+  int secs = time % SEC_IN_MIN;
   
-  if (brief && _hours) {
-    snprintf(buffer, buffer_size, "%ih %im %is", _hours, _mins, _secs);
-  } else if (brief && _mins) {
-    snprintf(buffer, buffer_size, "%im %is", _mins, _secs);
+  if (brief && hours) {
+    snprintf(buffer, buffer_size, "%ih %im %is", hours, mins, secs);
+    return;
+  } else if (brief && mins) {
+    snprintf(buffer, buffer_size, "%im %is", mins, secs);
+    return;
   } else if (brief) {
-    snprintf(buffer, buffer_size, "%is", _secs);
+    snprintf(buffer, buffer_size, "%is", secs);
+    return;
   } 
+
+  // Full
+  if (secs) snprintf(buffer, buffer_size, "%is", secs);
+  else if (mins) snprintf(buffer, buffer_size, "%im %is", mins, secs);
+  else if (hours) snprintf(buffer, TEXT_BUFFER_SIZE, "%ih %im %is", hours, mins, secs);
+  else if (days) snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im %is", days, hours, mins, secs); 
+  else if (years) snprintf(buffer, TEXT_BUFFER_SIZE, "%iy %id %ih %im %is", years, days, hours, mins, secs); 
+  else if (mills) snprintf(buffer, TEXT_BUFFER_SIZE, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs); 
+  else if (ages) snprintf(buffer, TEXT_BUFFER_SIZE, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs); 
+  else if (epochs) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs); 
+  else if (eras) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs); 
+  else snprintf(buffer, TEXT_BUFFER_SIZE, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs); 
   return;
-  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Did time %iy %id %ih %im %is", _years, _days, _hours, _mins, _secs);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Did time %iy %id %ih %im %is", _years, days, hours, mins, secs);
 }
 
-void percentage_to_string(uint64_t amount, uint64_t total, char* buffer, unsigned* value) {
+void percentageToString(uint64_t amount, uint64_t total, char* buffer, unsigned* value) {
   *value = (amount*100) / total;
   if (*value > 100) *value = 100;
   snprintf(buffer, TEXT_BUFFER_SIZE, "%i%%", *value);

@@ -6,14 +6,15 @@ static struct userData_v1* s_userData;
 void init_persistence() {
 
   // Check if first load
-  int32_t version = 0;
+  int version = 0;
   if (persist_exists(PERSISTENT_VERSION_KEY)) {
     version = persist_read_int(PERSISTENT_VERSION_KEY);
   }
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence schema version %i", version);
 
+  // Allocate user store memory
+  s_userData = malloc(sizeof(struct userData_v1));
   if (version == 0) {
-    // Create new user store
-    s_userData = malloc(sizeof(struct userData_v1));
     // Zero evertyhing
     memset(s_userData, 0, sizeof(struct userData_v1));
     // set some defaults
@@ -22,7 +23,7 @@ void init_persistence() {
   } else if (version == 1) {
     // Load from memory
     int result = persist_read_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence readd code %i", result);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence read code %i", result);
   } else {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence unknown save version!");
     // todo return an error

@@ -24,8 +24,8 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   static char s_tankContentText[TEXT_BUFFER_SIZE];
   
   unsigned _percentage;
-  percentage_to_string(getUserTime(), getTankCapacity(), s_tankFullPercetText, &_percentage);
-  time_to_string(getUserTime(), s_tankContentText, TEXT_BUFFER_SIZE, true);
+  percentageToString(getUserTime(), getTankCapacity(), s_tankFullPercetText, &_percentage);
+  timeToString(getUserTime(), s_tankContentText, TEXT_BUFFER_SIZE, true);
   
   // Fill back
   graphics_context_set_fill_color(ctx, GColorLightGray);
