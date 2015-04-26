@@ -3,10 +3,11 @@
 #include "timeStore.h"
 #include "constants.h"
 #include "resources.h"
+#include "ditheredRect.h"
   
-const uint8_t LIQUID_BIT_X[N_LIQUID_BITS] = {78,  92,  18,  123, 53,  37,  98,  45,  39,  94}; // Random 
-const uint8_t LIQUID_BIT_Y[N_LIQUID_BITS] = {43,  25,  45,  22,  7,   26,  16,  37,  48,  38}; // Random
-  
+// Frame to hold tank gfx 
+static Layer* s_tankLayer;
+
 void update_timeTank_layer() {
   layer_mark_dirty(s_tankLayer);
 }  
@@ -23,12 +24,13 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   
   unsigned _percentage;
   percentage_to_string(s_userLTime, s_userLTimeCapacity, s_tankFullPercetText, &_percentage);
-  time_to_string(s_userLTime, s_tankContentText);
+  time_to_string(s_userLTime, s_tankContentText, TEXT_BUFFER_SIZE, true);
   
   // Fill back
   graphics_context_set_fill_color(ctx, GColorLightGray);
-  graphics_fill_rect(ctx, tank_bounds, 10, GCornersAll);
-  
+  //graphics_fill_rect(ctx, tank_bounds, 10, GCornersAll);
+  draw_gradient_rect(ctx, tank_bounds,GColorDarkGray, GColorLightGray, TOP_TO_BOTTOM);
+
   // Fill liquid height
   int liquid_height = (tank_bounds.size.h * _percentage) / 100;
   GRect liquid_rect = GRect(0, tank_bounds.origin.y + tank_bounds.size.h - liquid_height, tank_bounds.size.w, liquid_height);
@@ -36,26 +38,26 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_fill_rect(ctx, liquid_rect, 0, GCornersAll);
   
   // Fill bits in the liquid
-  static GRect liquid_bits[N_LIQUID_BITS]; // Small rect is easier than using two points
-  graphics_context_set_fill_color(ctx, GColorYellow);
-  graphics_context_set_antialiased(ctx, false);
+  static GPoint liquid_bits_bgn[N_LIQUID_BITS];
+  static GPoint liquid_bits_end[N_LIQUID_BITS];
+  static uint16_t liquid_bit_y[N_LIQUID_BITS];
+  graphics_context_set_stroke_color(ctx, GColorCyan);
   static bool first_pass = true; // Do we need to update all 4 coords?
   for (unsigned i = 0; i < N_LIQUID_BITS; ++i) {
-    liquid_bits[i].origin.y = tank_bounds.origin.y + tank_bounds.size.h - liquid_height + LIQUID_BIT_Y[i];
     if (first_pass == true) {
-      liquid_bits[i].origin.x = LIQUID_BIT_X[i];
-      liquid_bits[i].size.w = 3;
-      liquid_bits[i].size.h = 1;
+      liquid_bits_bgn[i].x = 5 + rand()%130;
+      liquid_bits_end[i].x =liquid_bits_bgn[i].x + (2 + rand()%3);
+      liquid_bit_y[i] = 3 + rand()%50;
     }
-    graphics_draw_rect(ctx, liquid_bits[i]);
+    liquid_bits_bgn[i].y = tank_bounds.origin.y + tank_bounds.size.h - liquid_height + liquid_bit_y[i];
+    liquid_bits_end[i].y = liquid_bits_bgn[i].y;
+    graphics_draw_line(ctx, liquid_bits_bgn[i], liquid_bits_end[i]);
   }
   first_pass = false; // Only need update the y coord in future
-  graphics_context_set_antialiased(ctx, true);
-
 
   // Fill Frame
-  graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_context_set_stroke_width(ctx, 3);
+  graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_draw_round_rect(ctx, tank_bounds, 10);
   graphics_context_set_stroke_width(ctx, 1);
 
@@ -79,7 +81,8 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
                      GTextOverflowModeWordWrap,
                      GTextAlignmentLeft,
                      NULL);
-  if (_percentage == 100) graphics_context_set_text_color(ctx, GColorRed);
+  
+  if (_percentage == 100) graphics_context_set_text_color(ctx, GColorSunsetOrange);
   graphics_draw_text(ctx,
                      s_tankFullPercetText, 
                      *getDOSFont(), 
@@ -88,7 +91,6 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
                      GTextAlignmentCenter,
                      NULL);
 
-  
   	APP_LOG(APP_LOG_LEVEL_DEBUG, "Drew text");
 }
 

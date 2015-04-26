@@ -1,7 +1,7 @@
 #pragma once
 #include <pebble.h>
 
-static GFont s_perfectDOSFont;
+
 
 GFont* getDOSFont();
 

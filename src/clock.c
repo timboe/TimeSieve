@@ -1,5 +1,7 @@
 #include <pebble.h>
 #include <clock.h>
+  
+static Layer* s_clockLayer;
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);

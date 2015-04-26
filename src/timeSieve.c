@@ -1,5 +1,7 @@
 #include <pebble.h>
 #include "timeSieve.h"
+  
+static Layer* s_timeSieveLayer;
 
 static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
