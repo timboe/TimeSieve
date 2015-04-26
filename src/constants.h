@@ -55,8 +55,8 @@ extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
 extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
 extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
-extern const uint64_t REWARD_PRICE_TANK[MAX_UPGRADES];
-extern const uint64_t REWARD_PRICE_WATCHER[MAX_UPGRADES];
+extern const uint64_t REWARD_TANK[MAX_UPGRADES];
+extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 
 // typedef enum {
 //   TimeTongs, TYPE2, TYPE3, TYPE4,

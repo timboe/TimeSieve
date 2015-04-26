@@ -20,8 +20,7 @@ void init_persistence(); // Load
 void destroy_persistence(); // Save
 
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
+void addUpgrade(const unsigned typeID, const unsigned resourceID);
 
 void setUserTime(uint64_t newTime);
-void setUserTimeCapacity(uint64_t newTime);
 uint64_t getUserTime();
-uint64_t getUserTimeCapacity();

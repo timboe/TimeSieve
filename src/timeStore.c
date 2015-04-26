@@ -47,7 +47,7 @@ void init_timeStore() {
   }
 
   updateTimePerMin();
-  updateTimeCapacity();
+  updateTankCapacity();
 }
 
 void destroy_timeStore() {
@@ -100,6 +100,7 @@ void updateTankCapacity() {
 }
 
 void addTime(uint64_t toAdd) {
+  if ( getUserTime() + toAdd > getTankCapacity() ) toAdd = getTankCapacity() - getUserTime();
   setUserTime( getUserTime() + toAdd );
 }
 
@@ -108,6 +109,7 @@ void removeTime(uint64_t toSubtract) {
   setUserTime( getUserTime() - toSubtract );
 }
 
+ // This is for debug - it doesn´t check if there is space to store the extra
 void multiplyTime(uint64_t factor) {
   setUserTime( getUserTime() * factor );
 }

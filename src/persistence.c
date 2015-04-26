@@ -18,7 +18,7 @@ void init_persistence() {
     memset(s_userData, 0, sizeof(struct userData_v1));
     // set some defaults
     setUserTime(30);
-    setUserTimeCapacity(6000);
+    addUpgrade(TANK_ID, 0);
   } else if (version == 1) {
     // Load from memory
     int result = persist_read_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
@@ -28,6 +28,18 @@ void init_persistence() {
     // todo return an error
   }
 
+}
+
+void addUpgrade(const unsigned typeID, const unsigned resourceID) {
+  if (typeID == REFINERY_ID) {
+    ++s_userData->refineriesOwned[resourceID];
+  } else if (typeID == TANK_ID) {
+    ++s_userData->tanksOwned[resourceID];
+  } else if (typeID == SIEVE_ID) {
+    ++s_userData->sievesOwned[resourceID];
+  } else if (typeID == WATCHER_ID) {
+    ++s_userData->watchersOwned[resourceID];
+  }
 }
 
 void destroy_persistence() { // Save
@@ -60,6 +72,6 @@ void setUserTime(uint64_t newTime) {
   s_userData->currentTime = newTime;
 }
 
-void setUserTimeCapacity(uint64_t newTime) {
-  s_userData->timeCapacity = newTime;
+uint64_t getUserTime() {
+  return s_userData->currentTime;
 }
