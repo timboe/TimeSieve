@@ -11,17 +11,17 @@ void init_timeStore() {
   s_userLTime = 7;
   s_userLTimeCapacity = SEC_IN_HOUR;
   
-  s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+//   s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+//   s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+//   s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+//   s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
 }
 
 void destroy_timeStore() {
-  free( s_bufferRefineryPrice );
-  free( s_bufferTankPrice );
-  free( s_bufferSievePrice );
-  free( s_bufferWatcherPrice );
+//   free( s_bufferRefineryPrice );
+//   free( s_bufferTankPrice );
+//   free( s_bufferSievePrice );
+//   free( s_bufferWatcherPrice );
 }
 
 uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID, const unsigned alreadyOwned) {
@@ -35,7 +35,10 @@ uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID, con
 //   } else if (typeID == WATCHER_ID) {
 //     basePrice = INITIAL_PRICE_WATCHER[resourceID];
 //   }
-  uint64_t currentPrice = (s_bufferRefineryPrice[resourceID]);
+  
+  
+  
+//   uint64_t currentPrice = (s_bufferRefineryPrice[resourceID]);
   return 0;
 }
 
