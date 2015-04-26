@@ -2,7 +2,7 @@
 #include <pebble.h>
 #include "constants.h"  
   
-void init_timeStore();
+void init_timeStore(); 
 void destroy_timeStore();
 
 void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief);
