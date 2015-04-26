@@ -26,6 +26,10 @@
 // An eon is defined as 1 billion years
 #define SEC_IN_EON (uint64_t)31536000000000000
 // Warning - 584 billion years is the maximum size of uint64_t  
+
+// DEFINE EXPONENTIAL INCREASE FACTOR, CURRENTLY 7/6 which is ~x1.16
+#define INCREASE_MULTIPLY 7
+#define INCREASE_DIVIDE 6
   
 #define MAX_UPGRADES 16
 #define MAX_TREASURES 16
@@ -49,6 +53,10 @@ extern const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
+extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
+extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
+extern const uint64_t REWARD_PRICE_TANK[MAX_UPGRADES];
+extern const uint64_t REWARD_PRICE_WATCHER[MAX_UPGRADES];
 
 // typedef enum {
 //   TimeTongs, TYPE2, TYPE3, TYPE4,
@@ -81,6 +89,8 @@ extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
 #define BUY_MENU_BACK_COLOUR_ODD GColorMintGreen
 #define BUY_MENU_BACK_COLOUR_EVEN GColorSpringBud
 #define BUY_MENU_BACK_COLOUR_SELECT GColorDarkGreen
+#define BUY_MENU_BACK_COLOUR_CANNOT_AFFORD GColorDarkCandyAppleRed
+
 
 #define TEXT_BUFFER_SIZE 32
 #define TEXT_LARGE_BUFFER_SIZE 64
@@ -93,4 +103,8 @@ extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
 
 #define WIN_SIZE_X 144
 #define WIN_SIZE_Y 168
+
+#define PERSISTENT_VERSION_KEY 0
+#define PERSISTENT_USERDATA_KEY 1
+#define SCHEMA_VERSION 1
   

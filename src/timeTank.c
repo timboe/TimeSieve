@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "resources.h"
 #include "ditheredRect.h"
+#include "persistence.h"
   
 // Frame to hold tank gfx 
 static Layer* s_tankLayer;
@@ -23,8 +24,8 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   static char s_tankContentText[TEXT_BUFFER_SIZE];
   
   unsigned _percentage;
-  percentage_to_string(s_userLTime, s_userLTimeCapacity, s_tankFullPercetText, &_percentage);
-  time_to_string(s_userLTime, s_tankContentText, TEXT_BUFFER_SIZE, true);
+  percentage_to_string(getUserTime(), getTankCapacity(), s_tankFullPercetText, &_percentage);
+  time_to_string(getUserTime(), s_tankContentText, TEXT_BUFFER_SIZE, true);
   
   // Fill back
   graphics_context_set_fill_color(ctx, GColorLightGray);

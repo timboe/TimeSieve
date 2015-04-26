@@ -6,18 +6,36 @@ const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES] = {
   SEC_IN_MIN*2,
   SEC_IN_MIN*10,
   SEC_IN_MIN*60,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0};
+  SEC_IN_MIN*100,
+  SEC_IN_MIN*500,
+  SEC_IN_MIN*1000,
+  SEC_IN_MIN*5000,
+  SEC_IN_MIN*10000,
+  SEC_IN_MIN*50000,
+  SEC_IN_MIN*100000,
+  SEC_IN_MIN*500000,
+  SEC_IN_MIN*1000000,
+  SEC_IN_MIN*5000000,
+  SEC_IN_MIN*10000000,
+  SEC_IN_MIN*50000000};
+
+const uint64_t REWARD_REFINERY[MAX_UPGRADES] = {
+  1,
+  5,
+  40,
+  100,
+  400,
+  1000,
+  4000,
+  50000,
+  100000,
+  1000000,
+  10000000,
+  1,
+  1,
+  1,
+  1,
+  1};
 
 const char* const NAME_REFINERY[MAX_UPGRADES] = {
   "Time Tongs",
@@ -38,6 +56,24 @@ const char* const NAME_REFINERY[MAX_UPGRADES] = {
   "UPGRADE 16"};
 
 const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES] = {
+  SEC_IN_MIN,
+  SEC_IN_MIN*2,
+  SEC_IN_MIN*10,
+  SEC_IN_MIN*60,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0};
+
+const uint64_t REWARD_SIEVE[MAX_UPGRADES] = {
   SEC_IN_MIN,
   SEC_IN_MIN*2,
   SEC_IN_MIN*10,
@@ -91,6 +127,24 @@ const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES] = {
   (uint64_t)0,
   (uint64_t)0};
 
+const uint64_t REWARD_TANK[MAX_UPGRADES] = {
+  SEC_IN_MIN,
+  SEC_IN_MIN*2,
+  SEC_IN_MIN*10,
+  SEC_IN_MIN*60,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0};
+
 const char* const NAME_TANK[MAX_UPGRADES] = {
   "Minute Tank",
   "TUPGRADE 2",
@@ -110,6 +164,24 @@ const char* const NAME_TANK[MAX_UPGRADES] = {
   "TUPGRADE 16"};
 
 const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES] = {
+  SEC_IN_MIN,
+  SEC_IN_MIN*2,
+  SEC_IN_MIN*10,
+  SEC_IN_MIN*60,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0};
+
+const uint64_t REWARD_WATCHER[MAX_UPGRADES] = {
   SEC_IN_MIN,
   SEC_IN_MIN*2,
   SEC_IN_MIN*10,

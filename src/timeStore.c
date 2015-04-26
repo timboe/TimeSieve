@@ -1,47 +1,116 @@
 #include <pebble.h>
 #include "timeStore.h"
 #include "constants.h"
+#include "persistence.h"
   
 static uint64_t* s_bufferRefineryPrice;
 static uint64_t* s_bufferTankPrice;
 static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
-  
+static uint64_t s_timePerMin;
+static uint64_t s_timeCapacity;
+
+// Perform fixed point increase in price by floor of 7/6.
+uint64_t getPriceOfNext(uint64_t priceOfCurrent) {
+  priceOfCurrent *= INCREASE_MULTIPLY;
+  return priceOfCurrent / INCREASE_DIVIDE;
+}
+
 void init_timeStore() {
-  s_userLTime = 7;
-  s_userLTimeCapacity = SEC_IN_HOUR;
   
-//   s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-//   s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-//   s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-//   s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+  s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+  s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+  s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+  s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+
+  // Populate the buffer. This could take a little time, do it at the start
+  for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
+    uint16_t nOwned = getUserOwnsUpgrades(REFINERY_ID, upgrade);
+    uint64_t currentPrice = INITIAL_PRICE_REFINERY[upgrade];
+    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
+    s_bufferRefineryPrice[upgrade] = currentPrice;
+    //
+    nOwned = getUserOwnsUpgrades(TANK_ID, upgrade);
+    currentPrice = INITIAL_PRICE_TANK[upgrade];
+    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
+    s_bufferTankPrice[upgrade] = currentPrice;
+    //
+    nOwned = getUserOwnsUpgrades(SIEVE_ID, upgrade);
+    currentPrice = INITIAL_PRICE_SIEVE[upgrade];
+    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
+    s_bufferSievePrice[upgrade] = currentPrice;
+    //
+    nOwned = getUserOwnsUpgrades(TANK_ID, upgrade);
+    currentPrice = INITIAL_PRICE_WATCHER[upgrade];
+    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
+    s_bufferWatcherPrice[upgrade] = currentPrice;
+  }
+
+  updateTimePerMin();
+  updateTimeCapacity();
 }
 
 void destroy_timeStore() {
-//   free( s_bufferRefineryPrice );
-//   free( s_bufferTankPrice );
-//   free( s_bufferSievePrice );
-//   free( s_bufferWatcherPrice );
+  free( s_bufferRefineryPrice );
+  free( s_bufferTankPrice );
+  free( s_bufferSievePrice );
+  free( s_bufferWatcherPrice );
 }
 
-uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID, const unsigned alreadyOwned) {
-//   uint64_t basePrice = 0;
-//   if (typeID == REFINERY_ID) {
-//     basePrice = INITIAL_PRICE_REFINERY[resourceID];
-//   } else if (typeID == TANK_ID) {
-//     basePrice = INITIAL_PRICE_TANK[resourceID];
-//   } else if (typeID == SIEVE_ID) {
-//    basePrice = INITIAL_PRICE_SIEVE[resourceID];
-//   } else if (typeID == WATCHER_ID) {
-//     basePrice = INITIAL_PRICE_WATCHER[resourceID];
-//   }
-  
-  
-  
-//   uint64_t currentPrice = (s_bufferRefineryPrice[resourceID]);
-  return 0;
+
+uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
+  uint64_t currentPrice = 0;
+  if (typeID == REFINERY_ID) {
+    currentPrice = s_bufferRefineryPrice[resourceID];
+  } else if (typeID == TANK_ID) {
+    currentPrice = s_bufferTankPrice[resourceID];
+  } else if (typeID == SIEVE_ID) {
+    currentPrice = s_bufferSievePrice[resourceID];
+  } else if (typeID == WATCHER_ID) {
+    currentPrice = s_bufferWatcherPrice[resourceID];
+  }
+
+  return getPriceOfNext(currentPrice);
 }
 
+uint64_t getTimePerMin() {
+  return s_timePerMin;
+}
+
+/**
+ * Redo the calculation about how much time we should be making every min
+ * and take into acount all bonuses  
+ */ 
+void updateTimePerMin() {
+  s_timePerMin = 60; // This is the base level
+  for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
+    s_timePerMin += getUserOwnsUpgrades(REFINERY_ID, upgrade) * REWARD_REFINERY[upgrade];
+  }
+}
+
+uint64_t getTankCapacity() {
+  return s_timeCapacity;
+}
+
+void updateTankCapacity() {
+  s_timeCapacity = SEC_IN_HOUR; // Base level
+  for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
+    s_timeCapacity += getUserOwnsUpgrades(TANK_ID, upgrade) * REWARD_TANK[upgrade];
+  }
+}
+
+void addTime(uint64_t toAdd) {
+  setUserTime( getUserTime() + toAdd );
+}
+
+void removeTime(uint64_t toSubtract) {
+  if (toSubtract > getUserTime()) toSubtract = getUserTime();
+  setUserTime( getUserTime() - toSubtract );
+}
+
+void multiplyTime(uint64_t factor) {
+  setUserTime( getUserTime() * factor );
+}
 
 void time_to_string(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   

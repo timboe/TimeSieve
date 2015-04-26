@@ -2,6 +2,7 @@
 #include "buyMenu.h"
 #include "constants.h"
 #include "persistence.h"
+#include "timeStore.h"
   
 #define NUM_BUY_MENU_SECTIONS 1
 #define NUM_BUY_MENU_ITEMS 4
@@ -97,34 +98,36 @@ static void refinery_menu_draw_header_callback(GContext* ctx, const Layer *cell_
 }
 
 static void refinery_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
-  
+  GSize size = layer_get_frame(cell_layer).size;
+  bool selected = menu_cell_layer_is_highlighted(cell_layer);
   
   //Get name
   const unsigned location = cell_index->row;
   const char* upgradeName = NAME_REFINERY[location];
   // Get owned
   const uint16_t owned = getUserOwnsUpgrades(REFINERY_ID, location);
-  
-  bool display = true;
-  if (owned == 0) {
-    // Can I afford this? Only display if sp
-    
-  }
-  
-  
-  
-  // Determine which section we're going to draw in
-    
-    
-  if (cell_index->row == 0) {
-    menu_cell_basic_draw(ctx, cell_layer, "A", "Get more liquid time", NULL);
-  } else if (cell_index->row == 1) {
-    menu_cell_basic_draw(ctx, cell_layer, "B", "Store more liquid time", NULL);
-  } else if (cell_index->row == 2) {
-    menu_cell_basic_draw(ctx, cell_layer, "C", "Find more treasures", NULL);
+  const uint64_t priceNext = getPriceOfUpgrade(REFINERY_ID, location);
+
+  bool display = false, canAfford = false;
+    // Can I afford this? Only display if I am more than 50% of the way to being able to afford one
+  if (owned > 0 || getUserTime() > (priceNext/2)) display = true;
+  if (getUserTime() >= priceNext) canAfford = true;
+
+  // Do not have and cannot afford, draw ???s
+  if (display == false) {
+    if (selected)                      graphics_context_set_fill_color(ctx, GColorDarkGray);
+    else if (cell_index->row % 2 == 1) graphics_context_set_fill_color(ctx, GColorLightGray);
+    graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
+    menu_cell_basic_draw(ctx, cell_layer, "???", "??????", NULL);
   } else {
-    menu_cell_basic_draw(ctx, cell_layer, "D", "Collect more treasure", NULL);
+    if (selected && canAfford)         graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_SELECT);
+    else if (selected)                 graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_CANNOT_AFFORD);
+    else if (cell_index->row % 2 == 1) graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_ODD);
+    else                               graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_EVEN);
+    graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
+    menu_cell_basic_draw(ctx, cell_layer, upgradeName, "An items", NULL);
   }
+
 }
 
 static void refinery_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {

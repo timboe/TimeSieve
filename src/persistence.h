@@ -2,11 +2,10 @@
 #include "constants.h"
 
 // This structure defines the sum of persitifiable data
-// Currently 184/256 bytes
+// Currently 180/256 bytes
 struct userData_v1 {
   // Important time stores
   uint64_t currentTime;
-  uint64_t timeCapacity;
   uint64_t totalTime;
   // Things owned
   uint16_t refineriesOwned[MAX_UPGRADES];
