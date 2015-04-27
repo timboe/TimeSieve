@@ -44,6 +44,7 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID) {
 }
 
 void destroy_persistence() { // Save
+  s_userData->timeOfSave = time(NULL);
   int dataResult = persist_write_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
   free(s_userData);
   s_userData = 0;

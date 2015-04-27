@@ -12,6 +12,11 @@
                 "file": "fonts/perfect-dos-vga.ttf",
                 "name": "PERFECT_DOS_21",
                 "type": "font"
+            },
+            {
+                "file": "fonts/perfect-dos-vga.ttf",
+                "name": "PERFECT_DOS_40",
+                "type": "font"
             }
         ]
     },

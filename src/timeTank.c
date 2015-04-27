@@ -29,8 +29,22 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   
   // Fill back
   graphics_context_set_fill_color(ctx, GColorLightGray);
-  //graphics_fill_rect(ctx, tank_bounds, 10, GCornersAll);
-  draw_gradient_rect(ctx, tank_bounds,GColorDarkGray, GColorLightGray, TOP_TO_BOTTOM);
+  graphics_fill_rect(ctx, tank_bounds, 10, GCornersAll);
+  //draw_gradient_rect(ctx, tank_bounds,GColorDarkGray, GColorLightGray, TOP_TO_BOTTOM);
+
+  // Fill screws
+  graphics_context_set_stroke_color(ctx, GColorBlack);
+  graphics_context_set_fill_color(ctx, GColorDarkGray);
+  GPoint screw_one = GPoint(tank_bounds.origin.x + 1*tank_bounds.size.w/6 - 2, tank_bounds.origin.y + tank_bounds.size.h/3);
+  GPoint screw_two = GPoint(tank_bounds.origin.x + 5*tank_bounds.size.w/6 - 2, tank_bounds.origin.y + tank_bounds.size.h/3);
+  graphics_fill_circle(ctx, screw_one, 4);
+  graphics_fill_circle(ctx, screw_two, 4);
+  graphics_draw_circle(ctx, screw_one, 4);
+  graphics_draw_circle(ctx, screw_two, 4);
+  graphics_context_set_stroke_width(ctx, 1);
+  graphics_draw_line(ctx, GPoint(screw_one.x-2, screw_one.y-2), GPoint(screw_one.x+2, screw_one.y+2));
+  graphics_draw_line(ctx, GPoint(screw_two.x+3, screw_two.y-1), GPoint(screw_two.x-3, screw_two.y+1));
+  graphics_context_set_stroke_width(ctx, 1);
 
   // Fill liquid height
   int liquid_height = (tank_bounds.size.h * _percentage) / 100;
@@ -56,11 +70,19 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   }
   first_pass = false; // Only need update the y coord in future
 
+  // Fill borders
+  graphics_context_set_stroke_color(ctx, GColorBlack);
+  graphics_context_set_stroke_width(ctx, 5);
+  graphics_draw_rect(ctx, GRect(tank_bounds.origin.x, tank_bounds.origin.y, tank_bounds.size.w,  tank_bounds.size.h));
   // Fill Frame
   graphics_context_set_stroke_width(ctx, 3);
+  GRect middle_wall = GRect(tank_bounds.origin.x + 1, tank_bounds.origin.y + 0, tank_bounds.size.w - 2, tank_bounds.size.h - 0);
+  GRect inner_wall  = GRect(tank_bounds.origin.x + 2, tank_bounds.origin.y + 2, tank_bounds.size.w - 4, tank_bounds.size.h - 4);
+  graphics_context_set_stroke_color(ctx, GColorDarkGray);
+  graphics_draw_round_rect(ctx, middle_wall, 10);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  graphics_draw_round_rect(ctx, tank_bounds, 10);
   graphics_context_set_stroke_width(ctx, 1);
+  graphics_draw_round_rect(ctx, inner_wall, 10);
 
   // Fill the text
   GRect text_percentage_rect = GRect(tank_bounds.origin.x + 5, 
