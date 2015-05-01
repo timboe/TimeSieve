@@ -77,3 +77,15 @@ void setUserTime(uint64_t newTime) {
 uint64_t getUserTime() {
   return s_userData->currentTime;
 }
+
+void setUserOpt(USER_OPT opt, bool value) {
+  if (value) {
+    BITSET(s_userData->settingsBitmap, (uint16_t)opt);
+  } else {
+    BITCLEAR(s_userData->settingsBitmap, (uint16_t)opt);
+  }
+}
+
+bool getUserSetting(USER_OPT opt) {
+  return BITTEST(s_userData->settingsBitmap, (uint16_t)opt);
+}

@@ -77,6 +77,9 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define TANK_TEXT_V_OFFSET 5
 #define TANK_TEXT_HEIGHT 20
   
+#define CLOCK_PIX_OFFSET 2
+#define CLOCK_TEXT_SIZE 9
+
 // Bits in the liquid
 #define N_LIQUID_BITS 20
 
@@ -86,4 +89,21 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define PERSISTENT_VERSION_KEY 0
 #define PERSISTENT_USERDATA_KEY 1
 #define SCHEMA_VERSION 1
-  
+ 
+#define N_USER_OPT 16
+typedef enum {OPT_SHOW_SECONDS,
+              OPT_ANIMATE,
+              OPT_3,
+              OPT_4,
+              OPT_5,
+              OPT_6,
+              OPT_7,
+              OPT_8,
+              OPT_9,
+              OPT_10,
+              OPT_11,
+              OPT_12,
+              OPT_13,
+              OPT_14,
+              OPT_15,
+              OPT_16} USER_OPT;  

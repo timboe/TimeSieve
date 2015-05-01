@@ -32,7 +32,7 @@ void menu_single_click_handler(ClickRecognizerRef recognizer, void *context) {
   ButtonId _button = click_recognizer_get_button_id(recognizer);
   if (BUTTON_ID_DOWN == _button) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed the down button.");
-    multiplyTime(2); 
+    addTime(60); 
     update_timeTank_layer();
   } else if (BUTTON_ID_UP == _button) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed the buy window.");
@@ -61,6 +61,7 @@ void click_config_provider(Window *window) {
 void handle_init(void) {
   
   srand(time(NULL));
+  light_enable(1);
   init_resources();
   init_persistence();
   init_timeStore(); // neesds persistence

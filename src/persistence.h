@@ -14,7 +14,13 @@ struct userData_v1 {
   uint16_t tanksOwned[MAX_UPGRADES];
   uint16_t watchersOwned[MAX_UPGRADES];
   uint16_t treasuresOwned[MAX_TREASURES];
-  char uniquesOwned[BITNSLOTS(MAX_UNIQUE)];
+  char     uniquesOwned[BITNSLOTS(MAX_UNIQUE)];
+  // Options
+  uint8_t colourTheme;
+  uint8_t typeSetting;
+  uint8_t lightSetting;
+  uint8_t vibrateSetting;
+  char    settingsBitmap[BITNSLOTS(N_USER_OPT)];
 };
 
 void init_persistence(); // Load
@@ -25,3 +31,6 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID);
 
 void setUserTime(uint64_t newTime);
 uint64_t getUserTime();
+
+void setUserOpt(USER_OPT opt, bool value);
+bool getUserSetting(USER_OPT opt);

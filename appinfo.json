@@ -17,6 +17,11 @@
                 "file": "fonts/perfect-dos-vga.ttf",
                 "name": "PERFECT_DOS_40",
                 "type": "font"
+            },
+            {
+                "file": "fonts/Bowman.ttf",
+                "name": "BOWMAN_31",
+                "type": "font"
             }
         ]
     },

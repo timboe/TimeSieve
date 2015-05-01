@@ -4,6 +4,6 @@
 
 
 GFont* getDOSFont();
-GFont* getLargeDOSFont();
+GFont* getClockFont();
 void init_resources();
 void destroy_resources();
