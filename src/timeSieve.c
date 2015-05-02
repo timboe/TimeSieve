@@ -9,8 +9,8 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   // Fill back
   //graphics_context_set_fill_color(ctx, GColorLightGray);
   //graphics_fill_rect(ctx, tank_bounds, 2, GCornersAll);
-  //graphics_context_set_stroke_color(ctx, GColorBlack);
-  //graphics_draw_rect(ctx, tank_bounds);
+  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
 }
 
 void create_timeSieve_layer(Window* parentWindow) {

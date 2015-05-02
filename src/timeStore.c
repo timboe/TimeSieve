@@ -9,7 +9,7 @@ static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
 
 static uint64_t s_timePerMin;
-static uint64_t s_displayTime;
+//static uint64_t s_displayTime;
 static uint64_t s_timeCapacity;
 
 // Perform fixed point increase in price by floor of 7/6.
@@ -103,13 +103,13 @@ void updateTankCapacity() {
   }
 }
 
-uint64_t getDisplayTime() {
-  return s_displayTime;
-}
+// uint64_t getDisplayTime() {
+//   return s_displayTime;
+// }
 
-void updateDisplayTime(uint64_t t) {
-  s_displayTime = t;
-}
+// void updateDisplayTime(uint64_t t) {
+//   s_displayTime = t;
+// }
 
 void addTime(uint64_t toAdd) {
   if ( getUserTime() + toAdd > getTankCapacity() ) toAdd = getTankCapacity() - getUserTime();
@@ -219,16 +219,16 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   } 
 
   // Full
-  if (secs) snprintf(buffer, buffer_size, "%is", secs);
-  else if (mins) snprintf(buffer, buffer_size, "%im %is", mins, secs);
-  else if (hours) snprintf(buffer, TEXT_BUFFER_SIZE, "%ih %im %is", hours, mins, secs);
-  else if (days) snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im %is", days, hours, mins, secs); 
-  else if (years) snprintf(buffer, TEXT_BUFFER_SIZE, "%iy %id %ih %im %is", years, days, hours, mins, secs); 
-  else if (mills) snprintf(buffer, TEXT_BUFFER_SIZE, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs); 
-  else if (ages) snprintf(buffer, TEXT_BUFFER_SIZE, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs); 
-  else if (epochs) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs); 
+  if (eons) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs); 
   else if (eras) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs); 
-  else snprintf(buffer, TEXT_BUFFER_SIZE, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs); 
+  else if (epochs) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs); 
+  else if (ages) snprintf(buffer, TEXT_BUFFER_SIZE, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs); 
+  else if (mills) snprintf(buffer, TEXT_BUFFER_SIZE, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs); 
+  else if (years) snprintf(buffer, TEXT_BUFFER_SIZE, "%iy %id %ih %im %is", years, days, hours, mins, secs); 
+  else if (days) snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im %is", days, hours, mins, secs); 
+  else if (hours) snprintf(buffer, TEXT_BUFFER_SIZE, "%ih %im %is", hours, mins, secs);
+  else if (mins) snprintf(buffer, buffer_size, "%im %is", mins, secs);
+  else snprintf(buffer, buffer_size, "%is", secs);
   return;
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Did time %iy %id %ih %im %is", _years, days, hours, mins, secs);
 }

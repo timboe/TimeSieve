@@ -9,3 +9,5 @@ void destroy_clock_layer();
 void animCallback();
 
 bool spoogeAnimation();
+
+void setClockPixelOffset(uint8_t offset);

@@ -32,13 +32,20 @@
 #define INCREASE_DIVIDE 6
   
 #define MAX_UPGRADES 16
-#define MAX_TREASURES 16
+#define MAX_TREASURES 4
 #define MAX_UNIQUE 16
+#define MAX_CHEVOS 32
   
 #define REFINERY_ID 0
 #define SIEVE_ID 1
 #define TANK_ID 2
 #define WATCHER_ID 3
+
+#define COMMON_ID 0
+#define MAGIC_ID 1
+#define RARE_ID 2
+#define EPIC_ID 3
+#define LEGENDARY_ID 4
   
 #define N_REFINERY_UPGRADES 10
 #define N_SIEVE_UPGRADES 10
@@ -72,6 +79,25 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define MENU_BACK_YELLOW_EVEN GColorYellow
 #define MENU_BACK_YELLOW_SELECT GColorWindsorTan
 
+#define COLOUR_COMMON GColorLightGray
+#define COLOUR_MAGIC GColorBrightGreen
+#define COLOUR_RARE GColorPictonBlue
+#define COLOUR_EPIC GColorLavenderIndigo
+#define COLOUR_LEGENDARY GColorChromeYellow
+
+#define PALETTE_BLUE 0
+#define PALETTE_GREEN 1
+#define PALETTE_YELLOW 2
+#define PALETTE_RED 3
+#define PALETTE_MAX 4
+
+#define FONT_1 0
+#define FONT_2 1
+#define FONT_3 2
+#define FONT_4 3
+#define FONT_5 4
+#define FONT_MAX 5
+
 #define NUM_BUY_MENU_SECTIONS 1
 #define NUM_BUY_MENU_ITEMS 4
 #define MENU_CELL_LARGE_HEADER_HEIGHT 32
@@ -79,12 +105,11 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define MENU_CELL_HEIGHT 69
 
 #define TEXT_BUFFER_SIZE 32
-#define TEXT_LARGE_BUFFER_SIZE 64
+#define TEXT_LARGE_BUFFER_SIZE 128
   
 #define TANK_TEXT_V_OFFSET 5
 #define TANK_TEXT_HEIGHT 20
   
-#define CLOCK_PIX_OFFSET 2
 #define CLOCK_TEXT_SIZE 9
 
 // Bits in the liquid

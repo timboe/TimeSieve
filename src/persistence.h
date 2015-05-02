@@ -13,8 +13,12 @@ struct userData_v1 {
   uint16_t sievesOwned[MAX_UPGRADES];
   uint16_t tanksOwned[MAX_UPGRADES];
   uint16_t watchersOwned[MAX_UPGRADES];
-  uint16_t treasuresOwned[MAX_TREASURES];
-  char     uniquesOwned[BITNSLOTS(MAX_UNIQUE)];
+  uint16_t commonOwned[MAX_TREASURES];
+  uint16_t magicOwned[MAX_TREASURES];
+  uint16_t rareOwned[MAX_TREASURES];
+  uint16_t epicOwned[MAX_TREASURES];
+  char     uniqueOwned[BITNSLOTS(MAX_UNIQUE)];
+  char     chevoBitmap[BITNSLOTS(MAX_CHEVOS)];
   // Options
   uint8_t colourTheme;
   uint8_t typeSetting;
@@ -35,6 +39,8 @@ struct userData_v1 {
 void init_persistence(); // Load
 void destroy_persistence(); // Save
 
+uint16_t getUserTotalUpgrades(const unsigned typeID);
+uint16_t getUserTotalItems(const unsigned treasureID);
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
 void addUpgrade(const unsigned typeID, const unsigned resourceID);
 
@@ -46,3 +52,21 @@ uint64_t getUserTotalTime();
 
 void setUserOpt(USER_OPT opt, bool value);
 bool getUserOpt(USER_OPT opt);
+void flipUserOpt(USER_OPT opt);
+
+void incrementUserColorTheme();
+uint8_t getUserColorTheme();
+
+void incrementUserTypeSetting();
+void setUserTypeSetting(uint8_t value);
+uint8_t getUserTypeSetting();
+
+void setUserLightSetting(uint8_t value);
+uint8_t getUserLightSetting();
+
+void setUserVibrateSetting(uint8_t value);
+uint8_t getUserVibrateSetting();
+
+void setUserChevo(uint8_t chevo, bool value);
+bool getUserChevo(uint8_t chevo);
+uint8_t getTotalChevos();

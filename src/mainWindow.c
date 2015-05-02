@@ -34,8 +34,6 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
   ButtonId _button = click_recognizer_get_button_id(recognizer);
   if (BUTTON_ID_DOWN == _button) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed the down button.");
-    addTime(60); 
-    update_timeTank_layer();
     animCallback();
   } else if (BUTTON_ID_UP == _button) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed the buy window.");
@@ -68,7 +66,6 @@ void init_mainWindow() {
     .load = main_window_load,
     .unload = main_window_unload
   });
-  window_set_fullscreen(s_main_window, true);
   window_set_click_config_provider(s_main_window, (ClickConfigProvider) click_config_provider);
   
   // Create the buy window 

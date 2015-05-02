@@ -14,13 +14,28 @@
                 "type": "font"
             },
             {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "PERFECT_DOS_40",
+                "file": "fonts/Bowman.ttf",
+                "name": "FONT_A_31",
                 "type": "font"
             },
             {
-                "file": "fonts/Bowman.ttf",
-                "name": "BOWMAN_31",
+                "file": "fonts/oolrt.ttf",
+                "name": "FONT_B_29",
+                "type": "font"
+            },
+            {
+                "file": "fonts/jackinput.ttf",
+                "name": "FONT_C_29",
+                "type": "font"
+            },
+            {
+                "file": "fonts/monof55.ttf",
+                "name": "FONT_D_31",
+                "type": "font"
+            },
+            {
+                "file": "fonts/secrcode.ttf",
+                "name": "FONT_E_31",
                 "type": "font"
             }
         ]

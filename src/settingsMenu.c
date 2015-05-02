@@ -12,9 +12,10 @@
 #define SETTINGS_SECTION_ID 2
   
 #define NUM_SETTINGS_MENU_SECTIONS 3
-#define NUM_STAT_ROWS 2
+//
+#define NUM_STAT_ROWS 3
 #define NUM_CHEVO_ROWS 2
-#define NUM_SETTINGS_ROWS 4 
+#define NUM_SETTINGS_ROWS 9
 
 #define SETTINGS_CELL_HEIGHT 57
 
@@ -31,6 +32,8 @@ static int s_unique_context = UNIQUE_CONTEXT_ID;
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
 static uint8_t s_timeDisplay = 0;
+static uint8_t s_buildingDisplay = 0;
+static uint8_t s_itemDisplay = 0;
 
 /// 
 /// SETTINGS WINDOW CALLBACKS
@@ -67,7 +70,14 @@ static void settings_draw_header_callback(GContext* ctx, const Layer *cell_layer
   graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
 
-static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return SETTINGS_CELL_HEIGHT; }
+static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { 
+  switch(cell_index->section) {
+    case STAT_SECTION_ID: return SETTINGS_CELL_HEIGHT; 
+    case CHEVO_SECTION_ID: return 32;
+    case SETTINGS_SECTION_ID: return 44;
+    default: return 0;
+  }
+}
 
 static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
 
@@ -96,78 +106,144 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
   GRect ttlTextRect = GRect(0, 0,  size.w, size.h);
   GRect topTextRect = GRect(0, 22, size.w, size.h-22);
+  GRect botTextRect = GRect(0, 33, size.w, size.h-33);
 
   static char titleText[TEXT_BUFFER_SIZE];
-  static char subText[TEXT_LARGE_BUFFER_SIZE];
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "A");
+  static char subText1[TEXT_LARGE_BUFFER_SIZE];
+  static char subText2[TEXT_BUFFER_SIZE];
+  strcpy(titleText, "");
+  strcpy(subText1, "");
+  strcpy(subText2, "");
 
   // Stat section
   if (section == STAT_SECTION_ID) {
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "B");
 
-    if (row == 0) {
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "C");
+    if (row == 0) { // DISPLAY TIME
 
-      // DISPLAY TIME
-      uint64_t timeToDisplay = 0;
       if (s_timeDisplay == 0) {
         strcpy(titleText, "TOTAL Time >");
-        timeToDisplay = getUserTime(); 
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "TOTAL Time ");
+        timeToString(getUserTime(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       } else if (s_timeDisplay == 1) {
-        strcpy(titleText, "TIME Capacity >");        
-        timeToDisplay = getTankCapacity();
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "capacity ");
-      } else if (s_timeDisplay == 2) {
-        strcpy(titleText, "TIME Per Min >");     
-        timeToDisplay = getTimePerMin();
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "TPM ");
-      } else if (s_timeDisplay == 3) {
         strcpy(titleText, "ALLTime >"); 
-        timeToDisplay = getUserTotalTime();
-        APP_LOG(APP_LOG_LEVEL_DEBUG, "alltime ");
+        timeToString(getUserTotalTime(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       }
-      timeToString(timeToDisplay, subText, TEXT_LARGE_BUFFER_SIZE, false);
-    } else {
-      return;
+      
+
+    } else if (row == 1) { // DISPLAY BUILDINGS
+      
+      
+      if (s_buildingDisplay == 0) {
+        strcpy(titleText, "REFINERY Bonus >");
+        timeToString(getTimePerMin(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
+      } else if (s_buildingDisplay == 1) {
+        strcpy(titleText, "TANK Capacity >");  
+        timeToString(getTankCapacity(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
+      } else if (s_buildingDisplay == 2) {
+        strcpy(titleText, "SIEVE Chance >");        
+        strcpy(subText1, "TODO");        
+      } else if (s_buildingDisplay == 3) {
+        strcpy(titleText, "WATCHER Chance >"); 
+        strcpy(subText1, "TODO");        
+      }
+
+    } else if (row == 2) { // DISPLAY ITEMS
+
+      if (s_itemDisplay == 0) {
+        graphics_context_set_text_color(ctx, COLOUR_COMMON);
+        strcpy(titleText, "COMMON Items >");
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(COMMON_ID) );    
+        strcpy(subText2, "VALUE: TODO");        
+      } else if (s_itemDisplay == 1) {
+        graphics_context_set_text_color(ctx, COLOUR_MAGIC);
+        strcpy(titleText, "MAGIC Items >");  
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(MAGIC_ID) );  
+        strcpy(subText2, "VALUE: TODO");     
+      } else if (s_itemDisplay == 2) {
+        graphics_context_set_text_color(ctx, COLOUR_RARE);
+        strcpy(titleText, "RARE Items >");        
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(RARE_ID) );   
+        strcpy(subText2, "VALUE: TODO");    
+      } else if (s_itemDisplay == 3) {
+        graphics_context_set_text_color(ctx, COLOUR_EPIC);
+        strcpy(titleText, "EPIC Items >"); 
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(EPIC_ID) );    
+        strcpy(subText2, "VALUE: TODO");   
+      } else if (s_itemDisplay == 4) {
+        graphics_context_set_text_color(ctx, COLOUR_LEGENDARY);
+        strcpy(titleText, "LEGENDARIES >"); 
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(LEGENDARY_ID) );  
+        strcpy(subText2, "VALUE: TODO");     
+      }
+      if (!selected) graphics_context_set_text_color(ctx, GColorBlack);
+
     }
+
+  } else if (section == CHEVO_SECTION_ID) {
+
+    if (row == 0) { // DISPLAY LEGENDARY
+      strcpy(titleText, "LEGENDARIES");        
+    } else if (row == 1) { // DISPLAY CHEVO
+      strcpy(titleText, "ACHIEVEMENTS");        
+    }
+
+  } else if (section == SETTINGS_SECTION_ID) {
+
+// Color
+// Typeface
+// Animate
+// Seconds
+// Light on treasure
+// Vibe on treasure
+// Quite start
+// Quiet end
+// new game
+
+    if (row == 0) { // Color
+      strcpy(titleText, "COLOUR Theme"); 
+      if (getUserColorTheme() == PALETTE_BLUE) strcpy(subText1, "BLUE---"); 
+      else if (getUserColorTheme() == PALETTE_GREEN) strcpy(subText1, "-GREEN--");
+      else if (getUserColorTheme() == PALETTE_YELLOW) strcpy(subText1, "--YELLOW-"); 
+      else if (getUserColorTheme() == PALETTE_RED) strcpy(subText1, "---RED"); 
+    } else if (row == 1) { // Typeface
+      strcpy(titleText, "CLOCK Typeface");
+      if (getUserTypeSetting() == 0)      strcpy(subText1, "0----"); 
+      else if (getUserTypeSetting() == 1) strcpy(subText1, "-1---");
+      else if (getUserTypeSetting() == 2) strcpy(subText1, "--2--"); 
+      else if (getUserTypeSetting() == 3) strcpy(subText1, "---3-"); 
+      else if (getUserTypeSetting() == 4) strcpy(subText1, "----4"); 
+    } else if (row == 2) { // Animate
+      strcpy(titleText, "ANIMATIONS"); 
+      if (getUserOpt(OPT_ANIMATE)) strcpy(subText1, "ON-"); 
+      else strcpy(subText1, "-OFF"); 
+    } else if (row == 3) { // Seconds
+      strcpy(titleText, "UPDATE Freq.");
+      if (getUserOpt(OPT_SHOW_SECONDS)) strcpy(subText1, "SECONDS-"); 
+      else strcpy(subText1, "-MINUTES");    
+    } else if (row == 4) { // Light on treasure
+      strcpy(titleText, "LIGHT Notify");
+      strcpy(subText1, "TODO");   
+    } else if (row == 5) { // Vibe on treasure
+      strcpy(titleText, "VIBRATE Notify");
+      strcpy(subText1, "TODO");
+    } else if (row == 6) { // Quite start
+      strcpy(titleText, "QUIET Start");
+      strcpy(subText1, "TODO");
+    } else if (row == 7) { // Quiet end
+      strcpy(titleText, "QUIET End");
+      strcpy(subText1, "TODO");
+    } else if (row == 8) { // new game
+      strcpy(titleText, "RESET Game!");
+      strcpy(subText1, "TODO");
+    }
+
+
   } else {
     return;
   }
 
   graphics_draw_text(ctx, titleText, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  graphics_draw_text(ctx, subText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-
-  // // Do not have and cannot afford, draw ???s
-  // if (display == false) {
-  //   //draw_dithered_rect(ctx, GRect(0, 0, size.w, size.h), GColorLightGray, GColorWhite, DITHER_10_PERCENT);
-  //   GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
-  //   graphics_draw_text(ctx, "??????", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  // } else {
-  //   // Now text
-  //   GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
-  //   GRect topTextRect = GRect(MENU_X_OFFSET, 22, size.w-MENU_X_OFFSET, size.h-22);
-  //   GRect medTextRect = GRect(MENU_X_OFFSET, 33, size.w-MENU_X_OFFSET, size.h-33);
-  //   GRect botTextRect = GRect(MENU_X_OFFSET, 44, size.w-MENU_X_OFFSET, size.h-44);
-    
-  //   timeToString(priceNext, tempBuffer, TEXT_BUFFER_SIZE, true);
-  //   static char s_header[TEXT_BUFFER_SIZE];
-  //   strcpy(s_header, "COST: ");
-  //   strcat(s_header, tempBuffer);
-
-  //   static char s_owned[TEXT_BUFFER_SIZE];
-  //   snprintf(s_owned, TEXT_BUFFER_SIZE, "OWNED: %i", owned);
-
-  //   timeToString(reward, tempBuffer, TEXT_BUFFER_SIZE, true);
-  //   static char s_reward[TEXT_BUFFER_SIZE];
-  //   strcpy(s_reward, upgradeText);
-  //   strcat(s_reward, tempBuffer);
-
-  //   graphics_draw_text(ctx, upgradeName, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  //   graphics_draw_text(ctx, s_header, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  //   graphics_draw_text(ctx, s_owned, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), medTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  //   graphics_draw_text(ctx, s_reward, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  // }
+  graphics_draw_text(ctx, subText1, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, subText2, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 
   graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
@@ -178,10 +254,43 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
   const uint16_t row = cell_index->row;
   // Stat section
   if (section == STAT_SECTION_ID) {
+  
     if (row == 0) {
-      if (++s_timeDisplay == 4) s_timeDisplay = 0;
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "SWITCH MODE");
+      if (++s_timeDisplay == 2) s_timeDisplay = 0;
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "SWITCH MODE total time %lld", getUserTime());
+      setUserTime( getUserTime() * 2);
+    } else if (row == 1) {
+      if (++s_buildingDisplay == 4) s_buildingDisplay = 0;
+    } else if (row == 2) {
+      if (++s_itemDisplay == 5) s_itemDisplay = 0;
     }
+  
+  } else if (section == CHEVO_SECTION_ID) {
+
+
+
+  } else if (section == SETTINGS_SECTION_ID) {
+
+    if (row == 0) { // Color
+      incrementUserColorTheme();
+    } else if (row == 1) { // Typeface
+      incrementUserTypeSetting();
+    } else if (row == 2) { // Animate
+      flipUserOpt(OPT_ANIMATE);
+    } else if (row == 3) { // Seconds
+      flipUserOpt(OPT_SHOW_SECONDS);
+    } else if (row == 4) { // Light on treasure
+
+    } else if (row == 5) { // Vibe on treasure
+
+    } else if (row == 6) { // Quite start
+
+    } else if (row == 7) { // Quiet end
+
+    } else if (row == 8) { // new game
+
+    }
+
   }
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }

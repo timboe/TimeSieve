@@ -4,6 +4,7 @@
 #include "constants.h"
 #include "resources.h"
 #include "ditheredRect.h"
+#include "palette.h"
 #include "persistence.h"
   
 // Frame to hold tank gfx 
@@ -49,14 +50,14 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   // Fill liquid height
   int liquid_height = (tank_bounds.size.h * _percentage) / 100;
   GRect liquid_rect = GRect(0, tank_bounds.origin.y + tank_bounds.size.h - liquid_height, tank_bounds.size.w, liquid_height);
-  graphics_context_set_fill_color(ctx, GColorBlueMoon);
+  graphics_context_set_fill_color(ctx, getLiquidTimeColour());
   graphics_fill_rect(ctx, liquid_rect, 0, GCornersAll);
   
   // Fill bits in the liquid
   static GPoint liquid_bits_bgn[N_LIQUID_BITS];
   static GPoint liquid_bits_end[N_LIQUID_BITS];
   static uint16_t liquid_bit_y[N_LIQUID_BITS];
-  graphics_context_set_stroke_color(ctx, GColorCyan);
+  graphics_context_set_stroke_color(ctx, getLiquidTimeHighlightColour());
   static bool first_pass = true; // Do we need to update all 4 coords?
   for (unsigned i = 0; i < N_LIQUID_BITS; ++i) {
     if (first_pass == true) {
@@ -104,9 +105,7 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
                      GTextOverflowModeWordWrap,
                      GTextAlignmentLeft,
                      NULL);
-  
-  if (_percentage == 100) graphics_context_set_text_color(ctx, GColorSunsetOrange);
-  graphics_draw_text(ctx,
+    graphics_draw_text(ctx,
                      s_tankFullPercetText, 
                      *getDOSFont(), 
                      text_percentage_rect,

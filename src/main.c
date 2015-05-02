@@ -13,7 +13,8 @@ void handle_init(void) {
   init_persistence();
 
   // testing
-  setUserTime(3245464573353);
+  APP_LOG(APP_LOG_LEVEL_INFO, "GIVE TEST TIME");
+  setUserTime(17);
   
   init_timeStore(); // needs persistence
   init_mainWindow();
