@@ -41,5 +41,8 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID);
 void setUserTime(uint64_t newTime);
 uint64_t getUserTime();
 
+void setUserTotalTime(uint64_t newTime);
+uint64_t getUserTotalTime();
+
 void setUserOpt(USER_OPT opt, bool value);
-bool getUserSetting(USER_OPT opt);
+bool getUserOpt(USER_OPT opt);

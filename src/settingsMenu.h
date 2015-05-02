@@ -23,3 +23,4 @@ void settings_window_unload();
 // Vibe on treasure
 // Quite start
 // Quiet end
+// new game

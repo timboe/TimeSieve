@@ -12,14 +12,15 @@ void init_persistence() {
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence schema version %i", version);
 
+  // Force new
+  version = 0;
+
   // Allocate user store memory
   s_userData = malloc(sizeof(struct userData_v1));
   if (version == 0) {
     // Zero evertyhing
     memset(s_userData, 0, sizeof(struct userData_v1));
-    // set some defaults
-    setUserTime(30);
-    addUpgrade(TANK_ID, 0);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence clean");
   } else if (version == 1) {
     // Load from memory
     int result = persist_read_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
@@ -78,6 +79,14 @@ uint64_t getUserTime() {
   return s_userData->currentTime;
 }
 
+void setUserTotalTime(uint64_t newTime) {
+  s_userData->totalTime = newTime;
+}
+
+uint64_t getUserTotalTime() {
+  return s_userData->totalTime;
+}
+
 void setUserOpt(USER_OPT opt, bool value) {
   if (value) {
     BITSET(s_userData->settingsBitmap, (uint16_t)opt);
@@ -86,6 +95,6 @@ void setUserOpt(USER_OPT opt, bool value) {
   }
 }
 
-bool getUserSetting(USER_OPT opt) {
+bool getUserOpt(USER_OPT opt) {
   return BITTEST(s_userData->settingsBitmap, (uint16_t)opt);
 }

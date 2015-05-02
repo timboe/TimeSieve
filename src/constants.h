@@ -65,12 +65,12 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define MENU_BACK_RED_EVEN GColorSunsetOrange
 #define MENU_BACK_RED_SELECT GColorDarkCandyAppleRed
 
-#define MENU_BACK_BLUE_ODD GColorMintGreen
-#define MENU_BACK_BLUE_EVEN GColorScreaminGreen
-#define MENU_BACK_BLUE_SELECT GColorDarkGreen
-#define MENU_BACK_YELLOW_ODD GColorMintGreen
-#define MENU_BACK_YELLOW_EVEN GColorScreaminGreen
-#define MENU_BACK_YELLOW_SELECT GColorDarkGreen
+#define MENU_BACK_BLUE_ODD GColorVividCerulean
+#define MENU_BACK_BLUE_EVEN GColorPictonBlue
+#define MENU_BACK_BLUE_SELECT GColorOxfordBlue
+#define MENU_BACK_YELLOW_ODD GColorIcterine
+#define MENU_BACK_YELLOW_EVEN GColorYellow
+#define MENU_BACK_YELLOW_SELECT GColorWindsorTan
 
 #define NUM_BUY_MENU_SECTIONS 1
 #define NUM_BUY_MENU_ITEMS 4

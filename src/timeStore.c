@@ -114,6 +114,7 @@ void updateDisplayTime(uint64_t t) {
 void addTime(uint64_t toAdd) {
   if ( getUserTime() + toAdd > getTankCapacity() ) toAdd = getTankCapacity() - getUserTime();
   setUserTime( getUserTime() + toAdd );
+  setUserTotalTime( getUserTotalTime() + toAdd );
 }
 
 void removeTime(uint64_t toSubtract) {

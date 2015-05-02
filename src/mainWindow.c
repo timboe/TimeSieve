@@ -41,7 +41,8 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed the buy window.");
     window_stack_push(s_buy_window, true);
   } else if (BUTTON_ID_SELECT == _button) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "Just pushed the middle button.");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "middle button : just pushed settings");
+    window_stack_push(s_settings_window, true);
   } else {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "unknown button.");
 
@@ -80,7 +81,7 @@ void init_mainWindow() {
 
   // Create the settings window 
   s_settings_window = window_create();
-  window_set_window_handlers(s_buy_window, (WindowHandlers) {
+  window_set_window_handlers(s_settings_window, (WindowHandlers) {
     .load = settings_window_load,
     .unload = settings_window_unload
   });  

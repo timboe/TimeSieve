@@ -11,6 +11,10 @@ void handle_init(void) {
   light_enable(1);
   init_resources();
   init_persistence();
+
+  // testing
+  setUserTime(3245464573353);
+  
   init_timeStore(); // needs persistence
   init_mainWindow();
 }

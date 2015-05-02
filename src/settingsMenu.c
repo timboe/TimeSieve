@@ -16,6 +16,8 @@
 #define NUM_CHEVO_ROWS 2
 #define NUM_SETTINGS_ROWS 4 
 
+#define SETTINGS_CELL_HEIGHT 57
+
 static MenuLayer* s_settings_layer;  
 static MenuLayer* s_chevo_layer;  
 static MenuLayer* s_unique_layer;
@@ -27,6 +29,8 @@ static int s_chevo_context = CHEVO_CONTEXT_ID;
 static int s_unique_context = UNIQUE_CONTEXT_ID;
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
+
+static uint8_t s_timeDisplay = 0;
 
 /// 
 /// SETTINGS WINDOW CALLBACKS
@@ -49,17 +53,21 @@ static void settings_draw_header_callback(GContext* ctx, const Layer *cell_layer
   const GSize size = layer_get_frame(cell_layer).size;
   if (section_index == STAT_SECTION_ID) {
     strcpy(tempBuffer, "STATISTICS");
-    graphics_context_set_fill_color(ctx, MENU_BACK_YELLOW_EVEN);
+    graphics_context_set_fill_color(ctx, MENU_BACK_YELLOW_ODD);
   } else if (section_index == CHEVO_SECTION_ID) {
     strcpy(tempBuffer, "ACHIEVEMENTS");
-    graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_EVEN);
+    graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_ODD);
   } else if (section_index == SETTINGS_SECTION_ID) {
     strcpy(tempBuffer, "SETTINGS");
-    graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_EVEN);
+    graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_ODD);
   }
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   menu_cell_basic_header_draw(ctx, cell_layer, tempBuffer);
+  graphics_context_set_stroke_color(ctx, GColorBlack);
+  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
+
+static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return SETTINGS_CELL_HEIGHT; }
 
 static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
 
@@ -85,6 +93,50 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   else if (section == SETTINGS_SECTION_ID               ) backColor = MENU_BACK_BLUE_ODD;
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
+
+  GRect ttlTextRect = GRect(0, 0,  size.w, size.h);
+  GRect topTextRect = GRect(0, 22, size.w, size.h-22);
+
+  static char titleText[TEXT_BUFFER_SIZE];
+  static char subText[TEXT_LARGE_BUFFER_SIZE];
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "A");
+
+  // Stat section
+  if (section == STAT_SECTION_ID) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "B");
+
+    if (row == 0) {
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "C");
+
+      // DISPLAY TIME
+      uint64_t timeToDisplay = 0;
+      if (s_timeDisplay == 0) {
+        strcpy(titleText, "TOTAL Time >");
+        timeToDisplay = getUserTime(); 
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "TOTAL Time ");
+      } else if (s_timeDisplay == 1) {
+        strcpy(titleText, "TIME Capacity >");        
+        timeToDisplay = getTankCapacity();
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "capacity ");
+      } else if (s_timeDisplay == 2) {
+        strcpy(titleText, "TIME Per Min >");     
+        timeToDisplay = getTimePerMin();
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "TPM ");
+      } else if (s_timeDisplay == 3) {
+        strcpy(titleText, "ALLTime >"); 
+        timeToDisplay = getUserTotalTime();
+        APP_LOG(APP_LOG_LEVEL_DEBUG, "alltime ");
+      }
+      timeToString(timeToDisplay, subText, TEXT_LARGE_BUFFER_SIZE, false);
+    } else {
+      return;
+    }
+  } else {
+    return;
+  }
+
+  graphics_draw_text(ctx, titleText, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, subText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 
   // // Do not have and cannot afford, draw ???s
   // if (display == false) {
@@ -122,30 +174,16 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 }
 
 static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  // Use the row to specify which item will receive the select action
-  // const int row = cell_index->row;
-  // if (row == REFINERY_ID) { 
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH REFINERY");
-  //   window_stack_push(s_refinery_window, true);
-  // } else if (row == TANK_ID) {
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH TANK");
-  //   window_stack_push(s_tank_window, true);
-  // } else if (row == SIEVE_ID) {
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH SIEVE");
-  //   window_stack_push(s_sieve_window, true);
-  // } else if (row == WATCHER_ID) {
-  //   APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH WATCHER");
-  //   window_stack_push(s_watcher_window, true);
-  // }
-//   switch (cell_index->row) {
-//     // This is the menu item with the cycling icon
-//     case 1:
-//       // Cycle the icon
-//       //s_current_icon = (s_current_icon + 1) % NUM_MENU_ICONS;
-//       // After changing the icon, mark the layer to have it updated
-//       layer_mark_dirty(menu_layer_get_layer(menu_layer));
-//       break;
-//   }
+  const uint16_t section = cell_index->section;
+  const uint16_t row = cell_index->row;
+  // Stat section
+  if (section == STAT_SECTION_ID) {
+    if (row == 0) {
+      if (++s_timeDisplay == 4) s_timeDisplay = 0;
+      APP_LOG(APP_LOG_LEVEL_DEBUG, "SWITCH MODE");
+    }
+  }
+  layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
 /// 
@@ -351,6 +389,7 @@ void settings_window_load(Window* parentWindow) {
   menu_layer_set_callbacks(s_settings_layer, NULL, (MenuLayerCallbacks){
     .get_num_sections = settings_get_num_sections_callback,
     .get_num_rows = settings_get_num_rows_callback,
+    .get_cell_height = settings_get_cell_height_callback,
     .get_header_height = settings_get_header_height_callback,
     .draw_header = settings_draw_header_callback,
     .draw_row = settings_draw_row_callback,
