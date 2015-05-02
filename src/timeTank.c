@@ -114,7 +114,7 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
                      GTextAlignmentCenter,
                      NULL);
 
-  	APP_LOG(APP_LOG_LEVEL_DEBUG, "Drew text");
+  	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Drew text");
 }
 
 void create_timeTank_layer(Window* parentWindow) {

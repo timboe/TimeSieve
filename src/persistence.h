@@ -20,7 +20,16 @@ struct userData_v1 {
   uint8_t typeSetting;
   uint8_t lightSetting;
   uint8_t vibrateSetting;
+  // 
+  uint8_t zzzStartSetting;
+  uint8_t zzzEndSetting;
+  uint8_t aSetting;
+  uint8_t bSetting;
+  //
+  uint8_t cSetting;
+  uint8_t dSetting;
   char    settingsBitmap[BITNSLOTS(N_USER_OPT)];
+  //
 };
 
 void init_persistence(); // Load

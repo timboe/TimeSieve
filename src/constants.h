@@ -58,12 +58,19 @@ extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
 extern const uint64_t REWARD_TANK[MAX_UPGRADES];
 extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 
-#define BUY_MENU_BACK_COLOUR_ODD GColorMintGreen
-#define BUY_MENU_BACK_COLOUR_EVEN GColorScreaminGreen
-#define BUY_MENU_BACK_COLOUR_SELECT GColorDarkGreen
-#define BUY_MENU_BACK_COLOUR_ODD_NO GColorMelon
-#define BUY_MENU_BACK_COLOUR_EVEN_NO GColorSunsetOrange
-#define BUY_MENU_BACK_COLOUR_SELECT_NO GColorDarkCandyAppleRed
+#define MENU_BACK_GREEN_ODD GColorMintGreen
+#define MENU_BACK_GREEN_EVEN GColorScreaminGreen
+#define MENU_BACK_GREEN_SELECT GColorDarkGreen
+#define MENU_BACK_RED_ODD GColorMelon
+#define MENU_BACK_RED_EVEN GColorSunsetOrange
+#define MENU_BACK_RED_SELECT GColorDarkCandyAppleRed
+
+#define MENU_BACK_BLUE_ODD GColorMintGreen
+#define MENU_BACK_BLUE_EVEN GColorScreaminGreen
+#define MENU_BACK_BLUE_SELECT GColorDarkGreen
+#define MENU_BACK_YELLOW_ODD GColorMintGreen
+#define MENU_BACK_YELLOW_EVEN GColorScreaminGreen
+#define MENU_BACK_YELLOW_SELECT GColorDarkGreen
 
 #define NUM_BUY_MENU_SECTIONS 1
 #define NUM_BUY_MENU_ITEMS 4
@@ -83,12 +90,26 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 // Bits in the liquid
 #define N_LIQUID_BITS 20
 
+// PARTICLE EFFECTS
+#define N_SPOOGELET 30 
+#define SUB_PIXEL 100
+
 #define WIN_SIZE_X 144
 #define WIN_SIZE_Y 168
 
 #define PERSISTENT_VERSION_KEY 0
 #define PERSISTENT_USERDATA_KEY 1
 #define SCHEMA_VERSION 1
+
+#define ANIM_FPS 25
+//#define ANIM_TICK_PER_FRAME 2
+#define ANIM_DURATION 2
+#define ANIM_RESET 1
+#define ANIM_MS_PER_SEC 1000
+#define ANIM_MIN_V 100
+#define ANIM_MAX_V 300
+#define ANIM_FRAMES ANIM_FPS*ANIM_DURATION
+#define ANIM_DELAY ANIM_MS_PER_SEC/ANIM_FPS
  
 #define N_USER_OPT 16
 typedef enum {OPT_SHOW_SECONDS,

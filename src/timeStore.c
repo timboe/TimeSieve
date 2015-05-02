@@ -7,7 +7,9 @@ static uint64_t* s_bufferRefineryPrice;
 static uint64_t* s_bufferTankPrice;
 static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
+
 static uint64_t s_timePerMin;
+static uint64_t s_displayTime;
 static uint64_t s_timeCapacity;
 
 // Perform fixed point increase in price by floor of 7/6.
@@ -99,6 +101,14 @@ void updateTankCapacity() {
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
     s_timeCapacity += getUserOwnsUpgrades(TANK_ID, upgrade) * REWARD_TANK[upgrade];
   }
+}
+
+uint64_t getDisplayTime() {
+  return s_displayTime;
+}
+
+void updateDisplayTime(uint64_t t) {
+  s_displayTime = t;
 }
 
 void addTime(uint64_t toAdd) {

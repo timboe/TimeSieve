@@ -7,10 +7,10 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
   
   // Fill back
-  graphics_context_set_fill_color(ctx, GColorLightGray);
-  graphics_fill_rect(ctx, tank_bounds, 2, GCornersAll);
-  graphics_context_set_stroke_color(ctx, GColorBlack);
-  graphics_draw_rect(ctx, tank_bounds);
+  //graphics_context_set_fill_color(ctx, GColorLightGray);
+  //graphics_fill_rect(ctx, tank_bounds, 2, GCornersAll);
+  //graphics_context_set_stroke_color(ctx, GColorBlack);
+  //graphics_draw_rect(ctx, tank_bounds);
 }
 
 void create_timeSieve_layer(Window* parentWindow) {

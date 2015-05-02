@@ -45,9 +45,9 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   const GSize size = layer_get_frame(cell_layer).size;
   const bool selected = menu_cell_layer_is_highlighted(cell_layer);
   const int row = cell_index->row;
-  if (selected)        graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_SELECT);
-  else if (row%2 == 1) graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_ODD);
-  else                 graphics_context_set_fill_color(ctx, BUY_MENU_BACK_COLOUR_EVEN);
+  if (selected)        graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_SELECT);
+  else if (row%2 == 1) graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_ODD);
+  else                 graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_EVEN);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   if (row == REFINERY_ID) { 
     menu_cell_basic_draw(ctx, cell_layer, "REFINERY Upgrades", "Get more liquid time", NULL);
@@ -174,12 +174,12 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   GColor backColor;
   if (selected && !display)         backColor = GColorDarkGray;
   else if (!display)                backColor = GColorLightGray;
-  else if (selected && canAfford)   backColor = BUY_MENU_BACK_COLOUR_SELECT;
-  else if (selected)                backColor = BUY_MENU_BACK_COLOUR_SELECT_NO;
-  else if (row%2 == 1 && canAfford) backColor = BUY_MENU_BACK_COLOUR_ODD;
-  else if (canAfford)               backColor = BUY_MENU_BACK_COLOUR_EVEN;
-  else if (row%2 == 1)              backColor = BUY_MENU_BACK_COLOUR_ODD_NO;
-  else                              backColor = BUY_MENU_BACK_COLOUR_EVEN_NO;
+  else if (selected && canAfford)   backColor = MENU_BACK_GREEN_SELECT;
+  else if (selected)                backColor = MENU_BACK_RED_SELECT;
+  else if (row%2 == 1 && canAfford) backColor = MENU_BACK_GREEN_ODD;
+  else if (canAfford)               backColor = MENU_BACK_GREEN_EVEN;
+  else if (row%2 == 1)              backColor = MENU_BACK_RED_ODD;
+  else                              backColor = MENU_BACK_RED_EVEN;
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
@@ -270,11 +270,11 @@ void sub_window_unload(Window* parentWindow) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
   
-void createSubWin(Window* w, int* context) {
-  w = window_create();
-  window_set_user_data(w, context);
-  window_set_background_color(w, BUY_MENU_BACK_COLOUR_ODD);
-  window_set_window_handlers(w, (WindowHandlers) {
+void createSubWin(Window** w, int* context) {
+  *w = window_create();
+  window_set_user_data(*w, context);
+  window_set_background_color(*w, MENU_BACK_GREEN_ODD);
+  window_set_window_handlers(*w, (WindowHandlers) {
     .load = sub_window_load,
     .unload = sub_window_unload
   }); 
@@ -301,10 +301,10 @@ void buy_window_load(Window* parentWindow) {
   layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
 
   // Setup sub-windows that we might want to jump to 
-  createSubWin(s_refinery_window, &s_refinery_context);
-  createSubWin(s_sieve_window, &s_sieve_context);
-  createSubWin(s_tank_window, &s_tank_context);
-  createSubWin(s_watcher_window, &s_watcher_context);
+  createSubWin(&s_refinery_window, &s_refinery_context);
+  createSubWin(&s_sieve_window, &s_sieve_context);
+  createSubWin(&s_tank_window, &s_tank_context);
+  createSubWin(&s_watcher_window, &s_watcher_context);
 
 }
 
