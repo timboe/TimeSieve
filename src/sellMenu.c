@@ -38,31 +38,45 @@ static uint16_t sell_get_num_sections_callback(MenuLayer *menu_layer, void *data
   for (uint16_t i = 0; i < SELLABLE_CATEGORIES; ++i) {
     if (getUserTotalItems(i) > 0) s_sellSections[sections] = i;
   }
-  return ++sections; // Add one for the title
+  if (sections == 0) {
+    s_sellSections[0] = -1;
+    return 1; // Generic title
+  }
+  return sections;
 }
 
 static uint16_t sell_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { 
-  // switch (section_index) {
-  // 	// case STAT_SECTION_ID: return NUM_STAT_ROWS;
-  // 	// case CHEVO_SECTION_ID: return NUM_CHEVO_ROWS;
-  // 	// case SETTINGS_SECTION_ID: return NUM_SETTINGS_ROWS;
-  // 	default: return 0;
-  // }
-  return 0;
+  if (s_sellSections[section_index] == -1) return 1; // If no items to sell
+  return getUserItemTypes( s_sellSections[section_index] );
 }
 
-static int16_t sell_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return MENU_CELL_BASIC_HEADER_HEIGHT; }
+static int16_t sell_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { 
+  switch (section_index) {
+    case 0: return 2*MENU_CELL_BASIC_HEADER_HEIGHT;
+    default: return MENU_CELL_BASIC_HEADER_HEIGHT;
+  }
+}
 
 static void sell_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
+  const GSize size = layer_get_frame(cell_layer).size;
+  GRect top = GRect(0, 0, size.w, MENU_CELL_BASIC_HEADER_HEIGHT);
+  GRect bot = GRect(0, MENU_CELL_BASIC_HEADER_HEIGHT, size.w, MENU_CELL_BASIC_HEADER_HEIGHT);
+
   if (section_index == 0) {
-    menu_cell_basic_header_draw(ctx, cell_layer, "SELL Treasure");
-  } else {
-    const int8_t category = s_sellSections[section_index-1];
-    if (category == COMMON_ID) menu_cell_basic_header_draw(ctx, cell_layer, "COMMON Treasures");
-    else if (category == MAGIC_ID) menu_cell_basic_header_draw(ctx, cell_layer, "MAGIC Treasures");
-    else if (category == RARE_ID) menu_cell_basic_header_draw(ctx, cell_layer, "RARE Treasures");
-    else if (category == EPIC_ID) menu_cell_basic_header_draw(ctx, cell_layer, "EPIC Treasures");
+    graphics_draw_text(ctx, "SELL Items", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    if (s_sellSections[0] == -1) {
+      graphics_draw_text(ctx, "You have no items!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), bot, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+      return;
+    }
+    top = bot;
   }
+
+  const int8_t category = s_sellSections[section_index];
+  if (category == COMMON_ID) graphics_draw_text(ctx, "COMMON Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  else if (category == MAGIC_ID) graphics_draw_text(ctx, "MAGIC Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  else if (category == RARE_ID) graphics_draw_text(ctx, "RARE Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  else if (category == EPIC_ID) graphics_draw_text(ctx, "EPIC Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+
   // const GSize size = layer_get_frame(cell_layer).size;
   // if (section_index == STAT_SECTION_ID) {
   //   strcpy(tempBuffer, "STATISTICS");

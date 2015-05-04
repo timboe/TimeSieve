@@ -42,6 +42,8 @@ void resetUserData(); // Reset
 
 uint16_t getUserTotalUpgrades(const unsigned typeID);
 uint16_t getUserTotalItems(const unsigned treasureID);
+uint16_t getUserItemTypes(const unsigned treasureID);
+
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
 void addUpgrade(const unsigned typeID, const unsigned resourceID);
 void addItem(const unsigned treasureID, const unsigned itemID);

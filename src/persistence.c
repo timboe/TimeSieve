@@ -13,6 +13,13 @@ static struct userData_v1* s_userData;
 void DEVMODE() {
   addItem(LEGENDARY_ID, 2);
   addItem(LEGENDARY_ID, 3);
+  addItem(EPIC_ID, 3);
+  addItem(COMMON_ID, 3);
+  addItem(COMMON_ID, 0);
+  addItem(MAGIC_ID, 0);
+  addItem(MAGIC_ID, 1);
+  addItem(MAGIC_ID, 2);
+  addItem(MAGIC_ID, 3);
   //addItem(RARE_ID, 0);
 }
 
@@ -126,8 +133,31 @@ uint16_t getUserTotalItems(const unsigned treasureID) {
         count += s_userData->magicOwned[i];
       } else if (treasureID == RARE_ID) {
         count += s_userData->rareOwned[i];
-      } else if (treasureID == LEGENDARY_ID) {
+      } else if (treasureID == EPIC_ID) {
         count += s_userData->epicOwned[i];
+      }
+    }
+  }
+  return count;
+}
+
+/**
+ * For a given treasure type, how many different items do we have at least one of
+ */
+uint16_t getUserItemTypes(const unsigned treasureID) {
+  uint16_t count = 0;
+  if (treasureID == LEGENDARY_ID) {
+    return getUserTotalItems(treasureID);
+  } else {
+    for (unsigned i = 0; i < MAX_TREASURES; ++i) {
+      if (treasureID == COMMON_ID && s_userData->commonOwned[i] > 0) {
+        ++count;
+      } else if (treasureID == MAGIC_ID && s_userData->magicOwned[i] > 0) {
+        ++count;
+      } else if (treasureID == RARE_ID && s_userData->rareOwned[i] > 0) {
+        ++count;
+      } else if (treasureID == EPIC_ID && s_userData->epicOwned[i] > 0) {
+        ++count;
       }
     }
   }
