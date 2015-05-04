@@ -216,3 +216,71 @@ const char* const NAME_WATCHER[MAX_UPGRADES] = {
   "WUPGRADE 14",
   "WUPGRADE 15",
   "WUPGRADE 16"};
+
+const uint64_t SELL_PRICE_COMMON[MAX_TREASURES] = {
+  SEC_IN_MIN*10,
+  SEC_IN_MIN*30,
+  SEC_IN_HOUR*2,
+  SEC_IN_HOUR*6};
+
+const uint64_t SELL_PRICE_MAGIC[MAX_TREASURES] = {
+  SEC_IN_HOUR*18,
+  SEC_IN_DAY*5,
+  SEC_IN_DAY*20,
+  SEC_IN_DAY*30*2};
+
+const uint64_t SELL_PRICE_RARE[MAX_TREASURES] = {
+  SEC_IN_DAY*31*7,
+  SEC_IN_YEAR*3,
+  SEC_IN_YEAR*15,
+  SEC_IN_YEAR*75};
+
+const uint64_t SELL_PRICE_EPIC[MAX_TREASURES] = {
+  SEC_IN_YEAR*200,
+  SEC_IN_YEAR*500,
+  SEC_IN_MILLENIUM*1,
+  SEC_IN_MILLENIUM*5};
+
+const char* const NAME_COMMON[MAX_TREASURES] = {
+  "COMMON 1",
+  "COMMON 2",
+  "COMMON 3",
+  "COMMON 4"};
+
+const char* const NAME_MAGIC[MAX_TREASURES] = {
+  "COMMON 1",
+  "COMMON 2",
+  "COMMON 3",
+  "COMMON 4"};
+
+const char* const NAME_RARE[MAX_TREASURES] = {
+  "COMMON 1",
+  "COMMON 2",
+  "COMMON 3",
+  "COMMON 4"};
+
+const char* const NAME_EPIC[MAX_TREASURES] = {
+  "COMMON 1",
+  "COMMON 2",
+  "COMMON 3",
+  "COMMON 4"};
+
+const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
+  "LEG 1",
+  "LEG 2",
+  "LEG 3",
+  "LEG 4",
+  "LEG 5",
+  "LEG 6",
+  "LEG 7",
+  "LEG 8",
+  "LEG 9",
+  "LEG 10",
+  "LEG 11",
+  "LEG 12",
+  "LEG 13",
+  "LEG 14",
+  "LEG 15",
+  "LEG 16"};
+
+  

@@ -9,7 +9,7 @@ static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
 
 static uint64_t s_timePerMin;
-//static uint64_t s_displayTime;
+static uint64_t s_displayTime;
 static uint64_t s_timeCapacity;
 
 // Perform fixed point increase in price by floor of 7/6.
@@ -103,13 +103,13 @@ void updateTankCapacity() {
   }
 }
 
-// uint64_t getDisplayTime() {
-//   return s_displayTime;
-// }
+uint64_t getDisplayTime() {
+  return s_displayTime;
+}
 
-// void updateDisplayTime(uint64_t t) {
-//   s_displayTime = t;
-// }
+void updateDisplayTime(uint64_t t) {
+  s_displayTime = t;
+}
 
 void addTime(uint64_t toAdd) {
   if ( getUserTime() + toAdd > getTankCapacity() ) toAdd = getTankCapacity() - getUserTime();

@@ -38,11 +38,13 @@ struct userData_v1 {
 
 void init_persistence(); // Load
 void destroy_persistence(); // Save
+void resetUserData(); // Reset
 
 uint16_t getUserTotalUpgrades(const unsigned typeID);
 uint16_t getUserTotalItems(const unsigned treasureID);
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
 void addUpgrade(const unsigned typeID, const unsigned resourceID);
+void addItem(const unsigned treasureID, const unsigned itemID);
 
 void setUserTime(uint64_t newTime);
 uint64_t getUserTime();
@@ -61,11 +63,21 @@ void incrementUserTypeSetting();
 void setUserTypeSetting(uint8_t value);
 uint8_t getUserTypeSetting();
 
+void incrementUserLightSetting();
 void setUserLightSetting(uint8_t value);
 uint8_t getUserLightSetting();
 
+void incrementUserVibrateSetting();
 void setUserVibrateSetting(uint8_t value);
 uint8_t getUserVibrateSetting();
+
+void incrementUserZzzStartSetting();
+void setUserZzzStartSetting(uint8_t value);
+uint8_t getUserZzzStartSetting();
+
+void incrementUserZzzEndSetting();
+void setUserZzzEndSetting(uint8_t value);
+uint8_t getUserZzzEndSetting();
 
 void setUserChevo(uint8_t chevo, bool value);
 bool getUserChevo(uint8_t chevo);

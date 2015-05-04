@@ -2,8 +2,36 @@
 #include "persistence.h"
 #include "constants.h"
 #include "clock.h"
+#include "timeStore.h"
+#include "mainWindow.h"
 
 static struct userData_v1* s_userData;  
+
+/**
+ * Customisable list of things to give for testing.
+ */
+void DEVMODE() {
+  addItem(LEGENDARY_ID, 2);
+  addItem(LEGENDARY_ID, 3);
+  //addItem(RARE_ID, 0);
+}
+
+/**
+ * Make sure all settings which need to be enacted elsewhere are
+ */
+void initSettings() {
+  setUserTypeSetting( s_userData->typeSetting );
+  updateDisplayTime( getUserTime() );
+}
+
+void resetUserData() {
+  // Zero evertyhing
+  memset(s_userData, 0, sizeof(struct userData_v1));
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "resetUserData");
+  setUserOpt(OPT_ANIMATE, true);
+  DEVMODE();
+  initSettings();
+}
   
 void init_persistence() {
 
@@ -20,9 +48,7 @@ void init_persistence() {
   // Allocate user store memory
   s_userData = malloc(sizeof(struct userData_v1));
   if (version == 0) {
-    // Zero evertyhing
-    memset(s_userData, 0, sizeof(struct userData_v1));
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence clean");
+    resetUserData();
   } else if (version == 1) {
     // Load from memory
     int result = persist_read_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
@@ -32,9 +58,7 @@ void init_persistence() {
     // todo return an error
   }
 
-  // Make sure settings are enacted
-  setUserTypeSetting( s_userData->typeSetting );
-
+  initSettings();
 }
 
 void addUpgrade(const unsigned typeID, const unsigned resourceID) {
@@ -46,6 +70,20 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID) {
     ++s_userData->sievesOwned[resourceID];
   } else if (typeID == WATCHER_ID) {
     ++s_userData->watchersOwned[resourceID];
+  }
+}
+
+void addItem(const unsigned treasureID, const unsigned itemID) {
+  if (treasureID == COMMON_ID) {
+    ++s_userData->commonOwned[itemID];
+  } else if (treasureID == MAGIC_ID) {
+    ++s_userData->magicOwned[itemID];
+  } else if (treasureID == RARE_ID) {
+    ++s_userData->rareOwned[itemID];
+  } else if (treasureID == EPIC_ID) {
+    ++s_userData->epicOwned[itemID];
+  } else if (treasureID == LEGENDARY_ID) {
+    BITSET(s_userData->uniqueOwned, itemID);
   }
 }
 
@@ -84,11 +122,11 @@ uint16_t getUserTotalItems(const unsigned treasureID) {
     for (unsigned i = 0; i < MAX_TREASURES; ++i) {
       if (treasureID == COMMON_ID) {
         count += s_userData->commonOwned[i];
-      } else if (treasureID == TANK_ID) {
+      } else if (treasureID == MAGIC_ID) {
         count += s_userData->magicOwned[i];
-      } else if (treasureID == SIEVE_ID) {
+      } else if (treasureID == RARE_ID) {
         count += s_userData->rareOwned[i];
-      } else if (treasureID == WATCHER_ID) {
+      } else if (treasureID == LEGENDARY_ID) {
         count += s_userData->epicOwned[i];
       }
     }
@@ -139,8 +177,8 @@ uint8_t getUserColorTheme() {
 }
 
 void setUserTypeSetting(uint8_t value) {
+  if (value >= FONT_MAX) value = 0;
   s_userData->typeSetting = value;
-  if (s_userData->typeSetting >= FONT_MAX) s_userData->typeSetting = 0;
   switch(s_userData->typeSetting) {
     case FONT_5: setClockPixelOffset(1); break;
     default: setClockPixelOffset(2);
@@ -155,7 +193,12 @@ uint8_t getUserTypeSetting() {
   return s_userData->typeSetting; 
 }
 
+void incrementUserLightSetting() {
+  setUserLightSetting( s_userData->lightSetting + 1 );
+}
+
 void setUserLightSetting(uint8_t value) {
+  if (value >= MAX_NOTIFY_SETTINGS) value = 0;
   s_userData->lightSetting = value;
 }
 
@@ -163,12 +206,43 @@ uint8_t getUserLightSetting() {
   return s_userData->lightSetting; 
 }
 
+void incrementUserVibrateSetting() {
+  setUserVibrateSetting( s_userData->vibrateSetting + 1 );
+}
+
 void setUserVibrateSetting(uint8_t value) {
+  if (value >= MAX_NOTIFY_SETTINGS) value = 0;
   s_userData->vibrateSetting = value;
 }
 
 uint8_t getUserVibrateSetting() {
   return s_userData->vibrateSetting; 
+}
+
+void incrementUserZzzStartSetting() {
+  setUserZzzStartSetting( s_userData->zzzStartSetting + 1 );
+}
+
+void setUserZzzStartSetting(uint8_t value) {
+  if (value >= 24) value = 0;
+  s_userData->zzzStartSetting = value;
+}
+
+uint8_t getUserZzzStartSetting() {
+  return s_userData->zzzStartSetting;
+}
+
+void incrementUserZzzEndSetting() {
+  setUserZzzEndSetting( s_userData->zzzEndSetting + 1 );
+}
+
+void setUserZzzEndSetting(uint8_t value) {
+  if (value >= 24) value = 0;
+  s_userData->zzzEndSetting = value;
+}
+
+uint8_t getUserZzzEndSetting() {
+  return s_userData->zzzEndSetting;
 }
 
 void setUserOpt(USER_OPT opt, bool value) {
@@ -177,6 +251,9 @@ void setUserOpt(USER_OPT opt, bool value) {
   } else {
     BITCLEAR(s_userData->settingsBitmap, (uint16_t)opt);
   }
+
+  // Do we need to action on anything that has changed?
+  if (opt == OPT_SHOW_SECONDS) update_tick_handler();
 }
 
 void flipUserOpt(USER_OPT opt) {

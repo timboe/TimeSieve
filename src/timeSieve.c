@@ -3,6 +3,17 @@
   
 static Layer* s_timeSieveLayer;
 
+static uint8_t s_sieveTickCount;
+
+void sieveAnimReset() {
+  s_sieveTickCount = 0;
+}
+
+bool sieveAnimCallback() {
+  // TODO
+  return false;
+}
+
 static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
   

@@ -13,7 +13,8 @@ static int16_t s_spoogeletVx[N_SPOOGELET];
 static int16_t s_spoogeletVy[N_SPOOGELET];
 static GPoint s_attractor;
 
-static uint8_t s_tickCount = 0;
+static uint8_t s_clockTickCount = 0;
+
 static uint8_t s_clockPixelOffset = 2;
 
 #define CLOCK_OFFSET 16
@@ -22,29 +23,29 @@ void setClockPixelOffset(uint8_t offset) {
   s_clockPixelOffset = offset;
 }
 
-void animCallback(void *data) {
-  spoogeAnimation();
+void updateClockLayer() {
+  layer_mark_dirty(s_clockLayer);
 }
 
-bool spoogeAnimation() {
+void clockAnimReset() {
+  s_clockTickCount = 0;
+  for (unsigned i = 0; i < N_SPOOGELET; ++i) {
+    s_spoogelet[i].x = (7*WIN_SIZE_X/16 + (rand() % WIN_SIZE_X/8)) * SUB_PIXEL;
+    s_spoogelet[i].y = (30 + (rand() % 10)) * SUB_PIXEL;
 
-  // Animation reset
-  if (s_tickCount == 0) {
-    for (unsigned i = 0; i < N_SPOOGELET; ++i) {
-      s_spoogelet[i].x = (7*WIN_SIZE_X/16 + (rand() % WIN_SIZE_X/8)) * SUB_PIXEL;
-      s_spoogelet[i].y = (30 + (rand() % 10)) * SUB_PIXEL;
-
-      int32_t angle = rand() % TRIG_MAX_ANGLE;
-      int32_t v = ANIM_MIN_V + (rand() % (ANIM_MAX_V-ANIM_MIN_V));
-      s_spoogeletVx[i] =  sin_lookup(angle)* v / TRIG_MAX_RATIO;
-      s_spoogeletVy[i] = -cos_lookup(angle)* v / TRIG_MAX_RATIO;
-    }
-    s_attractor.x = 130;//130
-    s_attractor.y = 65;//60
+    int32_t angle = rand() % TRIG_MAX_ANGLE;
+    int32_t v = ANIM_MIN_V + (rand() % (ANIM_MAX_V-ANIM_MIN_V));
+    s_spoogeletVx[i] =  sin_lookup(angle)* v / TRIG_MAX_RATIO;
+    s_spoogeletVy[i] = -cos_lookup(angle)* v / TRIG_MAX_RATIO;
   }
+  s_attractor.x = 130;//130
+  s_attractor.y = 65;//60
+}
+
+bool clockAnimCallback() {
 
   int16_t strength =0;
-  if (s_tickCount > 24) strength = s_tickCount;
+  if (s_clockTickCount > 24) strength = s_clockTickCount;
 
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
 
@@ -59,31 +60,18 @@ bool spoogeAnimation() {
 
     // I go from 0 to 50, at 50 i need to set the offset so that they will be on top off each other
     // before that, it should nudge closer
-    //APP_LOG(APP_LOG_LEVEL_DEBUG, "B4 SCALE str %i xOff %i yOff %i", (int)strength, (int)xOff, (int)yOff);
 
     xOff = (xOff * strength) / 100;
     yOff = (yOff * strength) / 100; // nominally FPS*2 = 50
-
-    //APP_LOG(APP_LOG_LEVEL_DEBUG, "AF SCALE str %i xOff %i yOff %i", (int)strength, (int)xOff/SUB_PIXEL, (int)yOff/SUB_PIXEL);
-    //APP_LOG(APP_LOG_LEVEL_DEBUG, "AB SCALE str %i xOff %i yOff %i", (int)strength, (int)xOff, (int)yOff);
-    //APP_LOG(APP_LOG_LEVEL_DEBUG, " ");
 
     s_spoogelet[i].x += xOff;
     s_spoogelet[i].y += yOff;
   }
 
-  layer_mark_dirty(s_clockLayer); // Redraw
-  ++s_tickCount;
+  updateClockLayer(); // Redraw
 
-  if (s_tickCount == ANIM_FRAMES) {
-    s_tickCount = 0;
-    // animation done
-    return false;
-  } else {
-    app_timer_register(ANIM_DELAY, animCallback, NULL);
-    //register for another call
-    return true;
-  }
+  if (++s_clockTickCount == ANIM_FRAMES) return false;
+  return true; // Request more frames
 }
 
 void drawClock(GContext *ctx, GRect loc) {
@@ -134,46 +122,41 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
 
   // Do the clock
   time_t temp = time(NULL); 
-  struct tm *tick_time = localtime(&temp);
+  struct tm *tickTime = localtime(&temp);
  
   // Write the current hours and minutes and maybe secods into the buffer
   if (getUserOpt(OPT_SHOW_SECONDS) == true) {
     if(clock_is_24h_style() == true) {
-      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%H:%M:%S", tick_time);
+      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%H:%M:%S", tickTime);
     } else {
-      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%I:%M:%S", tick_time);
+      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%I:%M:%S", tickTime);
     }
   } else {
     if(clock_is_24h_style() == true) {
-      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%H:%M", tick_time);
+      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%H:%M", tickTime);
     } else {
-      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%I:%M", tick_time);
+      strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%I:%M", tickTime);
     }
   }
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
   drawClock(ctx, timeRect);
 
+  if (s_clockTickCount == 0) return; // No animation in progress
+
   graphics_context_set_stroke_color(ctx, GColorBlack);
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
-    bool isClose = false;
-    const uint8_t r = 1+rand()%3;
     const GPoint p = GPoint(s_spoogelet[i].x / SUB_PIXEL, s_spoogelet[i].y / SUB_PIXEL);
+    if ((p.x - s_attractor.x) < 8 && (p.x - s_attractor.x) > -8 && (p.y - s_attractor.y) < 8 && (p.y - s_attractor.y) > -8) continue; // Too close
+    const uint8_t r = 1+rand()%3;
     if (i%2==0) graphics_context_set_fill_color(ctx, getSpoogicalColourA());
     else        graphics_context_set_fill_color(ctx, getSpoogicalColourB());
-    if ((p.x - s_attractor.x) < 8 && (p.x - s_attractor.x) > -8 && (p.y - s_attractor.y) < 8 && (p.y - s_attractor.y) > -8) isClose = true;
-    if (isClose == false) {
-      graphics_fill_circle(ctx, p, r);
-      graphics_draw_circle(ctx, p, r);
-    }
+    graphics_fill_circle(ctx, p, r);
+    graphics_draw_circle(ctx, p, r);
   }
   graphics_context_set_fill_color(ctx, GColorGreen);
   graphics_fill_circle(ctx, s_attractor, 3);
 
-}
-
-void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  layer_mark_dirty(s_clockLayer);
 }
 
 void create_clock_layer(Window* parentWindow) {
@@ -184,7 +167,6 @@ void create_clock_layer(Window* parentWindow) {
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_clockLayer);
   layer_set_update_proc(s_clockLayer, clock_update_proc); 
-  tick_timer_service_subscribe(SECOND_UNIT, tick_handler);
   layer_set_clips(s_clockLayer, false);
 
 }

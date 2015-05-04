@@ -239,6 +239,8 @@ void sub_window_load(Window* parentWindow) {
 
   MenuLayer* new_layer;
   const int context = *((int*) window_get_user_data(parentWindow));
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i CREATE", context);
+
   if (context == REFINERY_ID)     new_layer = s_refinery_layer;
   else if (context == SIEVE_ID)   new_layer = s_sieve_layer;
   else if (context == TANK_ID)    new_layer = s_tank_layer;
@@ -261,6 +263,7 @@ void sub_window_load(Window* parentWindow) {
 
 void sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i DESTROY", context);
   if (context == REFINERY_ID)     menu_layer_destroy(s_refinery_layer);
   else if (context == SIEVE_ID)   menu_layer_destroy(s_sieve_layer);
   else if (context == TANK_ID)    menu_layer_destroy(s_tank_layer);
@@ -305,12 +308,14 @@ void buy_window_load(Window* parentWindow) {
   createSubWin(&s_sieve_window, &s_sieve_context);
   createSubWin(&s_tank_window, &s_tank_context);
   createSubWin(&s_watcher_window, &s_watcher_context);
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN LOAD");
 
 }
 
 void buy_window_unload() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN DESTROY");
   menu_layer_destroy(s_menu_layer);
-  
+
   // Destroy sub-windows
   window_destroy(s_refinery_window);
   window_destroy(s_tank_window);

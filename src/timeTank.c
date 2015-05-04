@@ -10,9 +10,68 @@
 // Frame to hold tank gfx 
 static Layer* s_tankLayer;
 
+static uint8_t s_tankTickCount;
+static uint8_t s_waterfallOffset;
+static uint64_t s_tankAnimToAdd;
+static uint64_t s_tankAnimRemainder;
+
+// Location of bits in the liquid
+static GPoint liquid_bits_bgn[N_LIQUID_BITS];
+static GPoint liquid_bits_end[N_LIQUID_BITS];
+static uint16_t liquid_bit_y[N_LIQUID_BITS];
+
+static GPoint waterfall_bits_bgn[N_WATERFALL_BITS];
+static GPoint waterfall_bits_end[N_WATERFALL_BITS];
+
+
+
+void randomiseWaterfallBits() {
+  for (unsigned i = 0; i < N_WATERFALL_BITS; ++i) {
+    int16_t x = 102 + rand()%8;
+    int16_t y = -4 - rand()%48;
+    waterfall_bits_bgn[i].x = x;
+    waterfall_bits_end[i].x = x;
+    waterfall_bits_bgn[i].y = y;
+    waterfall_bits_end[i].y = y + (2 + rand()%3);
+  }
+}
+
 void update_timeTank_layer() {
   layer_mark_dirty(s_tankLayer);
 }  
+
+void tankAnimReset() {
+  if (getDisplayTime() > getUserTime()) APP_LOG(APP_LOG_LEVEL_DEBUG, "DISP > USER ?!?!");
+  s_tankAnimToAdd     = getUserTime() - getDisplayTime();
+  s_tankAnimRemainder = s_tankAnimToAdd % (ANIM_FRAMES/2);
+  s_tankAnimToAdd     /= (ANIM_FRAMES/2);
+  s_waterfallOffset = 0;
+}
+
+bool tankAnimCallback() {
+
+  if (s_tankTickCount >= (ANIM_FRAMES/2)) {
+    updateDisplayTime( getDisplayTime() + s_tankAnimToAdd );
+    // Add the remainder on the first fram to make the value jump, then tend to the correct value
+    if (s_tankTickCount == (ANIM_FRAMES/2)) updateDisplayTime( getDisplayTime() + s_tankAnimRemainder );
+    update_timeTank_layer();
+    s_waterfallOffset += WATERFALL_SPEED;
+    for (unsigned i = 0; i < N_WATERFALL_BITS; ++i) {
+      waterfall_bits_bgn[i].y += WATERFALL_SPEED;
+      waterfall_bits_end[i].y += WATERFALL_SPEED;
+    }
+  }
+
+  if (++s_tankTickCount == ANIM_FRAMES) {
+    // Make sure we show the correct time at the end of the animation (there will be a modulus rounding error)
+    updateDisplayTime( getUserTime() );
+    randomiseWaterfallBits();
+    s_tankTickCount = 0;
+    return false;
+  } else {
+    return true; // Request more frames
+  }
+}
   
 /**
  * Draw the TimeTank which occupies the bottom 1/3 of the screen and holds how much liquid time the user has
@@ -25,8 +84,8 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   static char s_tankContentText[TEXT_BUFFER_SIZE];
   
   unsigned _percentage;
-  percentageToString(getUserTime(), getTankCapacity(), s_tankFullPercetText, &_percentage);
-  timeToString(getUserTime(), s_tankContentText, TEXT_BUFFER_SIZE, true);
+  percentageToString(getDisplayTime(), getTankCapacity(), s_tankFullPercetText, &_percentage);
+  timeToString(getDisplayTime(), s_tankContentText, TEXT_BUFFER_SIZE, true);
   
   // Fill back
   graphics_context_set_fill_color(ctx, GColorLightGray);
@@ -45,31 +104,28 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_stroke_width(ctx, 1);
   graphics_draw_line(ctx, GPoint(screw_one.x-2, screw_one.y-2), GPoint(screw_one.x+2, screw_one.y+2));
   graphics_draw_line(ctx, GPoint(screw_two.x+3, screw_two.y-1), GPoint(screw_two.x-3, screw_two.y+1));
-  graphics_context_set_stroke_width(ctx, 1);
+  graphics_context_set_stroke_width(ctx, 1); 
 
+  graphics_context_set_fill_color(ctx, getLiquidTimeColour());
+  graphics_context_set_stroke_color(ctx, getLiquidTimeHighlightColour());
+  // If animation true - fill the pouring liquid
+  if (s_tankTickCount >= ANIM_FRAMES/2) {
+    const GRect waterfall = GRect(100, tank_bounds.origin.y - tank_bounds.size.h + s_waterfallOffset, 10, tank_bounds.size.h);
+    graphics_fill_rect(ctx, waterfall, 3, GCornersAll);
+    for (unsigned i = 0; i < N_WATERFALL_BITS; ++i) {
+      graphics_draw_line(ctx, waterfall_bits_bgn[i], waterfall_bits_end[i]);
+    }
+  }
   // Fill liquid height
   int liquid_height = (tank_bounds.size.h * _percentage) / 100;
   GRect liquid_rect = GRect(0, tank_bounds.origin.y + tank_bounds.size.h - liquid_height, tank_bounds.size.w, liquid_height);
-  graphics_context_set_fill_color(ctx, getLiquidTimeColour());
   graphics_fill_rect(ctx, liquid_rect, 0, GCornersAll);
-  
   // Fill bits in the liquid
-  static GPoint liquid_bits_bgn[N_LIQUID_BITS];
-  static GPoint liquid_bits_end[N_LIQUID_BITS];
-  static uint16_t liquid_bit_y[N_LIQUID_BITS];
-  graphics_context_set_stroke_color(ctx, getLiquidTimeHighlightColour());
-  static bool first_pass = true; // Do we need to update all 4 coords?
   for (unsigned i = 0; i < N_LIQUID_BITS; ++i) {
-    if (first_pass == true) {
-      liquid_bits_bgn[i].x = 5 + rand()%130;
-      liquid_bits_end[i].x =liquid_bits_bgn[i].x + (2 + rand()%3);
-      liquid_bit_y[i] = 3 + rand()%50;
-    }
     liquid_bits_bgn[i].y = tank_bounds.origin.y + tank_bounds.size.h - liquid_height + liquid_bit_y[i];
     liquid_bits_end[i].y = liquid_bits_bgn[i].y;
     graphics_draw_line(ctx, liquid_bits_bgn[i], liquid_bits_end[i]);
   }
-  first_pass = false; // Only need update the y coord in future
 
   // Fill borders
   graphics_context_set_stroke_color(ctx, GColorBlack);
@@ -124,6 +180,14 @@ void create_timeTank_layer(Window* parentWindow) {
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_tankLayer);
   layer_set_update_proc(s_tankLayer, timeTank_update_proc); 
+
+  // Randomise liquid bits
+  for (unsigned i = 0; i < N_LIQUID_BITS; ++i) {
+    liquid_bits_bgn[i].x = 5 + rand()%130;
+    liquid_bits_end[i].x =liquid_bits_bgn[i].x + (2 + rand()%3);
+    liquid_bit_y[i] = 3 + rand()%50;
+  }
+  randomiseWaterfallBits();
 }
 
 void destroy_timeTank_layer() {

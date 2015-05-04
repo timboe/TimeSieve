@@ -10,6 +10,8 @@
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
 #define BITNSLOTS(nb) ((nb + CHAR_BIT - 1) / CHAR_BIT)
 
+// Used in animations
+#define MS_IN_SEC 1000 
 // DEFINE DIFFERENT TIME PERIODS
 #define SEC_IN_MIN (uint64_t)60
 #define SEC_IN_HOUR (uint64_t)3600
@@ -46,6 +48,8 @@
 #define RARE_ID 2
 #define EPIC_ID 3
 #define LEGENDARY_ID 4
+// Only common through epic may be sold on the market
+#define SELLABLE_CATEGORIES 4
   
 #define N_REFINERY_UPGRADES 10
 #define N_SIEVE_UPGRADES 10
@@ -56,6 +60,11 @@ extern const char* const NAME_REFINERY[MAX_UPGRADES];
 extern const char* const NAME_SIEVE[MAX_UPGRADES];
 extern const char* const NAME_TANK[MAX_UPGRADES];
 extern const char* const NAME_WATCHER[MAX_UPGRADES];
+extern const char* const NAME_COMMON[MAX_TREASURES];
+extern const char* const NAME_MAGIC[MAX_TREASURES];
+extern const char* const NAME_RARE[MAX_TREASURES];
+extern const char* const NAME_EPIC[MAX_TREASURES];
+extern const char* const NAME_LEGENDARY[MAX_UNIQUE];
 extern const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
@@ -64,6 +73,10 @@ extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
 extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
 extern const uint64_t REWARD_TANK[MAX_UPGRADES];
 extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
+extern const uint64_t SELL_PRICE_COMMON[MAX_TREASURES];
+extern const uint64_t SELL_PRICE_MAGIC[MAX_TREASURES];
+extern const uint64_t SELL_PRICE_RARE[MAX_TREASURES];
+extern const uint64_t SELL_PRICE_EPIC[MAX_TREASURES];
 
 #define MENU_BACK_GREEN_ODD GColorMintGreen
 #define MENU_BACK_GREEN_EVEN GColorScreaminGreen
@@ -104,6 +117,8 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define MENU_X_OFFSET 28
 #define MENU_CELL_HEIGHT 69
 
+#define MAX_NOTIFY_SETTINGS 6
+
 #define TEXT_BUFFER_SIZE 32
 #define TEXT_LARGE_BUFFER_SIZE 128
   
@@ -114,6 +129,8 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 
 // Bits in the liquid
 #define N_LIQUID_BITS 20
+#define N_WATERFALL_BITS 5
+#define WATERFALL_SPEED 5
 
 // PARTICLE EFFECTS
 #define N_SPOOGELET 30 
@@ -129,12 +146,10 @@ extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 #define ANIM_FPS 25
 //#define ANIM_TICK_PER_FRAME 2
 #define ANIM_DURATION 2
-#define ANIM_RESET 1
-#define ANIM_MS_PER_SEC 1000
 #define ANIM_MIN_V 100
 #define ANIM_MAX_V 300
 #define ANIM_FRAMES ANIM_FPS*ANIM_DURATION
-#define ANIM_DELAY ANIM_MS_PER_SEC/ANIM_FPS
+#define ANIM_DELAY MS_IN_SEC/ANIM_FPS
  
 #define N_USER_OPT 16
 typedef enum {OPT_SHOW_SECONDS,

@@ -22,3 +22,6 @@ void updateTankCapacity();
 void addTime(uint64_t toAdd);
 void removeTime(uint64_t toSubtract);
 void multiplyTime(uint64_t factor);
+
+uint64_t getDisplayTime();
+void updateDisplayTime(uint64_t t);
