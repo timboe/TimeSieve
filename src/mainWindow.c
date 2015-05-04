@@ -163,11 +163,11 @@ void init_mainWindow() {
     .unload = settings_window_unload
   });  
 
-  // s_sell_window = window_create();
-  // window_set_window_handlers(s_settings_window, (WindowHandlers) {
-  //   .load = sell_window_load,
-  //   .unload = sell_window_unload
-  // });  
+  s_sell_window = window_create();
+  window_set_window_handlers(s_sell_window, (WindowHandlers) {
+    .load = sell_window_load,
+    .unload = sell_window_unload
+  });  
 
   if (s_main_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "MainWin FAIL!");
   if (s_buy_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "BuyWin FAIL!");
