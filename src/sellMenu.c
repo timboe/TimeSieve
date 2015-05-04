@@ -36,7 +36,7 @@ static char tempBuffer[TEXT_BUFFER_SIZE];
 static uint16_t sell_get_num_sections_callback(MenuLayer *menu_layer, void *data) { 
   uint16_t sections = 0;
   for (uint16_t i = 0; i < SELLABLE_CATEGORIES; ++i) {
-    if (getUserTotalItems(i) > 0) s_sellSections[sections] = i;
+    if (getUserTotalItems(i) > 0) s_sellSections[sections++] = i; // Note - postincrement
   }
   if (sections == 0) {
     s_sellSections[0] = -1;
