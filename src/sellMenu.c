@@ -124,6 +124,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
     if (getUserItems(treasureID, itemID) > 0) {
       if (hasItems == row) {
         theItemID = itemID;
+        break;
       } else {
         ++hasItems;
       }

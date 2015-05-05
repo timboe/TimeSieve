@@ -248,22 +248,22 @@ const char* const NAME_COMMON[MAX_TREASURES] = {
   "COMMON 4"};
 
 const char* const NAME_MAGIC[MAX_TREASURES] = {
-  "COMMON 1",
-  "COMMON 2",
-  "COMMON 3",
-  "COMMON 4"};
+  "MAGIC 1",
+  "MAGIC 2",
+  "MAGIC 3",
+  "MAGIC 4"};
 
 const char* const NAME_RARE[MAX_TREASURES] = {
-  "COMMON 1",
-  "COMMON 2",
-  "COMMON 3",
-  "COMMON 4"};
+  "RARE 1",
+  "RARE 2",
+  "RARE 3",
+  "RARE 4"};
 
 const char* const NAME_EPIC[MAX_TREASURES] = {
-  "COMMON 1",
-  "COMMON 2",
-  "COMMON 3",
-  "COMMON 4"};
+  "EPIC 1",
+  "EPIC 2",
+  "EPIC 3",
+  "EPIC 4"};
 
 const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "LEG 1",
