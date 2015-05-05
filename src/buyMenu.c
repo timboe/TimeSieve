@@ -225,6 +225,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 static void sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   const int context = *((int*)data);
   const bool result = doPurchase(context, cell_index->row);  
+  if (result) updateDisplayTime( getUserTime() );
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
