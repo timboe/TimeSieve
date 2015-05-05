@@ -119,6 +119,23 @@ uint16_t getUserTotalUpgrades(const unsigned typeID) {
   return count;
 }
 
+uint16_t getUserItems(const unsigned treasureID, const unsigned itemID) {
+  if (treasureID == LEGENDARY_ID) {
+    return (uint16_t) BITTEST(s_userData->uniqueOwned, itemID); // Going to be either 1 or 0
+  } else {
+    if (treasureID == COMMON_ID) {
+      return s_userData->commonOwned[itemID];
+    } else if (treasureID == MAGIC_ID) {
+      return s_userData->magicOwned[itemID];
+    } else if (treasureID == RARE_ID) {
+      return s_userData->rareOwned[itemID];
+    } else if (treasureID == EPIC_ID) {
+      return s_userData->epicOwned[itemID];
+    }
+  }
+  return 0;
+}
+
 uint16_t getUserTotalItems(const unsigned treasureID) {
   uint16_t count = 0;
   if (treasureID == LEGENDARY_ID) {

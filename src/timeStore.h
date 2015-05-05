@@ -19,6 +19,8 @@ void updateTimePerMin();
 uint64_t getTankCapacity();
 void updateTankCapacity();
 
+void modulateSellPrices();
+
 void addTime(uint64_t toAdd);
 void removeTime(uint64_t toSubtract);
 void multiplyTime(uint64_t factor);

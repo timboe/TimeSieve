@@ -110,6 +110,43 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   const uint16_t section = cell_index->section;
   const uint16_t row = cell_index->row;
   const bool selected = menu_cell_layer_is_highlighted(cell_layer);
+
+  // get type
+  if (section == 0 && s_sellSections[0] == -1) {
+    // just draw a background coloured box and return as there is nothing to sell
+  }
+
+  const int8_t treasureID = s_sellSections[section];
+  uint8_t hasItems = 0;
+  int8_t theItemID = -1;
+  // Find the row'th item
+  for (uint8_t itemID = 0; itemID < MAX_TREASURES; ++itemID) {
+    if (getUserItems(treasureID, itemID) > 0) {
+      if (hasItems == row) {
+        theItemID = itemID;
+      } else {
+        ++hasItems;
+      }
+    }
+  }
+
+  if (theItemID == -1) {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "FAILED TO FIND ITEM FOR SELL ROW");
+    return;
+  }
+
+  const char* itemName = NULL;
+  switch (treasureID) {
+    case COMMON_ID: itemName = NAME_COMMON[theItemID]; break;
+    case MAGIC_ID: itemName = NAME_MAGIC[theItemID]; break;
+    case RARE_ID: itemName = NAME_RARE[theItemID]; break;
+    case EPIC_ID: itemName = NAME_EPIC[theItemID]; break;
+    default: APP_LOG(APP_LOG_LEVEL_DEBUG, "SELL MENU UNKNOWN TREASURE ID");
+  }
+
+  GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
+  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+
   
   // // Text colours
   // if (selected) graphics_context_set_text_color(ctx, GColorWhite);

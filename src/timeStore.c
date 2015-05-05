@@ -8,14 +8,57 @@ static uint64_t* s_bufferTankPrice;
 static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
 
+static uint64_t* s_bufferCommonSellPrice;
+static uint64_t* s_bufferMagicSellPrice;
+static uint64_t* s_bufferRareSellPrice;
+static uint64_t* s_bufferEpicSellPrice;
+
 static uint64_t s_timePerMin;
 static uint64_t s_displayTime;
 static uint64_t s_timeCapacity;
+
+#define INITIAL_PRICE_MODULATION 5
 
 // Perform fixed point increase in price by floor of 7/6.
 uint64_t getPriceOfNext(uint64_t priceOfCurrent) {
   priceOfCurrent *= INCREASE_MULTIPLY;
   return priceOfCurrent / INCREASE_DIVIDE;
+}
+
+/**
+ * Every 1m, we modulate the prices, very basic
+ */
+void modulateSellPrices() {
+  for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
+    s_bufferCommonSellPrice[item] += ( (s_bufferCommonSellPrice[item]/(uint64_t)100) * (-10+(rand()%21)) ); 
+    s_bufferMagicSellPrice[item]  += ( (s_bufferMagicSellPrice[item]/(uint64_t)100)  * (-10+(rand()%21)) ); 
+    s_bufferRareSellPrice[item]   += ( (s_bufferRareSellPrice[item]/(uint64_t)100)   * (-10+(rand()%21)) ); 
+    s_bufferEpicSellPrice[item]   += ( (s_bufferEpicSellPrice[item]/(uint64_t)100)   * (-10+(rand()%21)) ); 
+  }
+}
+
+/**
+ * Load the const default prices into a buffer so we can play with them
+ */
+void initiateSellPrices() {
+
+  s_bufferCommonSellPrice = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
+  s_bufferMagicSellPrice  = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
+  s_bufferRareSellPrice   = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
+  s_bufferEpicSellPrice   = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
+
+  // Load defaults
+  for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
+    s_bufferCommonSellPrice[item] = SELL_PRICE_COMMON[item];
+    s_bufferMagicSellPrice[item]  = SELL_PRICE_MAGIC[item];
+    s_bufferRareSellPrice[item]   = SELL_PRICE_RARE[item];
+    s_bufferEpicSellPrice[item]   = SELL_PRICE_EPIC[item];
+  }
+
+  // Do initial permuting
+  for (uint16_t n = 0; n < INITIAL_PRICE_MODULATION; ++n) {
+    modulateSellPrices();
+  }
 }
 
 void init_timeStore() {
@@ -52,6 +95,8 @@ void init_timeStore() {
 
   updateTimePerMin();
   updateTankCapacity();
+
+  initiateSellPrices();
 }
 
 void destroy_timeStore() {
@@ -59,6 +104,11 @@ void destroy_timeStore() {
   free( s_bufferTankPrice );
   free( s_bufferSievePrice );
   free( s_bufferWatcherPrice );
+
+  free( s_bufferCommonSellPrice );
+  free( s_bufferMagicSellPrice );
+  free( s_bufferRareSellPrice );
+  free( s_bufferEpicSellPrice );  
 }
 
 

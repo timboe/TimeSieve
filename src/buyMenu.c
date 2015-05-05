@@ -162,8 +162,8 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   }
 
   bool display = false, canAfford = false;
-  // Can I afford this? Only display if I am more than 50% of the way to being able to afford one
-  if (owned > 0 || getUserTime() > (priceNext/2)) display = true;
+  // Can I afford this? Only display if total time gained playing is greater than the cost
+  if (owned > 0 || getUserTotalTime() > priceNext) display = true;
   if (getUserTime() >= priceNext) canAfford = true;
 
   // Text colours

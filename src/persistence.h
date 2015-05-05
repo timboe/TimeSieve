@@ -41,6 +41,8 @@ void destroy_persistence(); // Save
 void resetUserData(); // Reset
 
 uint16_t getUserTotalUpgrades(const unsigned typeID);
+
+uint16_t getUserItems(const unsigned treasureID, const unsigned itemID);
 uint16_t getUserTotalItems(const unsigned treasureID);
 uint16_t getUserItemTypes(const unsigned treasureID);
 

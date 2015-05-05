@@ -121,6 +121,9 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     update_timeTank_layer(); // Show the user their new time
     updateClockLayer();  // Update the clock
   }
+ 
+  // Update prices
+  modulateSellPrices();
 
   // Found treasure?
 
