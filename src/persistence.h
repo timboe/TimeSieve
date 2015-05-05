@@ -39,6 +39,7 @@ struct userData_v1 {
 void init_persistence(); // Load
 void destroy_persistence(); // Save
 void resetUserData(); // Reset
+void DEVMODE();
 
 uint16_t getUserTotalUpgrades(const unsigned typeID);
 

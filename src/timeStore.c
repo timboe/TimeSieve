@@ -25,6 +25,21 @@ uint64_t getPriceOfNext(uint64_t priceOfCurrent) {
   return priceOfCurrent / INCREASE_DIVIDE;
 }
 
+uint64_t getItemBasePrice(const unsigned treasureID, const unsigned itemID) {
+  if (treasureID == COMMON_ID) {
+    return SELL_PRICE_COMMON[itemID];
+  } else if (treasureID == MAGIC_ID) {
+    return SELL_PRICE_MAGIC[itemID];
+  } else if (treasureID == RARE_ID) {
+    return SELL_PRICE_RARE[itemID];
+  } else if (treasureID == EPIC_ID) {
+    return SELL_PRICE_EPIC[itemID];
+  } else if (treasureID == LEGENDARY_ID) {
+    APP_LOG(APP_LOG_LEVEL_ERROR,"CANNOT SELL LEG.");
+  }
+  return 0;
+}
+
 /**
  * Every 1m, we modulate the prices, very basic
  */
@@ -49,10 +64,10 @@ void initiateSellPrices() {
 
   // Load defaults
   for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
-    s_bufferCommonSellPrice[item] = SELL_PRICE_COMMON[item];
-    s_bufferMagicSellPrice[item]  = SELL_PRICE_MAGIC[item];
-    s_bufferRareSellPrice[item]   = SELL_PRICE_RARE[item];
-    s_bufferEpicSellPrice[item]   = SELL_PRICE_EPIC[item];
+    s_bufferCommonSellPrice[item] = getItemBasePrice(COMMON_ID, item);
+    s_bufferMagicSellPrice[item]  = getItemBasePrice(MAGIC_ID, item);
+    s_bufferRareSellPrice[item]   = getItemBasePrice(RARE_ID, item);
+    s_bufferEpicSellPrice[item]   = getItemBasePrice(EPIC_ID, item);
   }
 
   // Do initial permuting
@@ -125,6 +140,27 @@ uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
   }
 
   return getPriceOfNext(currentPrice);
+}
+
+uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID) {
+  if (treasureID == COMMON_ID) {
+    return s_bufferCommonSellPrice[itemID];
+  } else if (treasureID == MAGIC_ID) {
+    return s_bufferMagicSellPrice[itemID];
+  } else if (treasureID == RARE_ID) {
+    return s_bufferRareSellPrice[itemID];
+  } else if (treasureID == EPIC_ID) {
+    return s_bufferEpicSellPrice[itemID];
+  } else if (treasureID == LEGENDARY_ID) {
+    APP_LOG(APP_LOG_LEVEL_ERROR,"CANNOT SELL LEG.");
+  }
+  return 0;
+}
+
+void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigned* value, const unsigned treasureID, const unsigned itemID) {
+  uint64_t basePrice = getItemBasePrice(treasureID, itemID);
+  uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
+  percentageToString(currentPrice, basePrice, buffer, buffer_size, value);
 }
 
 uint64_t getTimePerMin() {
@@ -283,10 +319,9 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Did time %iy %id %ih %im %is", _years, days, hours, mins, secs);
 }
 
-void percentageToString(uint64_t amount, uint64_t total, char* buffer, unsigned* value) {
+void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bufferSize, unsigned* value) {
   *value = (amount*100) / total;
-  if (*value > 100) *value = 100;
-  snprintf(buffer, TEXT_BUFFER_SIZE, "%i%%", *value);
+  snprintf(buffer, bufferSize, "%i%%", *value);
   return;
 }
 

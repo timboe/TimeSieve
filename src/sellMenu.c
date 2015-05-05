@@ -5,20 +5,20 @@
 #include "timeStore.h"
 
 
-// #define CHEVO_CONTEXT_ID 0
-// #define UNIQUE_CONTEXT_ID 1
+// Box is 32x27, ~14 px vert. available
+static const GPathInfo ARROW_DOWN_PATH = {
+  .num_points = 7, //2nd should be 26,5 18,5
+  .points = (GPoint []) {{0, 7}, {10, 0}, {3, 0}, {3, -7}, {-3, -7}, {-3, 0}, {-10, 0}}
+};
 
-// #define STAT_SECTION_ID 0
-// #define CHEVO_SECTION_ID 1
-// #define SETTINGS_SECTION_ID 2
-  
-// #define NUM_SETTINGS_MENU_SECTIONS 3
-// //
-// #define NUM_STAT_ROWS 3
-// #define NUM_CHEVO_ROWS 2
-// #define NUM_SETTINGS_ROWS 9
+static const GPathInfo ARROW_UP_PATH = {
+  .num_points = 7, //2nd should be 26,5 18,5
+  .points = (GPoint []) {{0, -7}, {10, 0}, {3, 0}, {3, 7}, {-3, 7}, {-3, 0}, {-10, 0}}
+};
+static GPath* s_arrowUp;
+static GPath* s_arrowDown;
 
-// #define SETTINGS_CELL_HEIGHT 57
+
 
 static int8_t s_sellSections[SELLABLE_CATEGORIES] = {-1};
 
@@ -101,7 +101,7 @@ static int16_t sell_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *c
   //   // case SETTINGS_SECTION_ID: return 44;
   //   default: return 0;
   // }
-  return 32;
+  return MENU_SMALL_CELL_HEIGHT;
 }
 
 static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
@@ -145,9 +145,50 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
     default: APP_LOG(APP_LOG_LEVEL_DEBUG, "SELL MENU UNKNOWN TREASURE ID");
   }
 
-  GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
-  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  static char subText1[TEXT_BUFFER_SIZE];
+  static char subText2[TEXT_BUFFER_SIZE];
+  strcpy(subText1, "");
+  
 
+  GRect ttlTextRect = GRect(MENU_X_OFFSET, -6, size.w-MENU_X_OFFSET, size.h);
+  GRect topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
+  GRect medTextRect = GRect(MENU_X_OFFSET, 27, size.w-MENU_X_OFFSET, size.h-33);
+
+  // Get owned
+  uint16_t owned = getUserItems(treasureID, theItemID);
+  // Get sell price
+  uint64_t sellPrice = owned * getCurrentSellPrice(treasureID, theItemID);
+  snprintf(subText1, TEXT_BUFFER_SIZE, "OWNED: %i", (int)owned);
+  strcpy(subText2, "VALUE:");
+  timeToString(sellPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
+  strcat(subText2, tempBuffer);
+
+  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, subText1, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, subText2, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), medTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+
+  // market box
+  unsigned percentage;
+  currentSellPricePercentage(tempBuffer, TEXT_BUFFER_SIZE, &percentage, treasureID, theItemID);
+  if (percentage > 110) graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_EVEN);
+  else if (percentage < 90) graphics_context_set_fill_color(ctx, MENU_BACK_RED_EVEN);
+  else graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_EVEN);
+  GRect valueBox = GRect(110, 2, 32, 27);
+  graphics_fill_rect(ctx, valueBox, 2, GCornersAll);
+  GRect percBox = GRect(110, 14, 32, 10);
+  graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), percBox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+
+  graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_SELECT);
+  if (percentage > 110)  {
+    gpath_draw_filled(ctx, s_arrowUp);
+  } else if (percentage < 90) {
+    gpath_draw_filled(ctx, s_arrowDown);
+  }
+
+  graphics_context_set_stroke_color(ctx, GColorBlack);
+  // Image placeholder
+  GRect imageRect = GRect(3, 4,  22, 36);
+  graphics_draw_rect(ctx, imageRect);
   
   // // Text colours
   // if (selected) graphics_context_set_text_color(ctx, GColorWhite);
@@ -207,6 +248,11 @@ void sell_window_load(Window* parentWindow) {
   Layer* window_layer = window_get_root_layer(parentWindow);
   GRect bounds = layer_get_frame(window_layer);
 
+  s_arrowUp = gpath_create(&ARROW_UP_PATH);
+  s_arrowDown = gpath_create(&ARROW_DOWN_PATH);
+  gpath_move_to(s_arrowUp, GPoint(126, 10));
+  gpath_move_to(s_arrowDown, GPoint(126, 10));
+
   // Create the menu layer
   s_sell_layer = menu_layer_create(bounds);
   menu_layer_set_callbacks(s_sell_layer, NULL, (MenuLayerCallbacks){
@@ -228,4 +274,6 @@ void sell_window_load(Window* parentWindow) {
 void sell_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SELL WIN DESTROY");
   menu_layer_destroy(s_sell_layer);
+  free(s_arrowUp);
+  free(s_arrowDown);
 }

@@ -242,26 +242,26 @@ const uint64_t SELL_PRICE_EPIC[MAX_TREASURES] = {
   SEC_IN_MILLENIUM*5};
 
 const char* const NAME_COMMON[MAX_TREASURES] = {
-  "COMMON 1",
-  "COMMON 2",
-  "COMMON 3",
-  "COMMON 4"};
+  "Old Tooth",
+  "Coathangr",
+  "Googly i",
+  "Milk"};
 
 const char* const NAME_MAGIC[MAX_TREASURES] = {
-  "MAGIC 1",
-  "MAGIC 2",
+  "Briefs",
+  "Rick Roll",
   "MAGIC 3",
   "MAGIC 4"};
 
 const char* const NAME_RARE[MAX_TREASURES] = {
   "RARE 1",
   "RARE 2",
-  "RARE 3",
-  "RARE 4"};
+  "5 Bitcoin",
+  "Man's Soul"};
 
 const char* const NAME_EPIC[MAX_TREASURES] = {
   "EPIC 1",
-  "EPIC 2",
+  "Gemerald",
   "EPIC 3",
   "EPIC 4"};
 

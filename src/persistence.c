@@ -14,13 +14,26 @@ void DEVMODE() {
   addItem(LEGENDARY_ID, 2);
   addItem(LEGENDARY_ID, 3);
   addItem(EPIC_ID, 3);
+  addItem(EPIC_ID, 2);
+  addItem(EPIC_ID, 1);
+  addItem(EPIC_ID, 0);
+  addItem(RARE_ID, 1);
+  addItem(RARE_ID, 2);
+  addItem(RARE_ID, 3);
+  addItem(RARE_ID, 0);
+
   addItem(COMMON_ID, 3);
   addItem(COMMON_ID, 0);
+  addItem(COMMON_ID, 1);
+  addItem(COMMON_ID, 2);
   addItem(MAGIC_ID, 0);
   addItem(MAGIC_ID, 1);
   addItem(MAGIC_ID, 2);
   addItem(MAGIC_ID, 3);
   //addItem(RARE_ID, 0);
+  addTime((uint64_t)300);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "DEV MODE");
+  updateDisplayTime( getUserTime() );
 }
 
 /**
@@ -36,7 +49,6 @@ void resetUserData() {
   memset(s_userData, 0, sizeof(struct userData_v1));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "resetUserData");
   setUserOpt(OPT_ANIMATE, true);
-  DEVMODE();
   initSettings();
 }
   
@@ -60,12 +72,12 @@ void init_persistence() {
     // Load from memory
     int result = persist_read_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
     APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence read code %i", result);
+    initSettings();
   } else {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence unknown save version!");
     // todo return an error
   }
 
-  initSettings();
 }
 
 void addUpgrade(const unsigned typeID, const unsigned resourceID) {

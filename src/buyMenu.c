@@ -190,10 +190,10 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     graphics_draw_text(ctx, "??????", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   } else {
     // Now text
-    GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
-    GRect topTextRect = GRect(MENU_X_OFFSET, 22, size.w-MENU_X_OFFSET, size.h-22);
-    GRect medTextRect = GRect(MENU_X_OFFSET, 33, size.w-MENU_X_OFFSET, size.h-33);
-    GRect botTextRect = GRect(MENU_X_OFFSET, 44, size.w-MENU_X_OFFSET, size.h-44);
+    GRect ttlTextRect = GRect(MENU_X_OFFSET, -6,  size.w-MENU_X_OFFSET, size.h);
+    GRect topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
+    GRect medTextRect = GRect(MENU_X_OFFSET, 27, size.w-MENU_X_OFFSET, size.h-33);
+    GRect botTextRect = GRect(MENU_X_OFFSET, 38, size.w-MENU_X_OFFSET, size.h-44);
     
     timeToString(priceNext, tempBuffer, TEXT_BUFFER_SIZE, true);
     static char s_header[TEXT_BUFFER_SIZE];
@@ -215,6 +215,11 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   }
 
   graphics_context_set_stroke_color(ctx, GColorBlack);
+
+  // Image placeholder
+  GRect imageRect = GRect(3, 10,  22, 36);
+  graphics_draw_rect(ctx, imageRect);
+
   graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 
 }

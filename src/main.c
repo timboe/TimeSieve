@@ -12,6 +12,7 @@ void handle_init(void) {
   init_persistence(); // Load user save
   init_timeStore(); // Buffer upgrade prices
   init_mainWindow(); // Create and push to the stack the main window
+  DEVMODE();
   update_tick_handler(); // Get 1s or 1m callbacks
 }
 
