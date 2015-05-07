@@ -23,6 +23,13 @@ static bool s_clockAnimRequest;
 static bool s_sieveAnimRequest;
 static bool s_tankAnimRequest;
 
+void animEnd() {
+    updateDisplayTime( getUserTime() ); // Make sure correct time is set
+    update_timeTank_layer(); // Show the user their new time
+    updateClockLayer();  // Update the clock
+    updateSellMenu(); // Update sell prices
+}
+
 /**
  * Function executes at 1/FPS while all areas are still requesting more frames.
  * Each anim function is expected to dirty any layers which need redrawing
@@ -33,6 +40,8 @@ void animCallback(void* data) {
   if (s_clockAnimRequest) s_clockAnimRequest = clockAnimCallback();
   if (s_clockAnimRequest || s_tankAnimRequest || s_clockAnimRequest) {
     app_timer_register(ANIM_DELAY, animCallback, NULL);
+  } else {
+    animEnd();
   }
 }
 
@@ -66,23 +75,28 @@ void main_window_unload(Window *window) {
 
 // For the main window
 void main_window_single_click_handler(ClickRecognizerRef recognizer, void *context) {
-  ButtonId _button = click_recognizer_get_button_id(recognizer);
+  ButtonId button = click_recognizer_get_button_id(recognizer);
 
-   if (BUTTON_ID_UP == _button) {
+   if (BUTTON_ID_UP == button) {
     window_stack_push(s_buy_window, true);
-  } else if (BUTTON_ID_SELECT == _button) {
+  } else if (BUTTON_ID_SELECT == button) {
     window_stack_push(s_settings_window, true);
-  } else if (BUTTON_ID_DOWN == _button) {
+  } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
+  } else if (BUTTON_ID_BACK == button) {
+    tick_handler(NULL, MINUTE_UNIT);
   }
+  
   
 }
 
 void click_config_provider(Window *window) {
  // single click / repeat-on-hold config:
-  window_single_click_subscribe(BUTTON_ID_DOWN|BUTTON_ID_UP|BUTTON_ID_SELECT, main_window_single_click_handler);
+  window_single_click_subscribe(BUTTON_ID_DOWN, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, main_window_single_click_handler);
+  window_single_click_subscribe(BUTTON_ID_BACK, main_window_single_click_handler);
+
 //   window_single_repeating_click_subscribe(BUTTON_ID_SELECT, 1000, select_single_click_handler);
 //   window_multi_click_subscribe(BUTTON_ID_SELECT, 2, 10, 0, true, select_multi_click_handler);
 //   window_long_click_subscribe(BUTTON_ID_SELECT, 700, select_long_click_handler, select_long_click_release_handler);
@@ -113,15 +127,6 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     return; // WARNING - if only 1s has passed we do not run anything below
   }
 
-  // Begin animation?
-  if (getUserOpt(OPT_ANIMATE) == true) { // do animation?
-    animBegin();
-  } else {
-    updateDisplayTime( getUserTime() ); // Just set time value
-    update_timeTank_layer(); // Show the user their new time
-    updateClockLayer();  // Update the clock
-  }
- 
   // Update prices
   modulateSellPrices();
 
@@ -130,6 +135,15 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   // Earned chevos?
 
   // Notification
+
+  // Begin animation?
+  if (getUserOpt(OPT_ANIMATE) == true) { // do animation?
+    animBegin();
+  } else {
+    animEnd(); // Just redraw
+  }
+
+  APP_LOG(APP_LOG_LEVEL_INFO,"Heap used:%i Heap free:%i",heap_bytes_used(), heap_bytes_free());
 
 }
 

@@ -48,8 +48,10 @@ uint16_t getUserTotalItems(const unsigned treasureID);
 uint16_t getUserItemTypes(const unsigned treasureID);
 
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
-void addUpgrade(const unsigned typeID, const unsigned resourceID);
-void addItem(const unsigned treasureID, const unsigned itemID);
+
+void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t n);
+void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
+void removeItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
 
 void setUserTime(uint64_t newTime);
 uint64_t getUserTime();

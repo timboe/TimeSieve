@@ -7,24 +7,49 @@
 
 // Box is 32x27, ~14 px vert. available
 static const GPathInfo ARROW_DOWN_PATH = {
-  .num_points = 7, //2nd should be 26,5 18,5
+  .num_points = 7, 
   .points = (GPoint []) {{0, 7}, {10, 0}, {3, 0}, {3, -7}, {-3, -7}, {-3, 0}, {-10, 0}}
 };
 
 static const GPathInfo ARROW_UP_PATH = {
-  .num_points = 7, //2nd should be 26,5 18,5
+  .num_points = 7, 
   .points = (GPoint []) {{0, -7}, {10, 0}, {3, 0}, {3, 7}, {-3, 7}, {-3, 0}, {-10, 0}}
 };
+
+static const GPathInfo BOX_PATH = {
+  .num_points = 4, 
+  .points = (GPoint []) {{0, 7}, {7, 0}, {0, -7}, {-7, 0}}
+};
+
 static GPath* s_arrowUp;
 static GPath* s_arrowDown;
-
-
+static GPath* s_box;
 
 static int8_t s_sellSections[SELLABLE_CATEGORIES] = {-1};
 
 static MenuLayer* s_sell_layer;  
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
+
+void updateSellMenu() {
+  if (s_sell_layer) layer_mark_dirty(menu_layer_get_layer(s_sell_layer));
+}
+
+
+int8_t getItemIDFromRow(const unsigned treasureID, const uint16_t row) {
+  uint8_t hasItems = 0;
+  // Find the row'th item
+  for (uint8_t itemID = 0; itemID < MAX_TREASURES; ++itemID) {
+    if (getUserItems(treasureID, itemID) > 0) {
+      if (hasItems == row) {
+        return itemID;
+      } else {
+        ++hasItems;
+      }
+    }
+  }
+  return -1;
+}
 
 /// 
 /// SELL WINDOW CALLBACKS
@@ -72,26 +97,24 @@ static void sell_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
   }
 
   const int8_t category = s_sellSections[section_index];
-  if (category == COMMON_ID) graphics_draw_text(ctx, "COMMON Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  else if (category == MAGIC_ID) graphics_draw_text(ctx, "MAGIC Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  else if (category == RARE_ID) graphics_draw_text(ctx, "RARE Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  else if (category == EPIC_ID) graphics_draw_text(ctx, "EPIC Treasures", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 
-  // const GSize size = layer_get_frame(cell_layer).size;
-  // if (section_index == STAT_SECTION_ID) {
-  //   strcpy(tempBuffer, "STATISTICS");
-  //   graphics_context_set_fill_color(ctx, MENU_BACK_YELLOW_ODD);
-  // } else if (section_index == CHEVO_SECTION_ID) {
-  //   strcpy(tempBuffer, "ACHIEVEMENTS");
-  //   graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_ODD);
-  // } else if (section_index == SETTINGS_SECTION_ID) {
-  //   strcpy(tempBuffer, "SETTINGS");
-  //   graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_ODD);
-  // }
-  // graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
-  // menu_cell_basic_header_draw(ctx, cell_layer, tempBuffer);
-  // graphics_context_set_stroke_color(ctx, GColorBlack);
-  // graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
+  GColor backColor;
+  if (category == COMMON_ID) {
+    strcpy(tempBuffer,"COMMON Treasures");
+    backColor = GColorLightGray;
+  } else if (category == MAGIC_ID) {
+    strcpy(tempBuffer,"MAGIC Treasures");
+    backColor = MENU_BACK_GREEN_ODD;
+  } else if (category == RARE_ID) {
+    strcpy(tempBuffer,"RARE Treasures");
+    backColor = MENU_BACK_BLUE_ODD;
+  } else if (category == EPIC_ID) {
+    strcpy(tempBuffer,"EPIC Treasures");
+    backColor = MENU_BACK_PURPLE_ODD;
+  }
+  graphics_context_set_fill_color(ctx, backColor);
+  graphics_fill_rect(ctx, top, 0, GCornersAll);
+  graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 }
 
 static int16_t sell_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { 
@@ -117,47 +140,53 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   }
 
   const int8_t treasureID = s_sellSections[section];
-  uint8_t hasItems = 0;
-  int8_t theItemID = -1;
+  int8_t itemID = getItemIDFromRow(treasureID, row);
   // Find the row'th item
-  for (uint8_t itemID = 0; itemID < MAX_TREASURES; ++itemID) {
-    if (getUserItems(treasureID, itemID) > 0) {
-      if (hasItems == row) {
-        theItemID = itemID;
-        break;
-      } else {
-        ++hasItems;
-      }
-    }
-  }
 
-  if (theItemID == -1) {
+  if (itemID == -1) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "FAILED TO FIND ITEM FOR SELL ROW");
     return;
   }
 
+  GColor backColor;
   const char* itemName = NULL;
-  switch (treasureID) {
-    case COMMON_ID: itemName = NAME_COMMON[theItemID]; break;
-    case MAGIC_ID: itemName = NAME_MAGIC[theItemID]; break;
-    case RARE_ID: itemName = NAME_RARE[theItemID]; break;
-    case EPIC_ID: itemName = NAME_EPIC[theItemID]; break;
-    default: APP_LOG(APP_LOG_LEVEL_DEBUG, "SELL MENU UNKNOWN TREASURE ID");
+  if (treasureID == COMMON_ID) {
+    itemName = NAME_COMMON[itemID];
+    if (selected) backColor = GColorDarkGray;
+    else backColor = GColorLightGray;
+  } else if (treasureID == MAGIC_ID) {
+    itemName = NAME_MAGIC[itemID];
+    if (selected) backColor = MENU_BACK_GREEN_SELECT;
+    else if (row%2==0) backColor = MENU_BACK_GREEN_EVEN;
+    else backColor = MENU_BACK_GREEN_ODD;
+  } else if (treasureID == RARE_ID) {
+    itemName = NAME_RARE[itemID];
+    if (selected) backColor = MENU_BACK_BLUE_SELECT;
+    else if (row%2==0) backColor = MENU_BACK_BLUE_EVEN;
+    else backColor = MENU_BACK_BLUE_ODD;
+  } else if (treasureID == EPIC_ID) {
+    itemName = NAME_EPIC[itemID];
+    if (selected) backColor = MENU_BACK_PURPLE_SELECT;
+    else if (row%2==0) backColor = MENU_BACK_PURPLE_EVEN;
+    else backColor = MENU_BACK_PURPLE_ODD;
+  } else {
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "SELL MENU UNKNOWN TREASURE ID");
   }
+  graphics_context_set_fill_color(ctx, backColor);
+  graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
   static char subText1[TEXT_BUFFER_SIZE];
   static char subText2[TEXT_BUFFER_SIZE];
   strcpy(subText1, "");
-  
 
   GRect ttlTextRect = GRect(MENU_X_OFFSET, -6, size.w-MENU_X_OFFSET, size.h);
   GRect topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
   GRect medTextRect = GRect(MENU_X_OFFSET, 27, size.w-MENU_X_OFFSET, size.h-33);
 
   // Get owned
-  uint16_t owned = getUserItems(treasureID, theItemID);
+  uint16_t owned = getUserItems(treasureID, itemID);
   // Get sell price
-  uint64_t sellPrice = owned * getCurrentSellPrice(treasureID, theItemID);
+  uint64_t sellPrice = owned * getCurrentSellPrice(treasureID, itemID);
   snprintf(subText1, TEXT_BUFFER_SIZE, "OWNED: %i", (int)owned);
   strcpy(subText2, "VALUE:");
   timeToString(sellPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
@@ -169,21 +198,55 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 
   // market box
   unsigned percentage;
-  currentSellPricePercentage(tempBuffer, TEXT_BUFFER_SIZE, &percentage, treasureID, theItemID);
-  if (percentage > 110) graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_EVEN);
-  else if (percentage < 90) graphics_context_set_fill_color(ctx, MENU_BACK_RED_EVEN);
-  else graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_EVEN);
-  GRect valueBox = GRect(110, 2, 32, 27);
-  graphics_fill_rect(ctx, valueBox, 2, GCornersAll);
-  GRect percBox = GRect(110, 14, 32, 10);
-  graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), percBox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-
-  graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_SELECT);
-  if (percentage > 110)  {
-    gpath_draw_filled(ctx, s_arrowUp);
+  currentSellPricePercentage(tempBuffer, TEXT_BUFFER_SIZE, &percentage, treasureID, itemID);
+  GColor percBoxBack;
+  GColor percBoxFront;
+  GColor percBoxHighlight;
+  GPath* arrow;
+  if (percentage > 110) {
+    arrow = s_arrowUp;
+    percBoxHighlight = GColorDarkGreen;
+    if (selected) {
+      percBoxBack = GColorJaegerGreen;
+      percBoxFront = GColorBrightGreen;
+    } else {
+      percBoxBack = GColorBrightGreen;
+      percBoxFront = GColorJaegerGreen;
+    }
   } else if (percentage < 90) {
-    gpath_draw_filled(ctx, s_arrowDown);
+    arrow = s_arrowDown;
+    percBoxHighlight = GColorBulgarianRose;
+    if (selected) {
+      percBoxBack = GColorRed;
+      percBoxFront = GColorMelon;
+    } else {
+      percBoxBack = GColorMelon;
+      percBoxFront = GColorRed;
+    }
+  } else {
+    arrow = s_box;
+    percBoxHighlight = GColorOxfordBlue;
+    if (selected) {
+      percBoxBack = GColorCobaltBlue;
+      percBoxFront = GColorCeleste;
+    } else {
+      percBoxBack = GColorCeleste;
+      percBoxFront = GColorCobaltBlue;
+    }
   }
+  GRect valueBox = GRect(110, 2, 32, 27);
+  GRect valueBorder = GRect(109, 1, 34, 29);
+  GRect percBox = GRect(110, 14, 32, 10);
+  graphics_context_set_stroke_color(ctx, percBoxHighlight);
+  graphics_context_set_fill_color(ctx, percBoxHighlight);
+  graphics_fill_rect(ctx, valueBorder, 2, GCornersAll);
+  graphics_context_set_fill_color(ctx, percBoxBack);
+  graphics_fill_rect(ctx, valueBox, 2, GCornersAll);
+  graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), percBox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_context_set_fill_color(ctx, percBoxFront);
+  gpath_draw_filled(ctx, arrow);
+  gpath_draw_outline(ctx, arrow);
+
 
   graphics_context_set_stroke_color(ctx, GColorBlack);
   // Image placeholder
@@ -233,6 +296,17 @@ static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   const uint16_t section = cell_index->section;
   const uint16_t row = cell_index->row;
 
+  // get type
+  if (section == 0 && s_sellSections[0] == -1) return;
+
+  const int8_t treasureID = s_sellSections[section];
+  int8_t itemID = getItemIDFromRow(treasureID, row);
+  if (itemID == -1) return;
+
+  uint16_t sold = sellItem(treasureID, itemID);
+
+  // TODO Display info box
+
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
@@ -250,8 +324,10 @@ void sell_window_load(Window* parentWindow) {
 
   s_arrowUp = gpath_create(&ARROW_UP_PATH);
   s_arrowDown = gpath_create(&ARROW_DOWN_PATH);
+  s_box = gpath_create(&BOX_PATH);
   gpath_move_to(s_arrowUp, GPoint(126, 10));
   gpath_move_to(s_arrowDown, GPoint(126, 10));
+  gpath_move_to(s_box, GPoint(126, 10));
 
   // Create the menu layer
   s_sell_layer = menu_layer_create(bounds);
@@ -274,6 +350,8 @@ void sell_window_load(Window* parentWindow) {
 void sell_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SELL WIN DESTROY");
   menu_layer_destroy(s_sell_layer);
+  s_sell_layer = 0;
   free(s_arrowUp);
   free(s_arrowDown);
+  free(s_box);
 }

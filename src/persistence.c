@@ -11,25 +11,25 @@ static struct userData_v1* s_userData;
  * Customisable list of things to give for testing.
  */
 void DEVMODE() {
-  addItem(LEGENDARY_ID, 2);
-  addItem(LEGENDARY_ID, 3);
-  addItem(EPIC_ID, 3);
-  addItem(EPIC_ID, 2);
-  addItem(EPIC_ID, 1);
-  addItem(EPIC_ID, 0);
-  addItem(RARE_ID, 1);
-  addItem(RARE_ID, 2);
-  addItem(RARE_ID, 3);
-  addItem(RARE_ID, 0);
+  addItem(LEGENDARY_ID, 2, 3);
+  addItem(LEGENDARY_ID, 3, 3);
+  addItem(EPIC_ID, 3, 3);
+  addItem(EPIC_ID, 2, 3);
+  addItem(EPIC_ID, 1, 3);
+  addItem(EPIC_ID, 0, 3);
+  addItem(RARE_ID, 1, 3);
+  addItem(RARE_ID, 2, 3);
+  addItem(RARE_ID, 3, 3);
+  addItem(RARE_ID, 0, 3);
 
-  addItem(COMMON_ID, 3);
-  addItem(COMMON_ID, 0);
-  addItem(COMMON_ID, 1);
-  addItem(COMMON_ID, 2);
-  addItem(MAGIC_ID, 0);
-  addItem(MAGIC_ID, 1);
-  addItem(MAGIC_ID, 2);
-  addItem(MAGIC_ID, 3);
+  addItem(COMMON_ID, 3, 3);
+  addItem(COMMON_ID, 0, 3);
+  addItem(COMMON_ID, 1, 3);
+  addItem(COMMON_ID, 2, 3);
+  addItem(MAGIC_ID, 0, 3);
+  addItem(MAGIC_ID, 1, 3);
+  addItem(MAGIC_ID, 2, 3);
+  addItem(MAGIC_ID, 3, 3);
   //addItem(RARE_ID, 0);
   addTime((uint64_t)300);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "DEV MODE");
@@ -80,30 +80,34 @@ void init_persistence() {
 
 }
 
-void addUpgrade(const unsigned typeID, const unsigned resourceID) {
+void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t n) {
   if (typeID == REFINERY_ID) {
-    ++s_userData->refineriesOwned[resourceID];
+    s_userData->refineriesOwned[resourceID] += n;
   } else if (typeID == TANK_ID) {
-    ++s_userData->tanksOwned[resourceID];
+    s_userData->tanksOwned[resourceID] += n;
   } else if (typeID == SIEVE_ID) {
-    ++s_userData->sievesOwned[resourceID];
+    s_userData->sievesOwned[resourceID] += n;
   } else if (typeID == WATCHER_ID) {
-    ++s_userData->watchersOwned[resourceID];
+    s_userData->watchersOwned[resourceID] += n;
   }
 }
 
-void addItem(const unsigned treasureID, const unsigned itemID) {
+void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n) {
   if (treasureID == COMMON_ID) {
-    ++s_userData->commonOwned[itemID];
+    s_userData->commonOwned[itemID] += n;
   } else if (treasureID == MAGIC_ID) {
-    ++s_userData->magicOwned[itemID];
+    s_userData->magicOwned[itemID] += n;
   } else if (treasureID == RARE_ID) {
-    ++s_userData->rareOwned[itemID];
+    s_userData->rareOwned[itemID] += n;
   } else if (treasureID == EPIC_ID) {
-    ++s_userData->epicOwned[itemID];
+    s_userData->epicOwned[itemID] += n;
   } else if (treasureID == LEGENDARY_ID) {
     BITSET(s_userData->uniqueOwned, itemID);
   }
+}
+
+void removeItem(const unsigned treasureID, const unsigned itemID, const int16_t n) {
+  addItem(treasureID, itemID, -n);
 }
 
 void destroy_persistence() { // Save

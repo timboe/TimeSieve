@@ -187,7 +187,13 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   if (display == false) {
     //draw_dithered_rect(ctx, GRect(0, 0, size.w, size.h), GColorLightGray, GColorWhite, DITHER_10_PERCENT);
     GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
-    graphics_draw_text(ctx, "??????", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    // Change the name to ?s
+    strcpy(tempBuffer, "");
+    for (uint8_t i = 0; upgradeName[i] != 0; i++) {
+      if (upgradeName[i] == ' ') strcat(tempBuffer, " ");
+      else strcat(tempBuffer, "?");
+    }
+    graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   } else {
     // Now text
     GRect ttlTextRect = GRect(MENU_X_OFFSET, -6,  size.w-MENU_X_OFFSET, size.h);

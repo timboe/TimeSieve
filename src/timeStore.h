@@ -13,6 +13,8 @@ uint64_t getPriceOfNext(uint64_t priceOfCurrent);
 
 bool doPurchase(const unsigned typeID, const unsigned resourceID);
 
+uint16_t sellItem(const unsigned treasureID, const unsigned itemID);
+
 uint64_t getTimePerMin();
 void updateTimePerMin();
 
@@ -25,7 +27,6 @@ void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigne
 
 void addTime(uint64_t toAdd);
 void removeTime(uint64_t toSubtract);
-void multiplyTime(uint64_t factor);
 
 uint64_t getDisplayTime();
 void updateDisplayTime(uint64_t t);

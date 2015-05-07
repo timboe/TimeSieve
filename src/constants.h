@@ -51,9 +51,9 @@
 // Only common through epic may be sold on the market
 #define SELLABLE_CATEGORIES 4
   
-#define N_REFINERY_UPGRADES 10
+#define N_REFINERY_UPGRADES 13
 #define N_SIEVE_UPGRADES 10
-#define N_TANK_UPGRADES 10
+#define N_TANK_UPGRADES 13
 #define N_WATCHER_UPGRADES 4
   
 extern const char* const NAME_REFINERY[MAX_UPGRADES];
@@ -84,13 +84,15 @@ extern const uint64_t SELL_PRICE_EPIC[MAX_TREASURES];
 #define MENU_BACK_RED_ODD GColorMelon
 #define MENU_BACK_RED_EVEN GColorSunsetOrange
 #define MENU_BACK_RED_SELECT GColorDarkCandyAppleRed
-
 #define MENU_BACK_BLUE_ODD GColorVividCerulean
 #define MENU_BACK_BLUE_EVEN GColorPictonBlue
 #define MENU_BACK_BLUE_SELECT GColorOxfordBlue
 #define MENU_BACK_YELLOW_ODD GColorIcterine
 #define MENU_BACK_YELLOW_EVEN GColorYellow
 #define MENU_BACK_YELLOW_SELECT GColorWindsorTan
+#define MENU_BACK_PURPLE_ODD GColorPurpureus
+#define MENU_BACK_PURPLE_EVEN GColorLavenderIndigo
+#define MENU_BACK_PURPLE_SELECT GColorJazzberryJam
 
 #define COLOUR_COMMON GColorLightGray
 #define COLOUR_MAGIC GColorBrightGreen

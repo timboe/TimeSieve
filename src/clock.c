@@ -24,7 +24,7 @@ void setClockPixelOffset(uint8_t offset) {
 }
 
 void updateClockLayer() {
-  layer_mark_dirty(s_clockLayer);
+  if (s_clockLayer) layer_mark_dirty(s_clockLayer);
 }
 
 void clockAnimReset() {
@@ -174,4 +174,5 @@ void create_clock_layer(Window* parentWindow) {
 
 void destroy_clock_layer() {
   layer_destroy(s_clockLayer);
+  s_clockLayer = 0;
 }

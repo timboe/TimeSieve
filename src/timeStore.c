@@ -208,9 +208,22 @@ void removeTime(uint64_t toSubtract) {
   setUserTime( getUserTime() - toSubtract );
 }
 
- // This is for debug - it doesn´t check if there is space to store the extra
-void multiplyTime(uint64_t factor) {
-  setUserTime( getUserTime() * factor );
+/**
+ * Check how many we could sell at the current price without filling up the tank.
+ * Sell up to that amount
+ **/
+uint16_t sellItem(const unsigned treasureID, const unsigned itemID) {
+  uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
+  uint16_t toSell = getUserItems(treasureID, itemID);
+  uint64_t capacityLeft = getTankCapacity() - getUserTime();
+  uint16_t couldSell = capacityLeft / currentPrice; // Round down is good, no loss of time
+
+  // Don't sell what we cannot store
+  if (toSell > couldSell) toSell = couldSell;
+  removeItem(treasureID, itemID, toSell);
+  addTime( toSell * currentPrice );
+  updateDisplayTime( getUserTime() );
+  return toSell;
 }
 
 /**
@@ -220,7 +233,7 @@ bool doPurchase(const unsigned typeID, const unsigned resourceID) {
   uint64_t cost = getPriceOfUpgrade(typeID, resourceID);
   if (cost > getUserTime()) return false;
   removeTime( cost ); // Debit the user
-  addUpgrade(typeID, resourceID); // Give them their upgrade
+  addUpgrade(typeID, resourceID, 1); // Give them their upgrade
   // Update the price in the buffer so the next one becomes more expensive
   // And recalculate factors
   if (typeID == REFINERY_ID) {
