@@ -47,6 +47,26 @@
               "file": "images/convBot.png",
               "name": "CONV_BOT",
               "type": "png"
+            },
+            {
+              "file": "images/convCap0.png",
+              "name": "CONV_CAP0",
+              "type": "png"
+            },
+            {
+              "file": "images/convCap1.png",
+              "name": "CONV_CAP1",
+              "type": "png"
+            },
+            {
+              "file": "images/convCap2.png",
+              "name": "CONV_CAP2",
+              "type": "png"
+            },
+            {
+              "file": "images/convCap3.png",
+              "name": "CONV_CAP3",
+              "type": "png"
             }
         ]
     },
