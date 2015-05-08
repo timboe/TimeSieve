@@ -32,7 +32,7 @@ bool sieveAnimCallback() {
   else if (s_convOffset == 4) s_convCap = s_convCap2;
   else                        s_convCap = s_convCap3;
 
-  if (s_sieveTickCount % 2 == 0 && ++s_convOffset == 9) s_convOffset = 0; // Degenerency
+  if (s_sieveTickCount % 2 == 0 && ++s_convOffset == 8) s_convOffset = 0; // Degenerency
 
 
 
@@ -53,13 +53,13 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
   
-  GRect convBotBound = GRect(10 - 8 + s_convOffset, 25, 94, 12);
+  GRect convBotBound = GRect(0 + s_convOffset, 31, 94, 12);
   graphics_draw_bitmap_in_rect(ctx, s_convBotBitmap, convBotBound);
 
-  GRect convTopBound = GRect(10 - s_convOffset, 20, 94, 12);
+  GRect convTopBound = GRect(8 - s_convOffset, 25, 94, 12);
   graphics_draw_bitmap_in_rect(ctx, s_convTopBitmap, convTopBound);
 
-  GRect convCapBound = GRect(0, 25, 10, 18);
+  GRect convCapBound = GRect(0, 25, 11, 18);
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
 
   
