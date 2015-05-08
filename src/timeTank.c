@@ -46,6 +46,7 @@ void tankAnimReset() {
   s_tankAnimRemainder = s_tankAnimToAdd % (ANIM_FRAMES/2);
   s_tankAnimToAdd     /= (ANIM_FRAMES/2);
   s_waterfallOffset = 0;
+  s_tankTickCount = 0;
 }
 
 bool tankAnimCallback() {
@@ -66,7 +67,6 @@ bool tankAnimCallback() {
     // Make sure we show the correct time at the end of the animation (there will be a modulus rounding error)
     updateDisplayTime( getUserTime() );
     randomiseWaterfallBits();
-    s_tankTickCount = 0;
     return false;
   } else {
     return true; // Request more frames

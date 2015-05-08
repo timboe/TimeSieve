@@ -133,7 +133,7 @@ extern const uint64_t SELL_PRICE_EPIC[MAX_TREASURES];
 
 // Bits in the liquid
 #define N_LIQUID_BITS 20
-#define N_WATERFALL_BITS 5
+#define N_WATERFALL_BITS 2
 #define WATERFALL_SPEED 5
 
 // PARTICLE EFFECTS

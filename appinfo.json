@@ -37,6 +37,16 @@
                 "file": "fonts/secrcode.ttf",
                 "name": "FONT_E_31",
                 "type": "font"
+            },
+            {
+              "file": "images/convTop.png",
+              "name": "CONV_TOP",
+              "type": "png"
+            },
+            {
+              "file": "images/convBot.png",
+              "name": "CONV_BOT",
+              "type": "png"
             }
         ]
     },
