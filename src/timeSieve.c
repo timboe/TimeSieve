@@ -15,6 +15,9 @@ static GBitmap* s_convCap2;
 static GBitmap* s_convCap3;
 static GBitmap* s_convCap;
 
+static GRect s_treasureLayer;
+
+
 
 static uint8_t s_convOffset = 0;
 
@@ -22,26 +25,29 @@ static uint8_t s_convOffset = 0;
 
 void sieveAnimReset() {
   s_sieveTickCount = 0;
+  s_treasureLayer.origin.x = 95;
+  s_treasureLayer.origin.y = 18;
+  s_treasureLayer.size.w = 15;
+  s_treasureLayer.size.h = 15;
 }
 
 bool sieveAnimCallback() {
 
 
-  if      (s_convOffset == 0) s_convCap = s_convCap0;
-  else if (s_convOffset == 2) s_convCap = s_convCap1;
-  else if (s_convOffset == 4) s_convCap = s_convCap2;
-  else                        s_convCap = s_convCap3;
+  // if      (s_convOffset == 0) s_convCap = s_convCap0;
+  // else if (s_convOffset == 2) s_convCap = s_convCap1;
+  // else if (s_convOffset == 4) s_convCap = s_convCap2;
+  // else                        s_convCap = s_convCap3;
 
-  if (s_sieveTickCount % 2 == 0 && ++s_convOffset == 8) s_convOffset = 0; // Degenerency
-
-
-
-
-  if (++s_sieveTickCount == ANIM_FRAMES) {
-    return false;
-  } else {
-    return true; // Request more frames
+  if (s_sieveTickCount % 2 == 0) {
+    if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
+    --s_treasureLayer.origin.x;
   }
+
+
+
+  if (++s_sieveTickCount == ANIM_FRAMES) return false;
+  else return true; // Request more frames
 }
 
 static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
@@ -62,7 +68,11 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect convCapBound = GRect(0, 25, 11, 18);
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
 
-  
+  graphics_context_set_fill_color(ctx, GColorLightGray);
+  graphics_fill_rect(ctx, GRect(90, 20, 40, 30), 0, GCornersAll);
+
+  graphics_context_set_fill_color(ctx, GColorBlue);
+  graphics_fill_rect(ctx, s_treasureLayer, 0, GCornersAll);
 }
 
 void create_timeSieve_layer(Window* parentWindow) {
