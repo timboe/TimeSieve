@@ -27,7 +27,7 @@ void updateClockLayer() {
   if (s_clockLayer) layer_mark_dirty(s_clockLayer);
 }
 
-void clockAnimReset() {
+void clockAnimReset(TimeUnits units_changed) {
   s_clockTickCount = 0;
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
     s_spoogelet[i].x = (7*WIN_SIZE_X/16 + (rand() % WIN_SIZE_X/8)) * SUB_PIXEL;
@@ -42,7 +42,7 @@ void clockAnimReset() {
   s_attractor.y = 65;//60
 }
 
-bool clockAnimCallback() {
+bool clockAnimCallback(TimeUnits units_changed) {
 
   int16_t strength =0;
   if (s_clockTickCount > 24) strength = s_clockTickCount;

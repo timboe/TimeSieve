@@ -19,24 +19,29 @@
                 "type": "font"
             },
             {
-                "file": "fonts/oolrt.ttf",
-                "name": "FONT_B_29",
-                "type": "font"
+              "file": "images/gemCommon.png",
+              "name": "GEM_COMMON",
+              "type": "png"
             },
             {
-                "file": "fonts/jackinput.ttf",
-                "name": "FONT_C_29",
-                "type": "font"
+              "file": "images/gemMagic.png",
+              "name": "GEM_MAGIC",
+              "type": "png"
             },
             {
-                "file": "fonts/monof55.ttf",
-                "name": "FONT_D_31",
-                "type": "font"
+              "file": "images/gemRare.png",
+              "name": "GEM_RARE",
+              "type": "png"
             },
             {
-                "file": "fonts/secrcode.ttf",
-                "name": "FONT_E_31",
-                "type": "font"
+              "file": "images/gemEpic.png",
+              "name": "GEM_EPIC",
+              "type": "png"
+            },
+            {
+              "file": "images/gemLeg.png",
+              "name": "GEM_LEGENDARY",
+              "type": "png"
             },
             {
               "file": "images/convTop.png",
@@ -49,23 +54,8 @@
               "type": "png"
             },
             {
-              "file": "images/convCap0.png",
-              "name": "CONV_CAP0",
-              "type": "png"
-            },
-            {
-              "file": "images/convCap1.png",
-              "name": "CONV_CAP1",
-              "type": "png"
-            },
-            {
-              "file": "images/convCap2.png",
-              "name": "CONV_CAP2",
-              "type": "png"
-            },
-            {
-              "file": "images/convCap3.png",
-              "name": "CONV_CAP3",
+              "file": "images/convCap.png",
+              "name": "CONV_CAP",
               "type": "png"
             }
         ]

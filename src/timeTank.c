@@ -3,7 +3,7 @@
 #include "timeStore.h"
 #include "constants.h"
 #include "resources.h"
-#include "ditheredRect.h"
+
 #include "palette.h"
 #include "persistence.h"
   
@@ -40,7 +40,7 @@ void update_timeTank_layer() {
   layer_mark_dirty(s_tankLayer);
 }  
 
-void tankAnimReset() {
+void tankAnimReset(TimeUnits units_changed) {
   if (getDisplayTime() > getUserTime()) APP_LOG(APP_LOG_LEVEL_DEBUG, "DISP > USER ?!?!");
   s_tankAnimToAdd     = getUserTime() - getDisplayTime();
   s_tankAnimRemainder = s_tankAnimToAdd % (ANIM_FRAMES/2);
@@ -49,7 +49,7 @@ void tankAnimReset() {
   s_tankTickCount = 0;
 }
 
-bool tankAnimCallback() {
+bool tankAnimCallback(TimeUnits units_changed) {
 
   if (s_tankTickCount >= (ANIM_FRAMES/2)) {
     updateDisplayTime( getDisplayTime() + s_tankAnimToAdd );

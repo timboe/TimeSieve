@@ -36,12 +36,12 @@
 #define MAX_UPGRADES 16
 #define MAX_TREASURES 4
 #define MAX_UNIQUE 16
-#define MAX_CHEVOS 32
+#define MAX_CHEVOS 16
   
 #define REFINERY_ID 0
-#define SIEVE_ID 1
-#define TANK_ID 2
-#define WATCHER_ID 3
+#define TANK_ID 1
+#define WATCHER_ID 2
+#define SIEVE_ID 3
 
 #define COMMON_ID 0
 #define MAGIC_ID 1
@@ -50,6 +50,9 @@
 #define LEGENDARY_ID 4
 // Only common through epic may be sold on the market
 #define SELLABLE_CATEGORIES 4
+#define ITEM_CATEGORIES 5
+
+#define TREASURE_DISPLAY_TIME 5000
   
 #define N_REFINERY_UPGRADES 13
 #define N_SIEVE_UPGRADES 10
@@ -95,9 +98,9 @@ extern const uint64_t SELL_PRICE_EPIC[MAX_TREASURES];
 #define MENU_BACK_PURPLE_SELECT GColorJazzberryJam
 
 #define COLOUR_COMMON GColorLightGray
-#define COLOUR_MAGIC GColorBrightGreen
-#define COLOUR_RARE GColorPictonBlue
-#define COLOUR_EPIC GColorLavenderIndigo
+#define COLOUR_MAGIC GColorKellyGreen
+#define COLOUR_RARE GColorVividCerulean
+#define COLOUR_EPIC GColorElectricUltramarine
 #define COLOUR_LEGENDARY GColorChromeYellow
 
 #define PALETTE_BLUE 0

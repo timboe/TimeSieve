@@ -8,7 +8,7 @@
 #include "settingsMenu.h"
 #include "sellMenu.h"
 #include "persistence.h"
-
+#include "items.h"
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed); //rm me later
 
@@ -17,6 +17,8 @@ static Window* s_main_window;
 static Window* s_buy_window;
 static Window* s_settings_window;
 static Window* s_sell_window;
+
+static TimeUnits s_units_changed; // Used in anim
 
 // Hold if the animation routine is still in progress and is requesting more frames.
 static bool s_clockAnimRequest;
@@ -35,9 +37,9 @@ void animEnd() {
  * Each anim function is expected to dirty any layers which need redrawing
  */ 
 void animCallback(void* data) {
-  if (s_tankAnimRequest)  s_tankAnimRequest  = tankAnimCallback();
-  if (s_sieveAnimRequest) s_sieveAnimRequest = sieveAnimCallback();
-  if (s_clockAnimRequest) s_clockAnimRequest = clockAnimCallback();
+  if (s_tankAnimRequest)  s_tankAnimRequest  = tankAnimCallback(s_units_changed);
+  if (s_sieveAnimRequest) s_sieveAnimRequest = sieveAnimCallback(s_units_changed);
+  if (s_clockAnimRequest) s_clockAnimRequest = clockAnimCallback(s_units_changed);
   if (s_clockAnimRequest || s_tankAnimRequest || s_clockAnimRequest) {
     app_timer_register(ANIM_DELAY, animCallback, NULL);
   } else {
@@ -49,9 +51,9 @@ void animCallback(void* data) {
  * Call to start the per-min animation. Resets all amination and starts the callback.
  */
 void animBegin() {
-  clockAnimReset();
-  sieveAnimReset();
-  tankAnimReset();
+  clockAnimReset(s_units_changed);
+  sieveAnimReset(s_units_changed);
+  tankAnimReset(s_units_changed);
   s_clockAnimRequest = true;
   s_sieveAnimRequest = true;
   s_tankAnimRequest = true;
@@ -80,6 +82,7 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
    if (BUTTON_ID_UP == button) {
     window_stack_push(s_buy_window, true);
   } else if (BUTTON_ID_SELECT == button) {
+    if (collectItem() == true) return; // First see if there is an item to collect
     window_stack_push(s_settings_window, true);
   } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
@@ -103,7 +106,7 @@ void click_config_provider(Window *window) {
 }
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-
+  s_units_changed = units_changed;
   // ADD USER TIME
 
   if (getUserOpt(OPT_SHOW_SECONDS) == true) { // seconds always pass
@@ -131,6 +134,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   modulateSellPrices();
 
   // Found treasure?
+  checkForItem( units_changed );
 
   // Earned chevos?
 

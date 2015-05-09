@@ -3,25 +3,22 @@
 #include "constants.h"
 #include "persistence.h"
 #include "timeStore.h"
-#include "ditheredRect.h"
-  
 
-  
 // Menu layers for my windows
 static MenuLayer* s_menu_layer;  
 static MenuLayer* s_refinery_layer;  
 static MenuLayer* s_tank_layer;
-static MenuLayer* s_sieve_layer;
 static MenuLayer* s_watcher_layer;
 
+//static MenuLayer* s_sieve_layer;
 // My sub-windows
 static Window* s_refinery_window;
 static Window* s_tank_window;
-static Window* s_sieve_window;
 static Window* s_watcher_window;
+//static Window* s_sieve_window;
 
 static int s_refinery_context = REFINERY_ID;
-static int s_sieve_context = SIEVE_ID;
+//static int s_sieve_context = SIEVE_ID;
 static int s_tank_context = TANK_ID;
 static int s_watcher_context = WATCHER_ID;
 

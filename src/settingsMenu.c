@@ -151,32 +151,32 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     } else if (row == 2) { // DISPLAY ITEMS
 
       if (s_itemDisplay == 0) {
-        graphics_context_set_text_color(ctx, COLOUR_COMMON);
+        //graphics_context_set_text_color(ctx, COLOUR_COMMON);
         strcpy(titleText, "COMMON Items >");
         snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(COMMON_ID) );    
         strcpy(subText2, "VALUE: TODO");        
       } else if (s_itemDisplay == 1) {
-        graphics_context_set_text_color(ctx, COLOUR_MAGIC);
+        //graphics_context_set_text_color(ctx, COLOUR_MAGIC);
         strcpy(titleText, "MAGIC Items >");  
         snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(MAGIC_ID) );  
         strcpy(subText2, "VALUE: TODO");     
       } else if (s_itemDisplay == 2) {
-        graphics_context_set_text_color(ctx, COLOUR_RARE);
+        //graphics_context_set_text_color(ctx, COLOUR_RARE);
         strcpy(titleText, "RARE Items >");        
         snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(RARE_ID) );   
         strcpy(subText2, "VALUE: TODO");    
       } else if (s_itemDisplay == 3) {
-        graphics_context_set_text_color(ctx, COLOUR_EPIC);
+        //graphics_context_set_text_color(ctx, COLOUR_EPIC);
         strcpy(titleText, "EPIC Items >"); 
         snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(EPIC_ID) );    
         strcpy(subText2, "VALUE: TODO");   
       } else if (s_itemDisplay == 4) {
-        graphics_context_set_text_color(ctx, COLOUR_LEGENDARY);
+        //graphics_context_set_text_color(ctx, COLOUR_LEGENDARY);
         strcpy(titleText, "LEGENDARIES >"); 
         snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(LEGENDARY_ID) );  
         strcpy(subText2, "VALUE: TODO");     
       }
-      if (!selected) graphics_context_set_text_color(ctx, GColorBlack);
+      //if (!selected) graphics_context_set_text_color(ctx, GColorBlack);
 
     }
 
@@ -304,8 +304,7 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
     } else if (row == 7) { // Quiet end
       incrementUserZzzEndSetting();
     } else if (row == 8) { // new game
-      if (s_restartCheck > 0) --s_restartCheck;
-      else resetUserData();
+      if (--s_restartCheck == 0) resetUserData();
     }
 
   }
