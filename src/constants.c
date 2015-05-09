@@ -202,18 +202,18 @@ const uint64_t REWARD_WATCHER[MAX_UPGRADES] = {
   (uint64_t)0};
 
 const char* const NAME_WATCHER[MAX_UPGRADES] = {
-  "Lacky",
-  "WUPGRADE 2",
-  "WUPGRADE 3",
-  "WUPGRADE 4",
-  "WUPGRADE 5",
-  "WUPGRADE 6",
-  "WUPGRADE 7",
-  "WUPGRADE 8",
-  "WUPGRADE 9",
-  "WUPGRADE 10",
-  "WUPGRADE 11",
-  "WUPGRADE 12",
+  "Junior Fetcher", // Increase treasure chance
+  "Techie", // Techie - unlock extra clock bits
+  "WUPGRADE 3",// XXX - Better treasure
+  "WUPGRADE 4",  // Electrician - light notify 
+  "WUPGRADE 5", // Senior Watcher - increase treasure chance  
+  "WUPGRADE 6", // Typogrgrapher - unlock font
+  "WUPGRADE 7", // Archiologist - better treasure
+  "WUPGRADE 8", // Craftsman - vibrate notify
+  "WUPGRADE 9", //XXX increase treasure chance
+  "WUPGRADE 10", // Painter - unlock theme
+  "WUPGRADE 11", // XXX better treasure
+  "WUPGRADE 12", // 
   "WUPGRADE 13",
   "WUPGRADE 14",
   "WUPGRADE 15",

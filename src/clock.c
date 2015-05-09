@@ -16,6 +16,7 @@ static GPoint s_attractor;
 static uint8_t s_clockTickCount = 0;
 
 static uint8_t s_clockPixelOffset = 2;
+static bool s_flashMainFace = false;
 
 #define CLOCK_OFFSET 16
 
@@ -44,8 +45,13 @@ void clockAnimReset(TimeUnits units_changed) {
 
 bool clockAnimCallback(TimeUnits units_changed) {
 
-  int16_t strength =0;
+  int16_t strength = 0;
   if (s_clockTickCount > 24) strength = s_clockTickCount;
+
+  // Hour+ specific animation
+  if ((units_changed & HOUR_UNIT) > 0 && s_clockTickCount % 4 == 0) {
+    s_flashMainFace = !s_flashMainFace;
+  }
 
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
 
@@ -70,8 +76,12 @@ bool clockAnimCallback(TimeUnits units_changed) {
 
   updateClockLayer(); // Redraw
 
-  if (++s_clockTickCount == ANIM_FRAMES) return false;
-  return true; // Request more frames
+  if (++s_clockTickCount == ANIM_FRAMES) {
+    s_flashMainFace = false;
+    return false;
+  } else {
+    return true; // Request more frames
+  }
 }
 
 void drawClock(GContext *ctx, GRect loc) {
@@ -109,16 +119,14 @@ void drawClock(GContext *ctx, GRect loc) {
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   // main
-  graphics_context_set_text_color(ctx, getTextColourC()); 
+  if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU()); 
+  else graphics_context_set_text_color(ctx, getTextColourC()); 
   loc.origin.x += s_clockPixelOffset; // O
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
-  graphics_context_set_fill_color(ctx, GColorBlack);
-  graphics_fill_rect(ctx, tank_bounds, 0, GCornersAll);
-  // Fill back
 
   // Do the clock
   time_t temp = time(NULL); 

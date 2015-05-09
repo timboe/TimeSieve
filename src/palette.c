@@ -5,9 +5,9 @@
 GColor getTextColourC() {
   switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorLiberty; // Darkest
-  	case PALETTE_GREEN: return GColorMalachite;
+  	case PALETTE_GREEN: return GColorKellyGreen;
   	case PALETTE_YELLOW: return GColorYellow;
-  	case PALETTE_RED: return GColorOrange;
+  	case PALETTE_RED: return GColorRed;
   	default: return GColorFashionMagenta; // !!!!!!!!!!!!!
   }
 }
@@ -56,7 +56,7 @@ GColor getLiquidTimeColour() {
   switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorBlueMoon;
    	case PALETTE_GREEN: return GColorKellyGreen;
-  	case PALETTE_YELLOW: return GColorRajah;
+  	case PALETTE_YELLOW: return GColorYellow;
   	case PALETTE_RED: return GColorOrange;
   	default: return GColorWhite;
   }
@@ -66,7 +66,7 @@ GColor getLiquidTimeHighlightColour() {
   switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorCyan;
    	case PALETTE_GREEN: return GColorIcterine;
-  	case PALETTE_YELLOW: return GColorYellow;
+  	case PALETTE_YELLOW: return GColorRajah;
   	case PALETTE_RED: return GColorRichBrilliantLavender;
   	default: return GColorWhite;
   }	

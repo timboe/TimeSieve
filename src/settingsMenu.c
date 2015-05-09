@@ -4,7 +4,6 @@
 #include "persistence.h"
 #include "timeStore.h"
 
-
 #define CHEVO_CONTEXT_ID 0
 #define UNIQUE_CONTEXT_ID 1
 
@@ -19,6 +18,8 @@
 #define NUM_SETTINGS_ROWS 9
 
 #define SETTINGS_CELL_HEIGHT 57
+
+#define RESTART_COUNTDOWN 8
 
 static MenuLayer* s_settings_layer;  
 static MenuLayer* s_chevo_layer;  
@@ -35,7 +36,7 @@ static char tempBuffer[TEXT_BUFFER_SIZE];
 static uint8_t s_timeDisplay = 0;
 static uint8_t s_buildingDisplay = 0;
 static uint8_t s_itemDisplay = 0;
-static uint8_t s_restartCheck = 8;
+static uint8_t s_restartCheck = RESTART_COUNTDOWN;
 
 /// 
 /// SETTINGS WINDOW CALLBACKS
@@ -414,7 +415,7 @@ void settings_window_load(Window* parentWindow) {
   // Setup sub-windows that we might want to jump to 
   createSettingsSubWin(&s_chevo_window, &s_chevo_context);
   createSettingsSubWin(&s_unique_window, &s_unique_context);
-  s_restartCheck = 8;
+  s_restartCheck = RESTART_COUNTDOWN;
 
 }
 

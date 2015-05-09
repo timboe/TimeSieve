@@ -2,6 +2,7 @@
 #include "timeSieve.h"
 #include "constants.h"
 #include "persistence.h"
+#include "items.h"
 
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
@@ -123,7 +124,12 @@ void stopDisplayItem(void* data) {
 
 void itemCanBeCollected() {
   s_treasureOnShow = true;
-  app_timer_register(TREASURE_DISPLAY_TIME, stopDisplayItem, NULL);   // Start timer to remove treasure
+  // Does it collect itself?
+  if (getItemAutoCollect()) {
+    collectItem(true);
+    return;
+  }
+  app_timer_register(TREASURE_DISPLAY_TIME, stopDisplayItem, NULL);   // Start timer to remove treasure - player better be fast!
 }
 
 void displyItem(uint8_t treasureID, uint8_t itemID) {
@@ -146,7 +152,7 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
   }
 }
 
-bool collectItem() {
+bool collectItem(bool autoCollect) {
   if (s_treasureOnShow == false) return false;
   addItem(s_treasureID, s_itemID, 1);
   stopDisplayItem(NULL);

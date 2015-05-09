@@ -4,3 +4,5 @@
 uint8_t getItemRarity();
 
 void checkForItem(TimeUnits units_changed);
+
+bool getItemAutoCollect();

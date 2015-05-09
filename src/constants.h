@@ -10,6 +10,8 @@
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
 #define BITNSLOTS(nb) ((nb + CHAR_BIT - 1) / CHAR_BIT)
 
+#define IS_DEBUG 1
+
 // Used in animations
 #define MS_IN_SEC 1000 
 // DEFINE DIFFERENT TIME PERIODS
@@ -80,6 +82,23 @@ extern const uint64_t SELL_PRICE_COMMON[MAX_TREASURES];
 extern const uint64_t SELL_PRICE_MAGIC[MAX_TREASURES];
 extern const uint64_t SELL_PRICE_RARE[MAX_TREASURES];
 extern const uint64_t SELL_PRICE_EPIC[MAX_TREASURES];
+
+typedef enum {WATCHER_FREQUENCY_1,
+              WATCHER_TECH,
+              WATCHER_CHANCE_1,
+              WATCHER_LIGHT,
+              WATCHER_QUALITY_1,
+              WATCHER_FONT,
+              WATCHER_FREQUENCY_2,
+              WATCHER_VIBE,
+              WATCHER_CHANCE_2,
+              WATCHER_COLOUR,
+              WATCHER_QUALITY_2,
+              W_12,
+              W_13,
+              W_14,
+              W_15,
+              W_16} WATCHER_TYPE; 
 
 #define MENU_BACK_GREEN_ODD GColorMintGreen
 #define MENU_BACK_GREEN_EVEN GColorScreaminGreen

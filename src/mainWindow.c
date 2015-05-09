@@ -62,16 +62,16 @@ void animBegin() {
 
 // Main window initialisation
 void main_window_load(Window *window) {
-  create_clock_layer(window);
+
   create_timeSieve_layer(window);
+  create_clock_layer(window);
   create_timeTank_layer(window);
 }
 
 // Main window destructiom
 void main_window_unload(Window *window) {
-  // Destroy output TextLayer
-  destroy_clock_layer();
   destroy_timeSieve_layer();
+  destroy_clock_layer();
   destroy_timeTank_layer();
 }
 
@@ -82,15 +82,17 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
    if (BUTTON_ID_UP == button) {
     window_stack_push(s_buy_window, true);
   } else if (BUTTON_ID_SELECT == button) {
-    if (collectItem() == true) return; // First see if there is an item to collect
+    // collectItem takes if this is an auto-collect. As this is button-based the answer is no
+    if (collectItem(false) == true) return; // First see if there is an item to collect
     window_stack_push(s_settings_window, true);
   } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
-  } else if (BUTTON_ID_BACK == button) {
-    tick_handler(NULL, MINUTE_UNIT);
+  } else if (IS_DEBUG && BUTTON_ID_BACK == button) {
+    //TimeUnits u;
+    //u |= SECOND_UNIT;
+    //u |= MINI
+    tick_handler(NULL, SECOND_UNIT|MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT);
   }
-  
-  
 }
 
 void click_config_provider(Window *window) {
@@ -99,10 +101,13 @@ void click_config_provider(Window *window) {
   window_single_click_subscribe(BUTTON_ID_SELECT, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_BACK, main_window_single_click_handler);
+}
 
-//   window_single_repeating_click_subscribe(BUTTON_ID_SELECT, 1000, select_single_click_handler);
-//   window_multi_click_subscribe(BUTTON_ID_SELECT, 2, 10, 0, true, select_multi_click_handler);
-//   window_long_click_subscribe(BUTTON_ID_SELECT, 700, select_long_click_handler, select_long_click_release_handler);
+/**
+ * Called on every tap. We only use this to collect items manually (the passed false)
+ **/
+void tapHandle(AccelData *data, uint32_t num_samples) {
+  collectItem(false);
 }
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -168,7 +173,10 @@ void init_mainWindow() {
     .load = main_window_load,
     .unload = main_window_unload
   });
+  window_set_background_color(s_main_window, GColorBlack);
   window_set_click_config_provider(s_main_window, (ClickConfigProvider) click_config_provider);
+  // Get taps to be able to collect items
+  accel_tap_service_subscribe( (AccelTapHandler) tapHandle );
   
   // Create the menu windows
   s_buy_window = window_create();
@@ -199,6 +207,7 @@ void init_mainWindow() {
 }
 
 void destroy_mainWindow() {
+  accel_tap_service_unsubscribe();
   window_destroy(s_main_window);
   window_destroy(s_buy_window);
   window_destroy(s_settings_window);
