@@ -3,7 +3,7 @@
 #include "constants.h"
 
 GColor getTextColourC() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorLiberty; // Darkest
   	case PALETTE_GREEN: return GColorMalachite;
   	case PALETTE_YELLOW: return GColorYellow;
@@ -13,7 +13,7 @@ GColor getTextColourC() {
 }
 
 GColor getTextColourU() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorCeleste; // Light U
    	case PALETTE_GREEN: return GColorInchworm;
   	case PALETTE_YELLOW: return GColorPastelYellow;
@@ -23,7 +23,7 @@ GColor getTextColourU() {
 }
 
 GColor getTextColourR() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorElectricBlue; // Light R
    	case PALETTE_GREEN: return GColorMintGreen;
   	case PALETTE_YELLOW: return GColorIcterine;
@@ -33,7 +33,7 @@ GColor getTextColourR() {
 }
 
 GColor getTextColourD() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorVividCerulean;  // Medium D
    	case PALETTE_GREEN: return GColorMayGreen;
   	case PALETTE_YELLOW: return GColorBrass;
@@ -43,7 +43,7 @@ GColor getTextColourD() {
 }
 
 GColor getTextColourL() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorCadetBlue; // Muddy (L)
    	case PALETTE_GREEN: return GColorArmyGreen;
   	case PALETTE_YELLOW: return GColorLimerick;
@@ -53,7 +53,7 @@ GColor getTextColourL() {
 }
 
 GColor getLiquidTimeColour() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorBlueMoon;
    	case PALETTE_GREEN: return GColorKellyGreen;
   	case PALETTE_YELLOW: return GColorRajah;
@@ -63,7 +63,7 @@ GColor getLiquidTimeColour() {
 }
 
 GColor getLiquidTimeHighlightColour() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorCyan;
    	case PALETTE_GREEN: return GColorIcterine;
   	case PALETTE_YELLOW: return GColorYellow;
@@ -73,7 +73,7 @@ GColor getLiquidTimeHighlightColour() {
 }
 
 GColor getSpoogicalColourA() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorPictonBlue;
    	case PALETTE_GREEN: return GColorMediumAquamarine;
   	case PALETTE_YELLOW: return GColorIcterine;
@@ -83,7 +83,7 @@ GColor getSpoogicalColourA() {
 }
 
 GColor getSpoogicalColourB() {
-  switch (getUserColorTheme()) {
+  switch (getUserSetting(SETTING_COLOUR)) {
   	case PALETTE_BLUE: return GColorMintGreen;
    	case PALETTE_GREEN: return GColorPastelYellow;
   	case PALETTE_YELLOW: return GColorChromeYellow;

@@ -40,7 +40,7 @@ void DEVMODE() {
  * Make sure all settings which need to be enacted elsewhere are
  */
 void initSettings() {
-  setUserTypeSetting( s_userData->typeSetting );
+  setUserSetting( SETTING_TYPE, getUserSetting(SETTING_TYPE) ); // Refrest typeface
   updateDisplayTime( getUserTime() );
 }
 
@@ -85,8 +85,8 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t 
     s_userData->refineriesOwned[resourceID] += n;
   } else if (typeID == TANK_ID) {
     s_userData->tanksOwned[resourceID] += n;
-  } else if (typeID == SIEVE_ID) {
-    s_userData->sievesOwned[resourceID] += n;
+//  } else if (typeID == SIEVE_ID) {
+//    s_userData->sievesOwned[resourceID] += n;
   } else if (typeID == WATCHER_ID) {
     s_userData->watchersOwned[resourceID] += n;
   }
@@ -126,8 +126,8 @@ uint16_t getUserTotalUpgrades(const unsigned typeID) {
       count += s_userData->refineriesOwned[i];
     } else if (typeID == TANK_ID) {
       count += s_userData->tanksOwned[i];
-    } else if (typeID == SIEVE_ID) {
-      count += s_userData->sievesOwned[i];
+//    } else if (typeID == SIEVE_ID) {
+//      count += s_userData->sievesOwned[i];
     } else if (typeID == WATCHER_ID) {
       count += s_userData->watchersOwned[i];
     }
@@ -206,8 +206,8 @@ uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
     return s_userData->refineriesOwned[resourceID];
   } else if (typeID == TANK_ID) {
     return s_userData->tanksOwned[resourceID];
-  } else if (typeID == SIEVE_ID) {
-    return s_userData->sievesOwned[resourceID];
+//  } else if (typeID == SIEVE_ID) {
+//    return s_userData->sievesOwned[resourceID];
   } else if (typeID == WATCHER_ID) {
     return s_userData->watchersOwned[resourceID];
   }
@@ -231,81 +231,27 @@ uint64_t getUserTotalTime() {
   return s_userData->totalTime;
 }
 
-void incrementUserColorTheme() {
-  if (++(s_userData->colourTheme) == PALETTE_MAX) s_userData->colourTheme = 0;
+void incrementUserSetting(USER_SETTING set) {
+  setUserSetting(set, getUserSetting(set) + 1);
 }
 
-uint8_t getUserColorTheme() {
-  return s_userData->colourTheme; 
-}
-
-void setUserTypeSetting(uint8_t value) {
-  if (value >= FONT_MAX) value = 0;
-  s_userData->typeSetting = value;
-  switch(s_userData->typeSetting) {
-    case FONT_5: setClockPixelOffset(1); break;
-    default: setClockPixelOffset(2);
+void setUserSetting(USER_SETTING set, uint8_t value) {
+  if ((set == SETTING_ZZZ_END || set == SETTING_ZZZ_START) && value > 23) value = 0;
+  if ((set == SETTING_LIGHT || set == SETTING_VIBE) && value >= MAX_NOTIFY_SETTINGS) value = 0;
+  if (set == SETTING_TYPE && value >= FONT_MAX) value = 0;
+  if (set == SETTING_COLOUR && value >= PALETTE_MAX) value = 0;
+  s_userData->settings[set] = value;
+  // Do we need to action on anything that has changed?
+  if (set == SETTING_TYPE) {
+    switch(value) {
+      case FONT_5: setClockPixelOffset(1); break;
+      default: setClockPixelOffset(2);
+    }
   }
 }
 
-void incrementUserTypeSetting() {
-  setUserTypeSetting( s_userData->typeSetting + 1 );
-}
-
-uint8_t getUserTypeSetting() {
-  return s_userData->typeSetting; 
-}
-
-void incrementUserLightSetting() {
-  setUserLightSetting( s_userData->lightSetting + 1 );
-}
-
-void setUserLightSetting(uint8_t value) {
-  if (value >= MAX_NOTIFY_SETTINGS) value = 0;
-  s_userData->lightSetting = value;
-}
-
-uint8_t getUserLightSetting() {
-  return s_userData->lightSetting; 
-}
-
-void incrementUserVibrateSetting() {
-  setUserVibrateSetting( s_userData->vibrateSetting + 1 );
-}
-
-void setUserVibrateSetting(uint8_t value) {
-  if (value >= MAX_NOTIFY_SETTINGS) value = 0;
-  s_userData->vibrateSetting = value;
-}
-
-uint8_t getUserVibrateSetting() {
-  return s_userData->vibrateSetting; 
-}
-
-void incrementUserZzzStartSetting() {
-  setUserZzzStartSetting( s_userData->zzzStartSetting + 1 );
-}
-
-void setUserZzzStartSetting(uint8_t value) {
-  if (value >= 24) value = 0;
-  s_userData->zzzStartSetting = value;
-}
-
-uint8_t getUserZzzStartSetting() {
-  return s_userData->zzzStartSetting;
-}
-
-void incrementUserZzzEndSetting() {
-  setUserZzzEndSetting( s_userData->zzzEndSetting + 1 );
-}
-
-void setUserZzzEndSetting(uint8_t value) {
-  if (value >= 24) value = 0;
-  s_userData->zzzEndSetting = value;
-}
-
-uint8_t getUserZzzEndSetting() {
-  return s_userData->zzzEndSetting;
+uint8_t getUserSetting(USER_SETTING set) {
+  return s_userData->settings[set];
 }
 
 void setUserOpt(USER_OPT opt, bool value) {
@@ -314,7 +260,6 @@ void setUserOpt(USER_OPT opt, bool value) {
   } else {
     BITCLEAR(s_userData->settingsBitmap, (uint16_t)opt);
   }
-
   // Do we need to action on anything that has changed?
   if (opt == OPT_SHOW_SECONDS) update_tick_handler();
 }

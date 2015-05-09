@@ -55,6 +55,7 @@ const char* const NAME_REFINERY[MAX_UPGRADES] = {
   "",
   ""};
 
+/*
 const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES] = {
   SEC_IN_MIN,
   SEC_IN_MIN*2,
@@ -108,6 +109,7 @@ const char* const NAME_SIEVE[MAX_UPGRADES] = {
   "SUPGRADE 14",
   "SUPGRADE 15",
   "SUPGRADE 16"};
+*/
 
 const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES] = {
   SEC_IN_MIN,
@@ -159,9 +161,9 @@ const char* const NAME_TANK[MAX_UPGRADES] = {
   "TUPGRADE 11",
   "TUPGRADE 12",
   "TUPGRADE 13",
-  "TUPGRADE 14",
-  "TUPGRADE 15",
-  "TUPGRADE 16"};
+  "",
+  "",
+  ""};
 
 const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES] = {
   SEC_IN_MIN,

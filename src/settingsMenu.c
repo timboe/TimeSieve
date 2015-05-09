@@ -204,17 +204,19 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 //TODO - many of these should be locked
     if (row == 0) { // Color
       strcpy(titleText, "COLOUR Theme"); 
-      if      (getUserColorTheme() == PALETTE_BLUE)   strcpy(subText1, "BLUE---"); 
-      else if (getUserColorTheme() == PALETTE_GREEN)  strcpy(subText1, "-GREEN--");
-      else if (getUserColorTheme() == PALETTE_YELLOW) strcpy(subText1, "--YELLOW-"); 
-      else if (getUserColorTheme() == PALETTE_RED)    strcpy(subText1, "---RED"); 
+      const uint8_t setting = getUserSetting(SETTING_COLOUR);
+      if      (setting == PALETTE_BLUE)   strcpy(subText1, "BLUE---"); 
+      else if (setting == PALETTE_GREEN)  strcpy(subText1, "-GREEN--");
+      else if (setting == PALETTE_YELLOW) strcpy(subText1, "--YELLOW-"); 
+      else if (setting == PALETTE_RED)    strcpy(subText1, "---RED"); 
     } else if (row == 1) { // Typeface
       strcpy(titleText, "CLOCK Typeface");
-      if      (getUserTypeSetting() == 0) strcpy(subText1, "0----"); 
-      else if (getUserTypeSetting() == 1) strcpy(subText1, "-1---");
-      else if (getUserTypeSetting() == 2) strcpy(subText1, "--2--"); 
-      else if (getUserTypeSetting() == 3) strcpy(subText1, "---3-"); 
-      else if (getUserTypeSetting() == 4) strcpy(subText1, "----4"); 
+      const uint8_t setting = getUserSetting(SETTING_TYPE);
+      if      (setting == 0) strcpy(subText1, "0----"); 
+      else if (setting == 1) strcpy(subText1, "-1---");
+      else if (setting == 2) strcpy(subText1, "--2--"); 
+      else if (setting == 3) strcpy(subText1, "---3-"); 
+      else if (setting == 4) strcpy(subText1, "----4"); 
     } else if (row == 2) { // Animate
       strcpy(titleText, "ANIMATIONS"); 
       if (getUserOpt(OPT_ANIMATE)) strcpy(subText1, "ON-"); 
@@ -225,26 +227,28 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
       else strcpy(subText1, "MINUTES-");    
     } else if (row == 4) { // Light on treasure
       strcpy(titleText, "LIGHT Notify");
-      if      (getUserLightSetting() == 0) strcpy(subText1, "OFF-----"); 
-      else if (getUserLightSetting() == 1) strcpy(subText1, "-COMMON+----"); 
-      else if (getUserLightSetting() == 2) strcpy(subText1, "--MAGIC+---"); 
-      else if (getUserLightSetting() == 3) strcpy(subText1, "---RARE+--"); 
-      else if (getUserLightSetting() == 4) strcpy(subText1, "----EPIC+-"); 
-      else if (getUserLightSetting() == 5) strcpy(subText1, "----LEGENDARY");
+      const uint8_t setting = getUserSetting(SETTING_LIGHT);
+      if      (setting == 0) strcpy(subText1, "OFF-----"); 
+      else if (setting == 1) strcpy(subText1, "-COMMON+----"); 
+      else if (setting == 2) strcpy(subText1, "--MAGIC+---"); 
+      else if (setting == 3) strcpy(subText1, "---RARE+--"); 
+      else if (setting == 4) strcpy(subText1, "----EPIC+-"); 
+      else if (setting == 5) strcpy(subText1, "----LEGENDARY");
     } else if (row == 5) { // Vibe on treasure
       strcpy(titleText, "VIBRATE Notify");
-      if      (getUserVibrateSetting() == 0) strcpy(subText1, "OFF-----"); 
-      else if (getUserVibrateSetting() == 1) strcpy(subText1, "-COMMON+----"); 
-      else if (getUserVibrateSetting() == 2) strcpy(subText1, "--MAGIC+---"); 
-      else if (getUserVibrateSetting() == 3) strcpy(subText1, "---RARE+--"); 
-      else if (getUserVibrateSetting() == 4) strcpy(subText1, "----EPIC+-"); 
-      else if (getUserVibrateSetting() == 5) strcpy(subText1, "----LEGENDARY");
+      const uint8_t setting = getUserSetting(SETTING_VIBE);
+      if      (setting == 0) strcpy(subText1, "OFF-----"); 
+      else if (setting == 1) strcpy(subText1, "-COMMON+----"); 
+      else if (setting == 2) strcpy(subText1, "--MAGIC+---"); 
+      else if (setting == 3) strcpy(subText1, "---RARE+--"); 
+      else if (setting == 4) strcpy(subText1, "----EPIC+-"); 
+      else if (setting == 5) strcpy(subText1, "----LEGENDARY");
     } else if (row == 6) { // Quite start
       strcpy(titleText, "QUIET Start");
-      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "Don't notify from %ih", (int)getUserZzzStartSetting() );    
+      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "Don't notify from %ih", (int)getUserSetting(SETTING_ZZZ_START) );    
     } else if (row == 7) { // Quiet end
       strcpy(titleText, "QUIET End");
-      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "... until %ih", (int)getUserZzzEndSetting() );    
+      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "... until %ih", (int)getUserSetting(SETTING_ZZZ_END) );    
     } else if (row == 8) { // new game
       strcpy(titleText, "RESET Game!");
       if (s_restartCheck == 8) strcpy(subText1, "Start again?");
@@ -288,21 +292,21 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
   } else if (section == SETTINGS_SECTION_ID) {
 
     if (row == 0) { // Color
-      incrementUserColorTheme();
+      incrementUserSetting(SETTING_COLOUR);
     } else if (row == 1) { // Typeface
-      incrementUserTypeSetting();
+      incrementUserSetting(SETTING_TYPE);
     } else if (row == 2) { // Animate
       flipUserOpt(OPT_ANIMATE);
     } else if (row == 3) { // Seconds
       flipUserOpt(OPT_SHOW_SECONDS);
     } else if (row == 4) { // Light on treasure
-      incrementUserLightSetting();
+      incrementUserSetting(SETTING_LIGHT);
     } else if (row == 5) { // Vibe on treasure
-      incrementUserVibrateSetting();
+      incrementUserSetting(SETTING_VIBE);
     } else if (row == 6) { // Quite start
-      incrementUserZzzStartSetting();
+      incrementUserSetting(SETTING_ZZZ_START);
     } else if (row == 7) { // Quiet end
-      incrementUserZzzEndSetting();
+      incrementUserSetting(SETTING_ZZZ_END);
     } else if (row == 8) { // new game
       if (--s_restartCheck == 0) resetUserData();
     }

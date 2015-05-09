@@ -18,9 +18,9 @@ static Window* s_watcher_window;
 //static Window* s_sieve_window;
 
 static int s_refinery_context = REFINERY_ID;
-//static int s_sieve_context = SIEVE_ID;
 static int s_tank_context = TANK_ID;
 static int s_watcher_context = WATCHER_ID;
+//static int s_sieve_context = SIEVE_ID;
 
 // Temp buffer
 static char tempBuffer[TEXT_BUFFER_SIZE];
@@ -50,10 +50,10 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
     menu_cell_basic_draw(ctx, cell_layer, "REFINERY Upgrades", "Get more liquid time", NULL);
   } else if (row == TANK_ID) {
     menu_cell_basic_draw(ctx, cell_layer, "TANK Upgrades", "Store more liquid time", NULL);
-  } else if (row == SIEVE_ID) {
-    menu_cell_basic_draw(ctx, cell_layer, "SIEVE Upgrades", "Find more treasures", NULL);
+//  } else if (row == SIEVE_ID) {
+//    menu_cell_basic_draw(ctx, cell_layer, "SIEVE Upgrades", "Find more treasures", NULL);
   } else if (row == WATCHER_ID) {
-    menu_cell_basic_draw(ctx, cell_layer, "WATCHERS", "Collect more treasure", NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "WORKERS", "They work for YOU", NULL);
   }
 }
 
@@ -66,22 +66,14 @@ static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   } else if (row == TANK_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH TANK");
     window_stack_push(s_tank_window, true);
-  } else if (row == SIEVE_ID) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH SIEVE");
-    window_stack_push(s_sieve_window, true);
+//  } else if (row == SIEVE_ID) {
+//    APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH SIEVE");
+//    window_stack_push(s_sieve_window, true);
   } else if (row == WATCHER_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH WATCHER");
     window_stack_push(s_watcher_window, true);
   }
-//   switch (cell_index->row) {
-//     // This is the menu item with the cycling icon
-//     case 1:
-//       // Cycle the icon
-//       //s_current_icon = (s_current_icon + 1) % NUM_MENU_ICONS;
-//       // After changing the icon, mark the layer to have it updated
-//       layer_mark_dirty(menu_layer_get_layer(menu_layer));
-//       break;
-//   }
+
 }
 
 /// 
@@ -94,7 +86,7 @@ static uint16_t sub_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t s
   const int context = *((int*)data);
   if (context == REFINERY_ID) return N_REFINERY_UPGRADES;
   else if (context == TANK_ID) return N_TANK_UPGRADES;
-  else if (context == SIEVE_ID) return N_SIEVE_UPGRADES;
+  //else if (context == SIEVE_ID) return N_SIEVE_UPGRADES;
   else if (context == WATCHER_ID) return N_WATCHER_UPGRADES;
   return 0;
 }
@@ -115,7 +107,7 @@ static void sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer
   strcat(s_header, tempBuffer);
   if (context == REFINERY_ID) strcpy(s_title, "REFINARY Upgrades");
   else if (context == TANK_ID) strcpy(s_title, "TANK Upgrades");
-  else if (context == SIEVE_ID) strcpy(s_title, "SIEVE Upgrades");
+  //else if (context == SIEVE_ID) strcpy(s_title, "SIEVE Upgrades");
   else if (context == WATCHER_ID) strcpy(s_title, "WATCHER Upgrades");
   GRect topTextRect = GRect(2, 0, size.w-2, size.h);
   GRect botTextRect = GRect(2, 14, size.w-2, size.h-14);
@@ -148,10 +140,10 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     upgradeName = NAME_TANK[location];
     reward = REWARD_TANK[location];
     strcpy(upgradeText, "SIZE: ");
-  } else if (context == SIEVE_ID) {
-    upgradeName = NAME_SIEVE[location];
-    reward = REWARD_SIEVE[location];
-    strcpy(upgradeText, "CHANCE: ");
+//  } else if (context == SIEVE_ID) {
+//    upgradeName = NAME_SIEVE[location];
+//    reward = REWARD_SIEVE[location];
+//    strcpy(upgradeText, "CHANCE: ");
   } else if (context == WATCHER_ID) {
     upgradeName = NAME_WATCHER[location];
     reward = REWARD_WATCHER[location];
@@ -251,7 +243,7 @@ void sub_window_load(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i CREATE", context);
 
   if (context == REFINERY_ID)     new_layer = s_refinery_layer;
-  else if (context == SIEVE_ID)   new_layer = s_sieve_layer;
+//  else if (context == SIEVE_ID)   new_layer = s_sieve_layer;
   else if (context == TANK_ID)    new_layer = s_tank_layer;
   else if (context == WATCHER_ID) new_layer = s_watcher_layer;
   // Create the menu layer
@@ -274,7 +266,7 @@ void sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i DESTROY", context);
   if (context == REFINERY_ID)     menu_layer_destroy(s_refinery_layer);
-  else if (context == SIEVE_ID)   menu_layer_destroy(s_sieve_layer);
+//  else if (context == SIEVE_ID)   menu_layer_destroy(s_sieve_layer);
   else if (context == TANK_ID)    menu_layer_destroy(s_tank_layer);
   else if (context == WATCHER_ID) menu_layer_destroy(s_watcher_layer);
   
@@ -314,7 +306,7 @@ void buy_window_load(Window* parentWindow) {
 
   // Setup sub-windows that we might want to jump to 
   createSubWin(&s_refinery_window, &s_refinery_context);
-  createSubWin(&s_sieve_window, &s_sieve_context);
+  //createSubWin(&s_sieve_window, &s_sieve_context);
   createSubWin(&s_tank_window, &s_tank_context);
   createSubWin(&s_watcher_window, &s_watcher_context);
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN LOAD");
@@ -328,6 +320,6 @@ void buy_window_unload() {
   // Destroy sub-windows
   window_destroy(s_refinery_window);
   window_destroy(s_tank_window);
-  window_destroy(s_sieve_window);
+ // window_destroy(s_sieve_window);
   window_destroy(s_watcher_window);
 }

@@ -60,7 +60,7 @@
 #define N_WATCHER_UPGRADES 4
   
 extern const char* const NAME_REFINERY[MAX_UPGRADES];
-extern const char* const NAME_SIEVE[MAX_UPGRADES];
+//extern const char* const NAME_SIEVE[MAX_UPGRADES];
 extern const char* const NAME_TANK[MAX_UPGRADES];
 extern const char* const NAME_WATCHER[MAX_UPGRADES];
 extern const char* const NAME_COMMON[MAX_TREASURES];
@@ -69,11 +69,11 @@ extern const char* const NAME_RARE[MAX_TREASURES];
 extern const char* const NAME_EPIC[MAX_TREASURES];
 extern const char* const NAME_LEGENDARY[MAX_UNIQUE];
 extern const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES];
-extern const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES];
+//extern const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
 extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
-extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
+//extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
 extern const uint64_t REWARD_TANK[MAX_UPGRADES];
 extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 extern const uint64_t SELL_PRICE_COMMON[MAX_TREASURES];
@@ -175,3 +175,17 @@ typedef enum {OPT_SHOW_SECONDS,
               OPT_14,
               OPT_15,
               OPT_16} USER_OPT;  
+              
+#define N_USER_SETTING 12
+typedef enum {SETTING_LIGHT,
+              SETTING_VIBE,
+              SETTING_TYPE,
+              SETTING_COLOUR,
+              SETTING_ZZZ_START,
+              SETTING_ZZZ_END,
+              SET_7,
+              SET_8,
+              SET_9,
+              SET_10,
+              SET_11,
+              SET_12} USER_SETTING;

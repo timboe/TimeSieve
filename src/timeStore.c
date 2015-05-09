@@ -5,7 +5,7 @@
   
 static uint64_t* s_bufferRefineryPrice;
 static uint64_t* s_bufferTankPrice;
-static uint64_t* s_bufferSievePrice;
+//static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
 
 static uint64_t* s_bufferCommonSellPrice;
@@ -80,7 +80,7 @@ void init_timeStore() {
   
   s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
   s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+  //s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
   s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
 
   // Populate the buffer. This could take a little time, do it at the start
@@ -96,10 +96,10 @@ void init_timeStore() {
     for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
     s_bufferTankPrice[upgrade] = currentPrice;
     //
-    nOwned = getUserOwnsUpgrades(SIEVE_ID, upgrade);
-    currentPrice = INITIAL_PRICE_SIEVE[upgrade];
-    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
-    s_bufferSievePrice[upgrade] = currentPrice;
+    //nOwned = getUserOwnsUpgrades(SIEVE_ID, upgrade);
+    //currentPrice = INITIAL_PRICE_SIEVE[upgrade];
+    //for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
+    //s_bufferSievePrice[upgrade] = currentPrice;
     //
     nOwned = getUserOwnsUpgrades(TANK_ID, upgrade);
     currentPrice = INITIAL_PRICE_WATCHER[upgrade];
@@ -117,7 +117,7 @@ void init_timeStore() {
 void destroy_timeStore() {
   free( s_bufferRefineryPrice );
   free( s_bufferTankPrice );
-  free( s_bufferSievePrice );
+  //free( s_bufferSievePrice );
   free( s_bufferWatcherPrice );
 
   free( s_bufferCommonSellPrice );
@@ -133,8 +133,8 @@ uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
     currentPrice = s_bufferRefineryPrice[resourceID];
   } else if (typeID == TANK_ID) {
     currentPrice = s_bufferTankPrice[resourceID];
-  } else if (typeID == SIEVE_ID) {
-    currentPrice = s_bufferSievePrice[resourceID];
+  //} else if (typeID == SIEVE_ID) {
+  //  currentPrice = s_bufferSievePrice[resourceID];
   } else if (typeID == WATCHER_ID) {
     currentPrice = s_bufferWatcherPrice[resourceID];
   }
@@ -242,8 +242,8 @@ bool doPurchase(const unsigned typeID, const unsigned resourceID) {
   } else if (typeID == TANK_ID) {
     s_bufferTankPrice[resourceID] = cost;
     updateTankCapacity();
-  } else if (typeID == SIEVE_ID) {
-    s_bufferSievePrice[resourceID] = cost;
+//  } else if (typeID == SIEVE_ID) {
+//    s_bufferSievePrice[resourceID] = cost;
   } else if (typeID == WATCHER_ID) {
     s_bufferWatcherPrice[resourceID] = cost;
   }
