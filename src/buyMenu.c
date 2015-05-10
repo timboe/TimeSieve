@@ -130,6 +130,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   const uint64_t priceNext = getPriceOfUpgrade(context, location);
   const char* upgradeName = NULL;
   uint64_t reward = 0;
+  bool maxLevel = false;
 
   char upgradeText[TEXT_BUFFER_SIZE];
   if (context == REFINERY_ID) {
@@ -140,14 +141,58 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     upgradeName = NAME_TANK[location];
     reward = REWARD_TANK[location];
     strcpy(upgradeText, "SIZE: ");
-//  } else if (context == SIEVE_ID) {
-//    upgradeName = NAME_SIEVE[location];
-//    reward = REWARD_SIEVE[location];
-//    strcpy(upgradeText, "CHANCE: ");
   } else if (context == WATCHER_ID) {
     upgradeName = NAME_WATCHER[location];
     reward = REWARD_WATCHER[location];
-    strcpy(upgradeText, "CHANCE: ");
+    bool doneNotifyTxt = false;
+    uint8_t setting;
+    switch (row) {
+      case COLLECTOR_1_CHANCE: strcpy(upgradeText, "AUTO-Collect Chance +1%"); break;
+      case COLLECTOR_2_CHANCE: strcpy(upgradeText, "AUTO-Collect Chance +5%"); break;
+      case FREQUENCY_1_CHANCE: strcpy(upgradeText, "TREASURE Chance +0.5%"); break;
+      case FREQUENCY_2_CHANCE: strcpy(upgradeText, "TREASURE Chance +3%"); break;
+      case QUALITY_1_CHANCE: strcpy(upgradeText, "TREASURE Quality 1%"); break;
+      case QUALITY_2_CHANCE: strcpy(upgradeText, "TREASURE Qaulity 2.5%"); break;
+      case WATCHER_TECH: 
+        strcpy(upgradeText, "UNLOCK Addon: ");
+        setting = getUserSetting(SETTING_ADDON);
+        if (setting == ADDON_NONE) strcat(upgradeText, "Battery");
+        else if (setting == ADDON_BATTERY) strcat(upgradeText, "Month");
+        else if (setting == ADDON_MONTH) strcat(upgradeText, "Weather");
+        else maxLevel = true;
+        break;
+      case WATCHER_LIGHT:
+        strcpy(upgradeText, "UNLOCK Light on: ");
+        doneNotifyTxt = true;
+        // DELIBERATE FALL-TRHOUGH
+      case WATCHER_VIBE:
+        setting = getUserSetting(SETTING_LIGHT);
+        if (doneNotifyTxt == false) {
+          strcpy(upgradeText, "UNLOCK Vibe on: ");
+          setting = getUserSetting(SETTING_VIBE);
+        } 
+        if (setting == NOTIFY_NONE) strcat(upgradeText, "Common+");
+        else if (setting == NOTIFY_COMMON) strcat(upgradeText, "Magic+");
+        else if (setting == NOTIFY_MAGIC) strcat(upgradeText, "Epic+");
+        else if (setting == NOTIFY_RARE) strcat(upgradeText, "Rare+");
+        else if (setting == NOTIFY_EPIC) strcat(upgradeText, "Legendary");
+        else maxLevel = true;
+        break;
+      case WATCHER_FONT:
+        setting = getUserSetting(SETTING_TYPE);
+        if (setting < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "UNLOCK Font: %i", (int)(setting+1));
+        else maxLevel = true;
+        break;
+      case WATCHER_COLOUR:
+        setting = getUserSetting(SETTING_COLOUR);
+        strcpy(upgradeText, "UNLOCK Theme: ");
+        if (setting == PALETTE_BLUE) strcat(upgradeText, "Green");
+        else if (setting == PALETTE_GREEN) strcat(upgradeText, "Yellow");
+        else if (setting == PALETTE_YELLOW) strcat(upgradeText, "Red");
+        else maxLevel = true;
+        break;
+    }
+    if (maxLevel) strcpy(upgradeText, "MAX");
   }
 
   bool display = false, canAfford = false;
@@ -194,14 +239,17 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     static char s_header[TEXT_BUFFER_SIZE];
     strcpy(s_header, "COST: ");
     strcat(s_header, tempBuffer);
+    if (maxLevel) strcpy(s_header, "MAX");
 
     static char s_owned[TEXT_BUFFER_SIZE];
     snprintf(s_owned, TEXT_BUFFER_SIZE, "OWNED: %i", owned);
 
-    timeToString(reward, tempBuffer, TEXT_BUFFER_SIZE, true);
     static char s_reward[TEXT_BUFFER_SIZE];
     strcpy(s_reward, upgradeText);
-    strcat(s_reward, tempBuffer);
+    if (context != WATCHER_ID) {
+      timeToString(reward, tempBuffer, TEXT_BUFFER_SIZE, true);
+      strcat(s_reward, tempBuffer);
+    }
 
     graphics_draw_text(ctx, upgradeName, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
     graphics_draw_text(ctx, s_header, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);

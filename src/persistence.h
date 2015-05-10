@@ -10,7 +10,6 @@ struct userData_v1 {
   time_t timeOfSave;
   // Things owned
   uint16_t refineriesOwned[MAX_UPGRADES];
-//  uint16_t sievesOwned[MAX_UPGRADES];
   uint16_t tanksOwned[MAX_UPGRADES];
   uint16_t watchersOwned[MAX_UPGRADES];
   uint16_t commonOwned[MAX_TREASURES];

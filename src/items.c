@@ -3,38 +3,7 @@
 #include "timeSieve.h"
 #include "persistence.h"
 
-// Prob max is 1million
-#define PROB_MAX 1000000
-// Basic collectors have a 1% chance
-#define COLLECTOR_1_CHANCE 10000
-// Advanced collectors have a 5% chance
-#define COLLECTOR_2_CHANCE 50000
-// Basic finders have a 0.5% chance to find an item
-#define FREQUENCY_1_CHANCE 5000
-// Advanced finders have a 3% chance to find an item
-#define FREQUENCY_2_CHANCE 30000
 
-// When it comes to finding items, mins have a 0.7% chance (roughly 10 per day)
-#define BASE_CHANCE_MIN 6944
-// Hours have base chance of 25%
-#define BASE_CHANCE_HOUR 250000
-// Days have a base chance of 65%
-#define BASE_CHANCE_DAY 650000
-// Months have a base chance of 90%
-#define BASE_CHANCE_MONTH 900000
-// Years have a base chance of 99%
-#define BASE_CHANCE_YEAR 990000
-
-// Note here the probabilities are done cumulativly
-// Common items have a base chance of 70%
-// Magic items have a base chance of 20%
-#define BASE_CHANCE_MAGIC 800000
-// Rare items have a base chance of 7%
-#define BASE_CHANCE_RARE 920000
-// Epic items have a base chance of 2.5%
-#define BASE_CHANCE_EPIC 975000
-// Legendary items have a base chance of 0.5%
-#define BASE_CHANCE_LEGENDARY 995000
 
 
 /*
@@ -72,16 +41,23 @@ bool getChance(uint16_t nTries, int32_t prob) {
 }
 
 /**
- * Get how rare the found item is - this works a bit differently fro the other chances
+ * Get how rare the found item is - this works a bit differently from the other chances
  * which are binomial.
  * Also, as we don't want an early player hitting the jackpot, we set a minimum
  * threshold of all-time-time which must be met per category. 
  * This is arbitrary, and is currently set to the value of the 3rd most expensive
  * item in the category
  **/
-uint8_t getItemRarity() {
+uint8_t getItemRarity(TimeUnits units_changed) {
   uint32_t chance = rand() % PROB_MAX;
-  // TODO - manipulate this number
+  uint32_t q1 = getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_1);
+  uint32_t q2 = getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_2);
+  chance *= QUALITY_SCALEFACTOR + (q1 * QUALITY_1_CHANCE) + (q2 * QUALITY_2_CHANCE);
+  chance /= QUALITY_SCALEFACTOR;
+  // Increased chance at larger boundaries
+  if ((units_changed & YEAR_UNIT) != 0)       chance += 900000;
+  else if ((units_changed & MONTH_UNIT) != 0) chance += 500000;
+  else if ((units_changed & DAY_UNIT) != 0)   chance += 100000;
   // Check to see what we win
   if (chance > BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
   else if (getUserTotalTime() > SELL_PRICE_EPIC[2] && chance > BASE_CHANCE_EPIC) return EPIC_ID;
@@ -91,7 +67,7 @@ uint8_t getItemRarity() {
 }
 
 bool getItemAppears(TimeUnits units_changed) {
-  // We have five different thresholds, min, hour, day, month year. Always use the largers
+  // We have five different thresholds, min, hour, day, month year. Always use the larger
   if ((units_changed & YEAR_UNIT) != 0) {
     if (rand() % PROB_MAX < BASE_CHANCE_YEAR) return true;
   } else if ((units_changed & MONTH_UNIT) != 0) {
@@ -121,10 +97,10 @@ void checkForItem(TimeUnits units_changed) {
 
   if (getItemAppears(units_changed) == false) return;
 
-  uint8_t treasureID = getItemRarity();
+  uint8_t treasureID = getItemRarity(units_changed);
   uint8_t itemID = rand() % MAX_TREASURES;
   
-  // Legendary is 1/MAX_UNIQUE and must be one we dont have else downgrade to epic
+  // Legendary is 1/MAX_UNIQUE and there must be one we dont have else downgrade to epic
   if (treasureID == LEGENDARY_ID) {
     if (getUserTotalItems(LEGENDARY_ID) == MAX_UNIQUE) {
       treasureID = EPIC_ID;

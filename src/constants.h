@@ -57,12 +57,10 @@
 #define TREASURE_DISPLAY_TIME 5000
   
 #define N_REFINERY_UPGRADES 13
-#define N_SIEVE_UPGRADES 10
 #define N_TANK_UPGRADES 13
-#define N_WATCHER_UPGRADES 4
+#define N_WATCHER_UPGRADES 11
   
 extern const char* const NAME_REFINERY[MAX_UPGRADES];
-//extern const char* const NAME_SIEVE[MAX_UPGRADES];
 extern const char* const NAME_TANK[MAX_UPGRADES];
 extern const char* const NAME_WATCHER[MAX_UPGRADES];
 extern const char* const NAME_COMMON[MAX_TREASURES];
@@ -71,11 +69,9 @@ extern const char* const NAME_RARE[MAX_TREASURES];
 extern const char* const NAME_EPIC[MAX_TREASURES];
 extern const char* const NAME_LEGENDARY[MAX_UNIQUE];
 extern const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES];
-//extern const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
 extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
-//extern const uint64_t REWARD_SIEVE[MAX_UPGRADES];
 extern const uint64_t REWARD_TANK[MAX_UPGRADES];
 extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
 extern const uint64_t SELL_PRICE_COMMON[MAX_TREASURES];
@@ -99,6 +95,49 @@ typedef enum {WATCHER_FREQUENCY_1,
               W_14,
               W_15,
               W_16} WATCHER_TYPE; 
+              
+// TREASURE SETTINGS
+
+// Prob max is 1million
+#define PROB_MAX 1000000
+// Basic collectors have a 1% chance 
+#define COLLECTOR_1_CHANCE 10000
+// Advanced collectors have a 5% chance
+#define COLLECTOR_2_CHANCE 50000
+// Basic finders have a 0.5% chance to find an item
+#define FREQUENCY_1_CHANCE 5000
+// Advanced finders have a 3% chance to find an item
+#define FREQUENCY_2_CHANCE 30000
+// Basic archeologists increase the chance by 1%
+// This is done via multiplication so needs a divisor
+#define QUALITY_SCALEFACTOR 1000
+#define QUALITY_1_CHANCE 10
+// Advanced achhelogists increase the chance by 2.5%
+#define QUALITY_2_CHANCE 25
+
+// When it comes to finding items, mins have a 0.7% chance (roughly 10 per day)
+#define BASE_CHANCE_MIN 6944
+// Hours have base chance of 25%
+#define BASE_CHANCE_HOUR 250000
+// Days have a base chance of 65%
+#define BASE_CHANCE_DAY 650000
+// Months have a base chance of 90%
+#define BASE_CHANCE_MONTH 900000
+// Years have a base chance of 99%
+#define BASE_CHANCE_YEAR 990000
+
+// Note here the probabilities are done cumulativly
+// Common items have a base chance of 70%
+// Magic items have a base chance of 20%
+#define BASE_CHANCE_MAGIC 800000
+// Rare items have a base chance of 7%
+#define BASE_CHANCE_RARE 920000
+// Epic items have a base chance of 2.5%
+#define BASE_CHANCE_EPIC 975000
+// Legendary items have a base chance of 0.5%
+#define BASE_CHANCE_LEGENDARY 995000
+
+// !TRESSURE SETTINGS
 
 #define MENU_BACK_GREEN_ODD GColorMintGreen
 #define MENU_BACK_GREEN_EVEN GColorScreaminGreen
@@ -135,13 +174,25 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define FONT_5 4
 #define FONT_MAX 5
 
+#define ADDON_NONE 0
+#define ADDON_BATTERY 1
+#define ADDON_MONTH 2
+#define ADDON_WEATHER 3
+#define ADDON_MAX 4
+
+#define NOTIFY_NONE 0
+#define NOTIFY_COMMON 1
+#define NOTIFY_MAGIC 2
+#define NOTIFY_RARE 3
+#define NOTIFY_EPIC 4
+#define NOTIFY_LEGENDARY 5
+
 #define NUM_BUY_MENU_SECTIONS 1
 #define NUM_BUY_MENU_ITEMS 4
 #define MENU_CELL_LARGE_HEADER_HEIGHT 32
 #define MENU_X_OFFSET 28
 #define MENU_CELL_HEIGHT 56
 #define MENU_SMALL_CELL_HEIGHT 44
-
 
 #define MAX_NOTIFY_SETTINGS 6
 
@@ -202,7 +253,7 @@ typedef enum {SETTING_LIGHT,
               SETTING_COLOUR,
               SETTING_ZZZ_START,
               SETTING_ZZZ_END,
-              SET_7,
+              SETTING_ADDON,
               SET_8,
               SET_9,
               SET_10,

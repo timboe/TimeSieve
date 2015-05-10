@@ -8,7 +8,7 @@ GColor getTextColourC() {
   	case PALETTE_GREEN: return GColorKellyGreen;
   	case PALETTE_YELLOW: return GColorYellow;
   	case PALETTE_RED: return GColorRed;
-  	default: return GColorFashionMagenta; // !!!!!!!!!!!!!
+  	default: return GColorWhite;
   }
 }
 
