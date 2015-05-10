@@ -155,7 +155,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   bitmap_layer_set_bitmap(s_sieveLayer, s_sieveBasic);
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
 
-  s_notifyLayer = layer_create( GRect(layerBounds.origin.x+2, layerBounds.origin.y+4, layerBounds.size.w-4, layerBounds.size.h-8) ); // border 5 top and bottom
+  s_notifyLayer = layer_create( GRect(4, 2, layerBounds.size.w-4, 48) ); // border 4 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
 }
