@@ -90,10 +90,15 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   GRect b = layer_get_bounds(this_layer);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, b, 6, GCornersAll);
-  graphics_context_set_stroke_color(ctx, getTrasureColour(s_notifyTreasureID));
+  graphics_context_set_fill_color(ctx, getTrasureColour(s_notifyTreasureID));
   graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
-  graphics_context_set_stroke_color(ctx, getTrasureColour(s_notifyTreasureID));
+  graphics_context_set_fill_color(ctx, getTrasureColour(s_notifyTreasureID));
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
+  // Image placeholder
+  graphics_context_set_stroke_color(ctx, GColorBlack);
+  GRect imageRect = GRect(6, 10,  22, 36);
+  graphics_draw_rect(ctx, imageRect);
+  graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(30,10,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void stopNotify(void* data) {
