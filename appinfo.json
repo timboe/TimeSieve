@@ -19,6 +19,11 @@
                 "type": "font"
             },
             {
+              "file": "images/sieveBasic.png",
+              "name": "SIEVE_BASIC",
+              "type": "png"
+            },
+            {
               "file": "images/gemCommon.png",
               "name": "GEM_COMMON",
               "type": "png"

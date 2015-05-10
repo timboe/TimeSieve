@@ -24,6 +24,11 @@ static bool s_treasureOnShow;
 static int8_t s_treasureID;
 static int8_t s_itemID;
 
+static BitmapLayer* s_sieveLayer;
+static GBitmap* s_sieveBasic;
+
+static Layer* s_notifyLayer;
+static int8_t s_layerColor = -1;
 
 // static BitmapLayer *s_convTopLayer;
 
@@ -67,7 +72,6 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
     }
     graphics_context_set_stroke_width(ctx, 3);
     graphics_draw_circle(ctx, GPoint(52, 30), 9); 
-    //graphics_context_set_stroke_width(ctx, 5);
     graphics_draw_circle(ctx, GPoint(52, 30), 14); 
     graphics_draw_circle(ctx, GPoint(52, 30), 19); 
     graphics_draw_circle(ctx, GPoint(52, 30), 24); 
@@ -83,10 +87,23 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 
   GRect convCapBound = GRect(0, 30, 11, 18);
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
+}
 
-  graphics_context_set_fill_color(ctx, GColorLightGray);
-  graphics_fill_rect(ctx, GRect(90, 20, 40, 30), 0, GCornersAll);
+static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
+  if (s_layerColor == -1) return; // Nothing to show
+  GRect bounds = layer_get_bounds(this_layer);
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, bounds, 4, GCornersAll);
+}
 
+void showNotify() {
+  s_layerColor = 1;
+  layer_mark_dirty(s_notifyLayer);
+}
+
+void stopNotify(const unsigned treasureID, const unsigned itemID) {
+  s_layerColor = -1;
+  layer_mark_dirty(s_notifyLayer);
 }
 
 void create_timeSieve_layer(Window* parentWindow) {
@@ -114,6 +131,17 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_treasureLayer = bitmap_layer_create(s_treasureFrame);
   bitmap_layer_set_compositing_mode(s_treasureLayer, GCompOpSet); // W transparencies
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_treasureLayer));
+  
+  // Create layer for the tank
+  s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
+  s_sieveLayer = bitmap_layer_create(GRect(90, 10, 40, 40));
+  bitmap_layer_set_compositing_mode(s_sieveLayer, GCompOpSet); // W transparencies
+  bitmap_layer_set_bitmap(s_sieveLayer, s_sieveBasic);
+  layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
+
+  s_notifyLayer = layer_create( GRect(0, 10, window_bounds.size.w, 30) );
+  layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
+  layer_add_child(s_timeSieveLayer, s_notifyLayer);
 }
 
 void stopDisplayItem(void* data) {
@@ -155,8 +183,8 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
 bool collectItem(bool autoCollect) {
   if (s_treasureOnShow == false) return false;
   addItem(s_treasureID, s_itemID, 1);
+  showNotify(s_treasureID, s_itemID);
   stopDisplayItem(NULL);
-  // TODO add collect window
   return true;
 }
 
@@ -167,6 +195,8 @@ void destroy_timeSieve_layer() {
   gbitmap_destroy(s_convTopBitmap);
   gbitmap_destroy(s_convBotBitmap);
   gbitmap_destroy(s_convCap);
+  
+  gbitmap_destroy(s_sieveBasic);
 
   gbitmap_destroy(s_gemCommon);
   gbitmap_destroy(s_gemMagic);
