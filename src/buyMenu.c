@@ -147,14 +147,14 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     bool doneNotifyTxt = false;
     uint8_t setting;
     switch (row) {
-      case COLLECTOR_1_CHANCE: strcpy(upgradeText, "AUTO-Collect Chance +1%"); break;
-      case COLLECTOR_2_CHANCE: strcpy(upgradeText, "AUTO-Collect Chance +5%"); break;
+      case COLLECTOR_1_CHANCE: strcpy(upgradeText, "AUTO-Collect +1%"); break;
+      case COLLECTOR_2_CHANCE: strcpy(upgradeText, "AUTO-Collect  +5%"); break;
       case FREQUENCY_1_CHANCE: strcpy(upgradeText, "TREASURE Chance +0.5%"); break;
       case FREQUENCY_2_CHANCE: strcpy(upgradeText, "TREASURE Chance +3%"); break;
       case QUALITY_1_CHANCE: strcpy(upgradeText, "TREASURE Quality 1%"); break;
       case QUALITY_2_CHANCE: strcpy(upgradeText, "TREASURE Qaulity 2.5%"); break;
       case WATCHER_TECH: 
-        strcpy(upgradeText, "UNLOCK Addon: ");
+        strcpy(upgradeText, "ADDON:");
         setting = getUserSetting(SETTING_ADDON);
         if (setting == ADDON_NONE) strcat(upgradeText, "Battery");
         else if (setting == ADDON_BATTERY) strcat(upgradeText, "Month");
@@ -162,13 +162,13 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         else maxLevel = true;
         break;
       case WATCHER_LIGHT:
-        strcpy(upgradeText, "UNLOCK Light on: ");
+        strcpy(upgradeText, "LIGHT on:");
         doneNotifyTxt = true;
         // DELIBERATE FALL-TRHOUGH
       case WATCHER_VIBE:
         setting = getUserSetting(SETTING_LIGHT);
         if (doneNotifyTxt == false) {
-          strcpy(upgradeText, "UNLOCK Vibe on: ");
+          strcpy(upgradeText, "VIBE on:");
           setting = getUserSetting(SETTING_VIBE);
         } 
         if (setting == NOTIFY_NONE) strcat(upgradeText, "Common+");
@@ -180,12 +180,12 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         break;
       case WATCHER_FONT:
         setting = getUserSetting(SETTING_TYPE);
-        if (setting < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "UNLOCK Font: %i", (int)(setting+1));
+        if (setting < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "FONT: %i", (int)(setting+1));
         else maxLevel = true;
         break;
       case WATCHER_COLOUR:
         setting = getUserSetting(SETTING_COLOUR);
-        strcpy(upgradeText, "UNLOCK Theme: ");
+        strcpy(upgradeText, "THEME:");
         if (setting == PALETTE_BLUE) strcat(upgradeText, "Green");
         else if (setting == PALETTE_GREEN) strcat(upgradeText, "Yellow");
         else if (setting == PALETTE_YELLOW) strcat(upgradeText, "Red");

@@ -183,18 +183,19 @@ const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES] = {
   (uint64_t)0,
   (uint64_t)0};
 
+// remember these prices double each time and some are finite
 const uint64_t REWARD_WATCHER[MAX_UPGRADES] = {
   SEC_IN_MIN,
   SEC_IN_MIN*2,
   SEC_IN_MIN*10,
-  SEC_IN_MIN*60,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
   (uint64_t)0,
   (uint64_t)0,
   (uint64_t)0,
@@ -202,22 +203,22 @@ const uint64_t REWARD_WATCHER[MAX_UPGRADES] = {
   (uint64_t)0};
 
 const char* const NAME_WATCHER[MAX_UPGRADES] = {
-  "Junior Fetcher", // Increase treasure chance
+  "", // Increase treasure chance
   "Techie", // Techie - unlock extra clock bits
-  "WUPGRADE 3",// XXX - Better treasure
-  "WUPGRADE 4",  // Electrician - light notify 
-  "WUPGRADE 5", // Senior Watcher - increase treasure chance  
-  "WUPGRADE 6", // Typogrgrapher - unlock font
-  "WUPGRADE 7", // Archiologist - better treasure
-  "WUPGRADE 8", // Craftsman - vibrate notify
-  "WUPGRADE 9", //XXX increase treasure chance
-  "WUPGRADE 10", // Painter - unlock theme
-  "WUPGRADE 11", // XXX better treasure
-  "WUPGRADE 12", // 
-  "WUPGRADE 13",
-  "WUPGRADE 14",
-  "WUPGRADE 15",
-  "WUPGRADE 16"};
+  "Intern Runner",// XXX - WATCHER_CHANCE_1
+  "Electrician",  // Electrician - light notify 
+  "Archaeologist", // WATCHER_QUALITY_1
+  "Typographer", // Typogrgrapher - unlock font
+  "Treasure Hunter", // WATCHER_FREQUENCY_2,
+  "Drill Operator", // WATCHER_VIB Craftsman - vibrate notify
+  "Sniffer Dog", //WATCHER_CHANCE_2
+  "Painter", // Painter - unlock theme
+  "Professor", // WATCHER_QUALITY_2 better treasure
+  "", 
+  "",
+  "",
+  "",
+  ""};
 
 const uint64_t SELL_PRICE_COMMON[MAX_TREASURES] = {
   SEC_IN_MIN*10,
