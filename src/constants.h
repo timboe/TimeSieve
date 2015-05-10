@@ -34,6 +34,8 @@
 // DEFINE EXPONENTIAL INCREASE FACTOR, CURRENTLY 7/6 which is ~x1.16
 #define INCREASE_MULTIPLY 7
 #define INCREASE_DIVIDE 6
+// Watchers increase by a constant factor
+#define INCREASE_WATCHER 2
   
 #define MAX_UPGRADES 16
 #define MAX_TREASURES 4

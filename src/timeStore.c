@@ -5,7 +5,6 @@
   
 static uint64_t* s_bufferRefineryPrice;
 static uint64_t* s_bufferTankPrice;
-//static uint64_t* s_bufferSievePrice;
 static uint64_t* s_bufferWatcherPrice;
 
 static uint64_t* s_bufferCommonSellPrice;
@@ -34,8 +33,6 @@ uint64_t getItemBasePrice(const unsigned treasureID, const unsigned itemID) {
     return SELL_PRICE_RARE[itemID];
   } else if (treasureID == EPIC_ID) {
     return SELL_PRICE_EPIC[itemID];
-  } else if (treasureID == LEGENDARY_ID) {
-    APP_LOG(APP_LOG_LEVEL_ERROR,"CANNOT SELL LEG.");
   }
   return 0;
 }
@@ -80,11 +77,11 @@ void init_timeStore() {
   
   s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
   s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  //s_bufferSievePrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+
   s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
 
   // Populate the buffer. This could take a little time, do it at the start
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Start Buffer");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "SBufr");
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
     uint16_t nOwned = getUserOwnsUpgrades(REFINERY_ID, upgrade);
     uint64_t currentPrice = INITIAL_PRICE_REFINERY[upgrade];
@@ -96,17 +93,13 @@ void init_timeStore() {
     for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
     s_bufferTankPrice[upgrade] = currentPrice;
     //
-    //nOwned = getUserOwnsUpgrades(SIEVE_ID, upgrade);
-    //currentPrice = INITIAL_PRICE_SIEVE[upgrade];
-    //for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
-    //s_bufferSievePrice[upgrade] = currentPrice;
-    //
-    nOwned = getUserOwnsUpgrades(TANK_ID, upgrade);
+    // Note watchers increase a lot more, a factor 2 here
+    nOwned = getUserOwnsUpgrades(WATCHER_ID, upgrade);
     currentPrice = INITIAL_PRICE_WATCHER[upgrade];
-    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
+    for (unsigned i = 0; i < nOwned; ++i) currentPrice *= INCREASE_WATCHER;
     s_bufferWatcherPrice[upgrade] = currentPrice;
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Fin Buffer");
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "FBufr");
 
   updateTimePerMin();
   updateTankCapacity();
@@ -117,7 +110,6 @@ void init_timeStore() {
 void destroy_timeStore() {
   free( s_bufferRefineryPrice );
   free( s_bufferTankPrice );
-  //free( s_bufferSievePrice );
   free( s_bufferWatcherPrice );
 
   free( s_bufferCommonSellPrice );
@@ -151,8 +143,6 @@ uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID) {
     return s_bufferRareSellPrice[itemID];
   } else if (treasureID == EPIC_ID) {
     return s_bufferEpicSellPrice[itemID];
-  } else if (treasureID == LEGENDARY_ID) {
-    APP_LOG(APP_LOG_LEVEL_ERROR,"CANNOT SELL LEG.");
   }
   return 0;
 }
