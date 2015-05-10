@@ -97,9 +97,10 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   // Image placeholder
   graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_context_set_text_color(ctx, GColorBlack);  
-  GRect imageRect = GRect(b.origin.x+6, b.origin.y+10,  22, 36);
+  GRect imageRect = GRect(b.origin.x+10, b.origin.y+10,  22, 36);
   graphics_draw_rect(ctx, imageRect);
-  graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+30, b.origin.y+10,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y+5,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+
 }
 
 void stopNotify(void* data) {
@@ -148,7 +149,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   bitmap_layer_set_bitmap(s_sieveLayer, s_sieveBasic);
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
 
-  s_notifyLayer = layer_create( GRect(0, 5, window_bounds.size.w, 46) ); // border 5 top and bottom
+  s_notifyLayer = layer_create( GRect(0, 0, window_bounds.size.w, window_bounds.size.h) ); // border 5 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
 }
