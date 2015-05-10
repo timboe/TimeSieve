@@ -99,14 +99,14 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_text_color(ctx, GColorBlack);  
   GRect imageRect = GRect(b.origin.x+10, b.origin.y+10,  22, 36);
   graphics_draw_rect(ctx, imageRect);
-  graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+5, b.origin.y+5,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   const char* itemName = NULL;
   if (s_notifyTreasureID == COMMON_ID) itemName = NAME_COMMON[s_notifyItemID];
   else if (s_notifyTreasureID == MAGIC_ID) itemName = NAME_MAGIC[s_notifyItemID];
   else if (s_notifyTreasureID == RARE_ID) itemName = NAME_RARE[s_notifyItemID];
   else if (s_notifyTreasureID == EPIC_ID) itemName = NAME_EPIC[s_notifyItemID];
   else itemName = NAME_LEGENDARY[s_notifyItemID];
-  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+20, b.origin.y+15,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+20,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void stopNotify(void* data) {
@@ -155,7 +155,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   bitmap_layer_set_bitmap(s_sieveLayer, s_sieveBasic);
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
 
-  s_notifyLayer = layer_create( GRect(window_bounds.origin.x+4, window_bounds.origin.y+2, window_bounds.size.w-4, window_bounds.size.h-20) ); // border 5 top and bottom
+  s_notifyLayer = layer_create( GRect(layerBounds.origin.x+2, layerBounds.origin.y+4, layerBounds.size.w-4, layerBounds.size.h-8) ); // border 5 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
 }
