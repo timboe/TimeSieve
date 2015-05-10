@@ -151,8 +151,8 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
       case COLLECTOR_2_CHANCE: strcpy(upgradeText, "AUTO-Collect +5%"); break;
       case FREQUENCY_1_CHANCE: strcpy(upgradeText, "ITEM Chance +0.5%"); break;
       case FREQUENCY_2_CHANCE: strcpy(upgradeText, "ITEM Chance +3%"); break;
-      case QUALITY_1_CHANCE: strcpy(upgradeText, "ITEM Quality 1%"); break;
-      case QUALITY_2_CHANCE: strcpy(upgradeText, "ITEM Qaulity 2.5%"); break;
+      case QUALITY_1_CHANCE: strcpy(upgradeText,   "ITEM Quality 1%"); break;
+      case QUALITY_2_CHANCE: strcpy(upgradeText,   "ITEM Qaulity 2.5%"); break;
       case WATCHER_TECH: 
         strcpy(upgradeText, "ADDON:");
         setting = getUserSetting(SETTING_ADDON);
