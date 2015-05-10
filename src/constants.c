@@ -209,7 +209,7 @@ const char* const NAME_WATCHER[MAX_UPGRADES] = {
   "Electrician",  // Electrician - light notify 
   "Archaeologist", // WATCHER_QUALITY_1
   "Typographer", // Typogrgrapher - unlock font
-  "Treasure Hunter", // WATCHER_FREQUENCY_2,
+  "Bounty Hunter", // WATCHER_FREQUENCY_2,
   "Drill Operator", // WATCHER_VIB Craftsman - vibrate notify
   "Sniffer Dog", //WATCHER_CHANCE_2
   "Painter", // Painter - unlock theme
