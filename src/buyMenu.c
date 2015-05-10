@@ -145,7 +145,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     uint8_t setting;
     switch (row) {
       case WATCHER_CHANCE_1: strcpy(upgradeText, "AUTO-Collect +1%"); break;
-      case WATCHER_CHANCE_1: strcpy(upgradeText, "AUTO-Collect +5%"); break;
+      case WATCHER_CHANCE_2: strcpy(upgradeText, "AUTO-Collect +5%"); break;
       case WATCHER_FREQUENCY_1: strcpy(upgradeText, "ITEM Chance +0.5%"); break;
       case WATCHER_FREQUENCY_2: strcpy(upgradeText, "ITEM Chance +3%"); break;
       case WATCHER_QUALITY_1: strcpy(upgradeText,   "ITEM Quality 1%"); break;
