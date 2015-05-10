@@ -93,7 +93,7 @@ GColor getSpoogicalColourB() {
 }
 
 GColor getTrasureColour(uint8_t treasureID) {
-  switch (s_treasureID) {
+  switch (treasureID) {
     case COMMON_ID: return COLOUR_COMMON;
     case MAGIC_ID: return COLOUR_MAGIC;
     case RARE_ID: return COLOUR_RARE;

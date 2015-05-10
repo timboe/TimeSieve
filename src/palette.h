@@ -12,3 +12,5 @@ GColor getLiquidTimeHighlightColour();
 
 GColor getSpoogicalColourA();
 GColor getSpoogicalColourB();
+
+GColor getTrasureColour(uint8_t treasureID);

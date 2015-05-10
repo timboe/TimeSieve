@@ -29,8 +29,8 @@ static BitmapLayer* s_sieveLayer;
 static GBitmap* s_sieveBasic;
 
 static Layer* s_notifyLayer;
-static uint8_t s_notifyTreasureID = -1;
-static uint8_t s_notifyItemID;
+static int8_t s_notifyTreasureID = -1;
+static int8_t s_notifyItemID;
 
 // static BitmapLayer *s_convTopLayer;
 
@@ -86,14 +86,20 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 }
 
 static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
-  if (s_layerColor == -1) return; // Nothing to show
+  if (s_notifyTreasureID == -1) return; // Nothing to show
   GRect b = layer_get_bounds(this_layer);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, b, 6, GCornersAll);
   graphics_context_set_stroke_color(ctx, getTrasureColour(s_notifyTreasureID));
-  graphics_fill_rect(ctx, GRect(b.origin.x.+2, b.orogin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
+  graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
   graphics_context_set_stroke_color(ctx, getTrasureColour(s_notifyTreasureID));
-  graphics_fill_rect(ctx, GRect(b.origin.x.+4, b.orogin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
+  graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
+}
+
+void stopNotify(void* data) {
+  if (s_notifyTreasureID == -1) return;
+  s_notifyTreasureID = -1;
+  layer_mark_dirty(s_notifyLayer);
 }
 
 void showNotify(uint8_t treasureID, uint8_t itemID) {
@@ -101,13 +107,6 @@ void showNotify(uint8_t treasureID, uint8_t itemID) {
   s_notifyItemID = itemID;
   app_timer_register(NOTIFY_DISPLAY_TIME, stopNotify, NULL); 
   layer_mark_dirty(s_notifyLayer);
-}
-
-bool stopNotify() {
-  if (s_notifyTreasureID == -1) return false; // Nothing was done
-  s_notifyTreasureID = -1;
-  layer_mark_dirty(s_notifyLayer);
-  return true;
 }
 
 void create_timeSieve_layer(Window* parentWindow) {
