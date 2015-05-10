@@ -30,9 +30,9 @@ static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data
 
 static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return NUM_BUY_MENU_ITEMS; }
 
-static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return 0; }
+static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return MENU_CELL_BASIC_HEADER_HEIGHT; }
 
-static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {}
+static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {menu_cell_basic_header_draw(ctx, cell_layer, "BUY Upgrades");}
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Determine which section we're going to draw in
@@ -44,11 +44,9 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   else                 graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_EVEN);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   if (row == REFINERY_ID) { 
-    menu_cell_basic_draw(ctx, cell_layer, "REFINERY Upgrades", "Get more liquid time", NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "REFINERY", "Get more liquid time", NULL);
   } else if (row == TANK_ID) {
-    menu_cell_basic_draw(ctx, cell_layer, "TANK Upgrades", "Store more liquid time", NULL);
-//  } else if (row == SIEVE_ID) {
-//    menu_cell_basic_draw(ctx, cell_layer, "SIEVE Upgrades", "Find more treasures", NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "TANK", "Store more liquid time", NULL);
   } else if (row == WATCHER_ID) {
     menu_cell_basic_draw(ctx, cell_layer, "WORKERS", "They work for YOU", NULL);
   }
