@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "persistence.h"
 #include "timeStore.h"
-
+#include "resources.h"
 
 // Box is 32x27, ~14 px vert. available
 static const GPathInfo ARROW_DOWN_PATH = {
@@ -118,12 +118,6 @@ static void sell_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 }
 
 static int16_t sell_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { 
-  // switch(cell_index->section) {
-  //   // case STAT_SECTION_ID: return SETTINGS_CELL_HEIGHT; 
-  //   // case CHEVO_SECTION_ID: return 32;
-  //   // case SETTINGS_SECTION_ID: return 44;
-  //   default: return 0;
-  // }
   return MENU_SMALL_CELL_HEIGHT;
 }
 
@@ -137,6 +131,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   // get type
   if (section == 0 && s_sellSections[0] == -1) {
     // just draw a background coloured box and return as there is nothing to sell
+    return;
   }
 
   const int8_t treasureID = s_sellSections[section];
@@ -170,7 +165,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
     else if (row%2==0) backColor = MENU_BACK_PURPLE_EVEN;
     else backColor = MENU_BACK_PURPLE_ODD;
   } else {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "SELL MENU UNKNOWN TREASURE ID");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "SlMnuUnwnTsrId");
   }
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
@@ -248,48 +243,9 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   gpath_draw_outline(ctx, arrow);
 
 
-  graphics_context_set_stroke_color(ctx, GColorBlack);
   // Image placeholder
   GRect imageRect = GRect(3, 4,  22, 36);
-  graphics_draw_rect(ctx, imageRect);
-  
-  // // Text colours
-  // if (selected) graphics_context_set_text_color(ctx, GColorWhite);
-  // else graphics_context_set_text_color(ctx, GColorBlack);
-
-  // // Back color
-  // GColor backColor;
-  // // if      (section == STAT_SECTION_ID && selected   ) backColor = MENU_BACK_YELLOW_SELECT;
-  // // else if (section == STAT_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_YELLOW_EVEN;
-  // // else if (section == STAT_SECTION_ID               ) backColor = MENU_BACK_YELLOW_ODD;
-  // // else if (section == CHEVO_SECTION_ID && selected   ) backColor = MENU_BACK_GREEN_SELECT;
-  // // else if (section == CHEVO_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_GREEN_EVEN;
-  // // else if (section == CHEVO_SECTION_ID               ) backColor = MENU_BACK_GREEN_ODD;
-  // // else if (section == SETTINGS_SECTION_ID && selected   ) backColor = MENU_BACK_BLUE_SELECT;
-  // // else if (section == SETTINGS_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_BLUE_EVEN;
-  // // else if (section == SETTINGS_SECTION_ID               ) backColor = MENU_BACK_BLUE_ODD;
-  // graphics_context_set_fill_color(ctx, backColor);
-  // graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
-
-  // GRect ttlTextRect = GRect(0, 0,  size.w, size.h);
-  // GRect topTextRect = GRect(0, 22, size.w, size.h-22);
-  // GRect botTextRect = GRect(0, 33, size.w, size.h-33);
-
-  // static char titleText[TEXT_BUFFER_SIZE];
-  // static char subText1[TEXT_LARGE_BUFFER_SIZE];
-  // static char subText2[TEXT_BUFFER_SIZE];
-  // strcpy(titleText, "");
-  // strcpy(subText1, "");
-  // strcpy(subText2, "");
-
-  // // ...
-
-  // graphics_draw_text(ctx, titleText, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  // graphics_draw_text(ctx, subText1, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  // graphics_draw_text(ctx, subText2, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-
-  // graphics_context_set_stroke_color(ctx, GColorBlack);
-  // graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
+  graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
 }
 
 static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {

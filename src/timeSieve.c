@@ -4,6 +4,7 @@
 #include "persistence.h"
 #include "items.h"
 #include "palette.h"
+#include "resource.h"
 
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
@@ -88,17 +89,18 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   if (s_notifyTreasureID == -1) return; // Nothing to show
   GRect b = layer_get_bounds(this_layer);
+  // Outer box
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, b, 6, GCornersAll);
   graphics_context_set_fill_color(ctx, getTrasureColour(s_notifyTreasureID));
   graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
-  // Image placeholder
-  graphics_context_set_stroke_color(ctx, GColorBlack);
+  // Image
   graphics_context_set_text_color(ctx, GColorBlack);  
   GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
-  graphics_draw_rect(ctx, imageRect);
+  graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
+  // Text
   graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   const char* itemName = NULL;
   if (s_notifyTreasureID == COMMON_ID) itemName = NAME_COMMON[s_notifyItemID];

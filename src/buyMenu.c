@@ -151,7 +151,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
       case WATCHER_QUALITY_1: strcpy(upgradeText,   "ITEM Quality 1%"); break;
       case WATCHER_QUALITY_2: strcpy(upgradeText,   "ITEM Qaulity 2.5%"); break;
       case WATCHER_TECH: 
-        strcpy(upgradeText, "ADDON:");
+        strcpy(upgradeText, "ADDON: ");
         setting = getUserSetting(SETTING_ADDON);
         if (setting == ADDON_NONE) strcat(upgradeText, "Battery");
         else if (setting == ADDON_BATTERY) strcat(upgradeText, "Month");
@@ -159,13 +159,13 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         else maxLevel = true;
         break;
       case WATCHER_LIGHT:
-        strcpy(upgradeText, "LIGHT on:");
+        strcpy(upgradeText, "LIGHT: ");
         doneNotifyTxt = true;
         // DELIBERATE FALL-TRHOUGH
       case WATCHER_VIBE:
         setting = getUserSetting(SETTING_LIGHT);
         if (doneNotifyTxt == false) {
-          strcpy(upgradeText, "VIBE on:");
+          strcpy(upgradeText, "VIBE: ");
           setting = getUserSetting(SETTING_VIBE);
         } 
         if (setting == NOTIFY_NONE) strcat(upgradeText, "Common+");
@@ -182,7 +182,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         break;
       case WATCHER_COLOUR:
         setting = getUserSetting(SETTING_COLOUR);
-        strcpy(upgradeText, "THEME:");
+        strcpy(upgradeText, "THEME: ");
         if (setting == PALETTE_BLUE) strcat(upgradeText, "Green");
         else if (setting == PALETTE_GREEN) strcat(upgradeText, "Yellow");
         else if (setting == PALETTE_YELLOW) strcat(upgradeText, "Red");
@@ -351,7 +351,6 @@ void buy_window_load(Window* parentWindow) {
 
   // Setup sub-windows that we might want to jump to 
   createSubWin(&s_refinery_window, &s_refinery_context);
-  //createSubWin(&s_sieve_window, &s_sieve_context);
   createSubWin(&s_tank_window, &s_tank_context);
   createSubWin(&s_watcher_window, &s_watcher_context);
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN LOAD");

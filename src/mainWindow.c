@@ -187,12 +187,14 @@ void init_mainWindow() {
   });  
 
   s_settings_window = window_create();
+  window_set_background_color(s_buy_window, MENU_BACK_YELLOW_ODD);
   window_set_window_handlers(s_settings_window, (WindowHandlers) {
     .load = settings_window_load,
     .unload = settings_window_unload
   });  
 
   s_sell_window = window_create();
+  window_set_background_color(s_buy_window, MENU_BACK_RED_ODD);
   window_set_window_handlers(s_sell_window, (WindowHandlers) {
     .load = sell_window_load,
     .unload = sell_window_unload
