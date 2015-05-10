@@ -39,8 +39,8 @@ void clockAnimReset(TimeUnits units_changed) {
     s_spoogeletVx[i] =  sin_lookup(angle)* v / TRIG_MAX_RATIO;
     s_spoogeletVy[i] = -cos_lookup(angle)* v / TRIG_MAX_RATIO;
   }
-  s_attractor.x = 130;//130
-  s_attractor.y = 65;//60
+  s_attractor.x = 110;//130
+  s_attractor.y = 75;//60
 }
 
 bool clockAnimCallback(TimeUnits units_changed) {
