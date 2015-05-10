@@ -4,7 +4,7 @@
 #include "persistence.h"
 #include "items.h"
 #include "palette.h"
-#include "resource.h"
+#include "resources.h"
 
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
