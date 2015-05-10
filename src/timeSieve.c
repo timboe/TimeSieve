@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "persistence.h"
 #include "items.h"
+#include "palette.h"
 
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
@@ -28,7 +29,8 @@ static BitmapLayer* s_sieveLayer;
 static GBitmap* s_sieveBasic;
 
 static Layer* s_notifyLayer;
-static int8_t s_layerColor = -1;
+static uint8_t s_notifyTreasureID = -1;
+static uint8_t s_notifyItemID;
 
 // static BitmapLayer *s_convTopLayer;
 
@@ -63,13 +65,7 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
   
   if (s_treasureOnShow) {
-    switch (s_treasureID) {
-      case COMMON_ID: graphics_context_set_stroke_color(ctx, COLOUR_COMMON); break;
-      case MAGIC_ID: graphics_context_set_stroke_color(ctx, COLOUR_MAGIC); break;
-      case RARE_ID: graphics_context_set_stroke_color(ctx, COLOUR_RARE); break;
-      case EPIC_ID: graphics_context_set_stroke_color(ctx, COLOUR_EPIC); break;
-      case LEGENDARY_ID: graphics_context_set_stroke_color(ctx, COLOUR_LEGENDARY); break;
-    }
+    graphics_context_set_stroke_color(ctx, getTrasureColour(s_treasureID));
     graphics_context_set_stroke_width(ctx, 3);
     graphics_draw_circle(ctx, GPoint(52, 30), 9); 
     graphics_draw_circle(ctx, GPoint(52, 30), 14); 
@@ -91,19 +87,27 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 
 static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   if (s_layerColor == -1) return; // Nothing to show
-  GRect bounds = layer_get_bounds(this_layer);
+  GRect b = layer_get_bounds(this_layer);
   graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_fill_rect(ctx, bounds, 4, GCornersAll);
+  graphics_fill_rect(ctx, b, 6, GCornersAll);
+  graphics_context_set_stroke_color(ctx, getTrasureColour(s_notifyTreasureID));
+  graphics_fill_rect(ctx, GRect(b.origin.x.+2, b.orogin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
+  graphics_context_set_stroke_color(ctx, getTrasureColour(s_notifyTreasureID));
+  graphics_fill_rect(ctx, GRect(b.origin.x.+4, b.orogin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
 }
 
-void showNotify() {
-  s_layerColor = 1;
+void showNotify(uint8_t treasureID, uint8_t itemID) {
+  s_notifyTreasureID = treasureID;
+  s_notifyItemID = itemID;
+  app_timer_register(NOTIFY_DISPLAY_TIME, stopNotify, NULL); 
   layer_mark_dirty(s_notifyLayer);
 }
 
-void stopNotify(const unsigned treasureID, const unsigned itemID) {
-  s_layerColor = -1;
+bool stopNotify() {
+  if (s_notifyTreasureID == -1) return false; // Nothing was done
+  s_notifyTreasureID = -1;
   layer_mark_dirty(s_notifyLayer);
+  return true;
 }
 
 void create_timeSieve_layer(Window* parentWindow) {
@@ -139,7 +143,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   bitmap_layer_set_bitmap(s_sieveLayer, s_sieveBasic);
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
 
-  s_notifyLayer = layer_create( GRect(0, 10, window_bounds.size.w, 30) );
+  s_notifyLayer = layer_create( GRect(0, 10, window_bounds.size.w, 36) ); // border 10 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
 }

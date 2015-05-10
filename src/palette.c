@@ -91,3 +91,14 @@ GColor getSpoogicalColourB() {
   	default: return GColorWhite;
   }
 }
+
+GColor getTrasureColour(uint8_t treasureID) {
+  switch (s_treasureID) {
+    case COMMON_ID: return COLOUR_COMMON;
+    case MAGIC_ID: return COLOUR_MAGIC;
+    case RARE_ID: return COLOUR_RARE;
+    case EPIC_ID: return COLOUR_EPIC;
+    case LEGENDARY_ID: return COLOUR_LEGENDARY;
+    default: return GColorWhite;
+  }
+}
