@@ -30,8 +30,9 @@ void DEVMODE() {
   addItem(MAGIC_ID, 1, 3);
   addItem(MAGIC_ID, 2, 3);
   addItem(MAGIC_ID, 3, 3);
-  //addItem(RARE_ID, 0);
+
   addTime((uint64_t)300);
+  setUserTotalTime(SEC_IN_AGE);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "DEV MODE");
   updateDisplayTime( getUserTime() );
 }

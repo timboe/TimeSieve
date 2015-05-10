@@ -10,17 +10,14 @@ static MenuLayer* s_refinery_layer;
 static MenuLayer* s_tank_layer;
 static MenuLayer* s_watcher_layer;
 
-//static MenuLayer* s_sieve_layer;
 // My sub-windows
 static Window* s_refinery_window;
 static Window* s_tank_window;
 static Window* s_watcher_window;
-//static Window* s_sieve_window;
 
 static int s_refinery_context = REFINERY_ID;
 static int s_tank_context = TANK_ID;
 static int s_watcher_context = WATCHER_ID;
-//static int s_sieve_context = SIEVE_ID;
 
 // Temp buffer
 static char tempBuffer[TEXT_BUFFER_SIZE];
