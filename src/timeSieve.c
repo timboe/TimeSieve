@@ -97,7 +97,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   // Image placeholder
   graphics_context_set_stroke_color(ctx, GColorBlack);
   graphics_context_set_text_color(ctx, GColorBlack);  
-  GRect imageRect = GRect(b.origin.x+10, b.origin.y+5,  22, 36);
+  GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
   graphics_draw_rect(ctx, imageRect);
   graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   const char* itemName = NULL;
