@@ -26,6 +26,9 @@ static bool s_treasureOnShow;
 static int8_t s_treasureID;
 static int8_t s_itemID;
 
+static GPoint s_halo;
+static uint8_t s_haloRings;
+
 static BitmapLayer* s_sieveLayer;
 static GBitmap* s_sieveBasic;
 
@@ -39,6 +42,8 @@ static BitmapLayer* s_notifyBitmapLayer;
 void sieveAnimReset(TimeUnits units_changed) {
   s_sieveTickCount = 0;
   s_treasureFrame.origin.x = 95;
+  s_halo = GPoint(103,30);
+  s_haloRings = 0;
   layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
 }
 
@@ -48,7 +53,10 @@ bool sieveAnimCallback(TimeUnits units_changed) {
 
   if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
   --s_treasureFrame.origin.x;
+  --s_halo.x;
   layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
+  
+  if (s_sieveTickCount % 12 == 0) ++s_haloRings; 
 
   if (++s_sieveTickCount == ANIM_FRAMES) {
     itemCanBeCollected();
@@ -69,11 +77,11 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   if (s_treasureOnShow) {
     graphics_context_set_stroke_color(ctx, getTrasureColour(s_treasureID));
     graphics_context_set_stroke_width(ctx, 3);
-    graphics_draw_circle(ctx, GPoint(52, 30), 9); 
-    graphics_draw_circle(ctx, GPoint(52, 30), 14); 
-    graphics_draw_circle(ctx, GPoint(52, 30), 19); 
-    graphics_draw_circle(ctx, GPoint(52, 30), 24); 
-    graphics_context_set_fill_color(ctx, GColorBlack);
+    uint8_t r = 9;
+    for (uint8_t h = 0; h < s_haloRings; ++h) {
+      graphics_draw_circle(ctx, s_halo, r);
+      r +=5;
+    }
     graphics_fill_rect(ctx, GRect(20, 30, 80, 40), 0, GCornersAll); // Masking box
   }
   
@@ -140,6 +148,9 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_gemRare = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE); 
   s_gemEpic = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC); 
   s_gemLegendary = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY); 
+  
+  // Hide halo
+  s_haloRings = 0;
 
   // Create a layer for the treasure
   s_treasureID = -1;
@@ -182,7 +193,7 @@ void itemCanBeCollected() {
 void displyItem(uint8_t treasureID, uint8_t itemID) {
   s_treasureID = treasureID;
   s_itemID = itemID;
-  // If no animation then pop straight in
+
   switch (treasureID) {
     case COMMON_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemCommon); break;
     case MAGIC_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemMagic); break;
@@ -195,6 +206,8 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
   if ( getUserOpt(OPT_ANIMATE) == false ) {
     s_treasureFrame.origin.x = 45;
     layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
+    s_halo = GPoint(53,30);
+    s_haloRings = 4;
     itemCanBeCollected();
   }
 }

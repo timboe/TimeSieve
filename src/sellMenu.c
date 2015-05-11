@@ -276,12 +276,12 @@ static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_text_color(ctx, GColorBlack);  
   snprintf(soldText, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
   if (s_tankFull) {
-    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,5,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,15,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,30,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,4,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,34,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   } else {
-    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,20,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,6,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   }
 }
 
@@ -356,12 +356,13 @@ void sell_window_load(Window* parentWindow) {
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
   
+  ScrollLayer* sl = menu_layer_get_scroll_layer(s_sell_layer); //TODO try using this!
   s_sellBitmapLayer = bitmap_layer_create( GRect(3, 64,  22, 36) );
   bitmap_layer_set_compositing_mode(s_sellBitmapLayer, GCompOpSet); // W transparencies
   layer_add_child(window_layer, bitmap_layer_get_layer(s_sellBitmapLayer));
   
   // Notify layer goes on top, shows sold items
-  s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 50) ); 
+  s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 55) ); 
   layer_set_update_proc(s_sellNotifyLayer, sellNotifyUpdateProc); 
   layer_add_child(window_layer, s_sellNotifyLayer);
   s_sellTimer = NULL;

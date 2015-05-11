@@ -19,6 +19,8 @@ static int s_refinery_context = REFINERY_ID;
 static int s_tank_context = TANK_ID;
 static int s_watcher_context = WATCHER_ID;
 
+static bool s_selectedMaxLevel;
+
 // Temp buffer
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
@@ -48,7 +50,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   } else if (row == TANK_ID) {
     menu_cell_basic_draw(ctx, cell_layer, "TANK", "Store more liquid time", NULL);
   } else if (row == WATCHER_ID) {
-    menu_cell_basic_draw(ctx, cell_layer, "WORKERS", "They work for YOU", NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "EMPLOYEES", "They work for YOU", NULL);
   }
 }
 
@@ -81,7 +83,6 @@ static uint16_t sub_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t s
   const int context = *((int*)data);
   if (context == REFINERY_ID) return N_REFINERY_UPGRADES;
   else if (context == TANK_ID) return N_TANK_UPGRADES;
-  //else if (context == SIEVE_ID) return N_SIEVE_UPGRADES;
   else if (context == WATCHER_ID) return N_WATCHER_UPGRADES;
   return 0;
 }
@@ -102,7 +103,6 @@ static void sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer
   strcat(s_header, tempBuffer);
   if (context == REFINERY_ID) strcpy(s_title, "REFINARY Upgrades");
   else if (context == TANK_ID) strcpy(s_title, "TANK Upgrades");
-  //else if (context == SIEVE_ID) strcpy(s_title, "SIEVE Upgrades");
   else if (context == WATCHER_ID) strcpy(s_title, "WATCHER Upgrades");
   GRect topTextRect = GRect(2, 0, size.w-2, size.h);
   GRect botTextRect = GRect(2, 14, size.w-2, size.h-14);
@@ -140,7 +140,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     upgradeName = NAME_WATCHER[location];
     reward = REWARD_WATCHER[location];
     bool doneNotifyTxt = false;
-    uint8_t setting;
+    uint8_t owned = getUserOwnsUpgrades(WATCHER_ID, row);
     switch (row) {
       case WATCHER_CHANCE_1: strcpy(upgradeText, "AUTO-Collect +1%"); break;
       case WATCHER_CHANCE_2: strcpy(upgradeText, "AUTO-Collect +5%"); break;
@@ -150,10 +150,9 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
       case WATCHER_QUALITY_2: strcpy(upgradeText,   "ITEM Qaulity 2.5%"); break;
       case WATCHER_TECH: 
         strcpy(upgradeText, "ADDON: ");
-        setting = getUserSetting(SETTING_ADDON);
-        if (setting == ADDON_NONE) strcat(upgradeText, "Battery");
-        else if (setting == ADDON_BATTERY) strcat(upgradeText, "Month");
-        else if (setting == ADDON_MONTH) strcat(upgradeText, "Weather");
+        if (owned == TECH_NONE) strcat(upgradeText, "Battery");
+        else if (owned == TECH_BATTERY) strcat(upgradeText, "Month");
+        else if (owned == TECH_MONTH) strcat(upgradeText, "Weather");
         else maxLevel = true;
         break;
       case WATCHER_LIGHT:
@@ -161,34 +160,32 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         doneNotifyTxt = true;
         // DELIBERATE FALL-TRHOUGH
       case WATCHER_VIBE:
-        setting = getUserSetting(SETTING_LIGHT);
         if (doneNotifyTxt == false) {
           strcpy(upgradeText, "VIBE: ");
-          setting = getUserSetting(SETTING_VIBE);
         } 
-        if (setting == NOTIFY_NONE) strcat(upgradeText, "Common+");
-        else if (setting == NOTIFY_COMMON) strcat(upgradeText, "Magic+");
-        else if (setting == NOTIFY_MAGIC) strcat(upgradeText, "Epic+");
-        else if (setting == NOTIFY_RARE) strcat(upgradeText, "Rare+");
-        else if (setting == NOTIFY_EPIC) strcat(upgradeText, "Legendary");
+        if (owned == NOTIFY_NONE) strcat(upgradeText, "Common+");
+        else if (owned == NOTIFY_COMMON) strcat(upgradeText, "Magic+");
+        else if (owned == NOTIFY_MAGIC) strcat(upgradeText, "Epic+");
+        else if (owned == NOTIFY_RARE) strcat(upgradeText, "Rare+");
+        else if (owned == NOTIFY_EPIC) strcat(upgradeText, "Legendary");
         else maxLevel = true;
         break;
       case WATCHER_FONT:
-        setting = getUserSetting(SETTING_TYPE);
-        if (setting < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "FONT: %i", (int)(setting+1));
+        if (owned < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "FONT: %i", (int)(owned+1));
         else maxLevel = true;
         break;
       case WATCHER_COLOUR:
-        setting = getUserSetting(SETTING_COLOUR);
         strcpy(upgradeText, "THEME: ");
-        if (setting == PALETTE_BLUE) strcat(upgradeText, "Green");
-        else if (setting == PALETTE_GREEN) strcat(upgradeText, "Yellow");
-        else if (setting == PALETTE_YELLOW) strcat(upgradeText, "Red");
+        if (owned == PALETTE_BLUE) strcat(upgradeText, "Green");
+        else if (owned == PALETTE_GREEN) strcat(upgradeText, "Yellow");
+        else if (owned == PALETTE_YELLOW) strcat(upgradeText, "Red");
         else maxLevel = true;
         break;
     }
     if (maxLevel) strcpy(upgradeText, "MAX");
+
   }
+  if (selected) s_selectedMaxLevel = maxLevel;
 
   bool display = false, canAfford = false;
   // Can I afford this? Only display if total time gained playing is greater than the cost
@@ -234,7 +231,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     static char s_header[TEXT_BUFFER_SIZE];
     strcpy(s_header, "COST: ");
     strcat(s_header, tempBuffer);
-    if (maxLevel) strcpy(s_header, "MAX");
+    if (maxLevel) strcpy(s_header, "COST: -");
 
     static char s_owned[TEXT_BUFFER_SIZE];
     snprintf(s_owned, TEXT_BUFFER_SIZE, "OWNED: %i", owned);
@@ -266,6 +263,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
  * User is trying to buy something, trigger the purchase, will only go through if it is affordable
  */
 static void sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  if ( s_selectedMaxLevel == true ) return; // Cannot buy as have maximum
   const int context = *((int*)data);
   const bool result = doPurchase(context, cell_index->row);  
   if (result) updateDisplayTime( getUserTime() );

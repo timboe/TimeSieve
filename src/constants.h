@@ -45,7 +45,6 @@
 #define REFINERY_ID 0
 #define TANK_ID 1
 #define WATCHER_ID 2
-#define SIEVE_ID 3
 
 #define COMMON_ID 0
 #define MAGIC_ID 1
@@ -178,11 +177,11 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define FONT_5 4
 #define FONT_MAX 5
 
-#define ADDON_NONE 0
-#define ADDON_BATTERY 1
-#define ADDON_MONTH 2
-#define ADDON_WEATHER 3
-#define ADDON_MAX 4
+#define TECH_NONE 0
+#define TECH_BATTERY 1
+#define TECH_MONTH 2
+#define TECH_WEATHER 3
+#define TECH_MAX 4
 
 #define NOTIFY_NONE 0
 #define NOTIFY_COMMON 1
@@ -190,6 +189,7 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define NOTIFY_RARE 3
 #define NOTIFY_EPIC 4
 #define NOTIFY_LEGENDARY 5
+#define NOTIFY_MAX 6
 
 #define NUM_BUY_MENU_SECTIONS 1
 #define NUM_BUY_MENU_ITEMS 3
@@ -257,7 +257,7 @@ typedef enum {SETTING_LIGHT,
               SETTING_COLOUR,
               SETTING_ZZZ_START,
               SETTING_ZZZ_END,
-              SETTING_ADDON,
+              SETTING_TECH,
               SET_8,
               SET_9,
               SET_10,

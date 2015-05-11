@@ -9,13 +9,15 @@
 
 #define STAT_SECTION_ID 0
 #define CHEVO_SECTION_ID 1
-#define SETTINGS_SECTION_ID 2
+#define UNLOCK_SECTION_ID 2
+#define SETTINGS_SECTION_ID 3
   
-#define NUM_SETTINGS_MENU_SECTIONS 3
+#define NUM_SETTINGS_MENU_SECTIONS 4
 //
 #define NUM_STAT_ROWS 3
 #define NUM_CHEVO_ROWS 2
-#define NUM_SETTINGS_ROWS 9
+#define NUM_UNLOCK_ROWS 5
+#define NUM_SETTINGS_ROWS 5
 
 #define SETTINGS_CELL_HEIGHT 57
 
@@ -38,6 +40,36 @@ static uint8_t s_buildingDisplay = 0;
 static uint8_t s_itemDisplay = 0;
 static uint8_t s_restartCheck = RESTART_COUNTDOWN;
 
+#define SETTINGS_UPDATEF_ID 0
+#define SETTINGS_ANIMATE_ID 1
+#define SETTINGS_QUIETS_ID 2
+#define SETTINGS_QUIETE_ID 3  
+#define SETTINGS_RESET_ID 4
+
+// Hold unlockable settings and which are currently locked
+#define UNLOCK_TECH_ID 0
+#define UNLOCK_LIGHT_ID 1
+#define UNLOCK_FONT_ID 2
+#define UNLOCK_VIBE_ID 3
+#define UNLOCK_COLOUR_ID 4
+
+static uint8_t s_unlockSetting[NUM_UNLOCK_ROWS];
+static uint8_t s_unlockedTo[NUM_UNLOCK_ROWS]; // How far has the user actually unlocked?
+
+void loadUserSettings() {
+  s_unlockSetting[UNLOCK_TECH_ID]   = getUserSetting(SETTING_TECH);
+  s_unlockSetting[UNLOCK_LIGHT_ID]  = getUserSetting(SETTING_LIGHT);
+  s_unlockSetting[UNLOCK_FONT_ID]   = getUserSetting(SETTING_TYPE);
+  s_unlockSetting[UNLOCK_VIBE_ID]   = getUserSetting(SETTING_VIBE);
+  s_unlockSetting[UNLOCK_COLOUR_ID] = getUserSetting(SETTING_COLOUR);
+  
+  s_unlockedTo[UNLOCK_TECH_ID]   = getUserOwnsUpgrades(WATCHER_ID, WATCHER_TECH);
+  s_unlockedTo[UNLOCK_LIGHT_ID]  = getUserOwnsUpgrades(WATCHER_ID, WATCHER_LIGHT);
+  s_unlockedTo[UNLOCK_FONT_ID]   = getUserOwnsUpgrades(WATCHER_ID, WATCHER_FONT);
+  s_unlockedTo[UNLOCK_VIBE_ID]   = getUserOwnsUpgrades(WATCHER_ID, WATCHER_VIBE);
+  s_unlockedTo[UNLOCK_COLOUR_ID] = getUserOwnsUpgrades(WATCHER_ID, WATCHER_COLOUR);  
+}
+
 /// 
 /// SETTINGS WINDOW CALLBACKS
 ///
@@ -48,6 +80,7 @@ static uint16_t settings_get_num_rows_callback(MenuLayer *menu_layer, uint16_t s
   switch (section_index) {
   	case STAT_SECTION_ID: return NUM_STAT_ROWS;
   	case CHEVO_SECTION_ID: return NUM_CHEVO_ROWS;
+  	case UNLOCK_SECTION_ID: return NUM_UNLOCK_ROWS;
   	case SETTINGS_SECTION_ID: return NUM_SETTINGS_ROWS;
   	default: return 0;
   }
@@ -63,9 +96,12 @@ static void settings_draw_header_callback(GContext* ctx, const Layer *cell_layer
   } else if (section_index == CHEVO_SECTION_ID) {
     strcpy(tempBuffer, "ACHIEVEMENTS");
     graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_ODD);
+  } else if (section_index == UNLOCK_SECTION_ID) {
+    strcpy(tempBuffer, "UNLOCKS");
+    graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_ODD);
   } else if (section_index == SETTINGS_SECTION_ID) {
     strcpy(tempBuffer, "SETTINGS");
-    graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_ODD);
+    graphics_context_set_fill_color(ctx, MENU_BACK_RED_ODD);
   }
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   menu_cell_basic_header_draw(ctx, cell_layer, tempBuffer);
@@ -77,7 +113,7 @@ static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuInde
   switch(cell_index->section) {
     case STAT_SECTION_ID: return SETTINGS_CELL_HEIGHT; 
     case CHEVO_SECTION_ID: return 32;
-    case SETTINGS_SECTION_ID: return 44;
+    case SETTINGS_SECTION_ID: case UNLOCK_SECTION_ID: return 44;
     default: return 0;
   }
 }
@@ -101,9 +137,12 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   else if (section == CHEVO_SECTION_ID && selected   ) backColor = MENU_BACK_GREEN_SELECT;
   else if (section == CHEVO_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_GREEN_EVEN;
   else if (section == CHEVO_SECTION_ID               ) backColor = MENU_BACK_GREEN_ODD;
-  else if (section == SETTINGS_SECTION_ID && selected   ) backColor = MENU_BACK_BLUE_SELECT;
-  else if (section == SETTINGS_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_BLUE_EVEN;
-  else if (section == SETTINGS_SECTION_ID               ) backColor = MENU_BACK_BLUE_ODD;
+  else if (section == UNLOCK_SECTION_ID && selected   ) backColor = MENU_BACK_BLUE_SELECT;
+  else if (section == UNLOCK_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_BLUE_EVEN;
+  else if (section == UNLOCK_SECTION_ID               ) backColor = MENU_BACK_BLUE_ODD;
+  else if (section == SETTINGS_SECTION_ID && selected   ) backColor = MENU_BACK_RED_SELECT;
+  else if (section == SETTINGS_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_RED_EVEN;
+  else if (section == SETTINGS_SECTION_ID               ) backColor = MENU_BACK_RED_ODD;
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
@@ -151,114 +190,107 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
     } else if (row == 2) { // DISPLAY ITEMS
 
-      if (s_itemDisplay == 0) {
-        //graphics_context_set_text_color(ctx, COLOUR_COMMON);
-        strcpy(titleText, "COMMON Items >");
-        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(COMMON_ID) );    
-        strcpy(subText2, "VALUE: TODO");        
-      } else if (s_itemDisplay == 1) {
-        //graphics_context_set_text_color(ctx, COLOUR_MAGIC);
-        strcpy(titleText, "MAGIC Items >");  
-        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(MAGIC_ID) );  
-        strcpy(subText2, "VALUE: TODO");     
-      } else if (s_itemDisplay == 2) {
-        //graphics_context_set_text_color(ctx, COLOUR_RARE);
-        strcpy(titleText, "RARE Items >");        
-        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(RARE_ID) );   
-        strcpy(subText2, "VALUE: TODO");    
-      } else if (s_itemDisplay == 3) {
-        //graphics_context_set_text_color(ctx, COLOUR_EPIC);
-        strcpy(titleText, "EPIC Items >"); 
-        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(EPIC_ID) );    
-        strcpy(subText2, "VALUE: TODO");   
-      } else if (s_itemDisplay == 4) {
-        //graphics_context_set_text_color(ctx, COLOUR_LEGENDARY);
-        strcpy(titleText, "LEGENDARIES >"); 
-        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(LEGENDARY_ID) );  
-        strcpy(subText2, "VALUE: TODO");     
-      }
-      //if (!selected) graphics_context_set_text_color(ctx, GColorBlack);
+      if      (s_itemDisplay == COMMON_ID)    strcpy(titleText, "COMMON Items >");
+      else if (s_itemDisplay == MAGIC_ID)     strcpy(titleText, "MAGIC Items >");  
+      else if (s_itemDisplay == RARE_ID)      strcpy(titleText, "RARE Items >");        
+      else if (s_itemDisplay == EPIC_ID)      strcpy(titleText, "EPIC Items >"); 
+      else if (s_itemDisplay == LEGENDARY_ID) strcpy(titleText, "LEGENDARIES >"); 
+      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(s_itemDisplay) );    
+      strcpy(subText2, "VALUE:");
+      timeToString(currentCategorySellPrice(s_itemDisplay), tempBuffer, TEXT_BUFFER_SIZE, true);
+      strcat(subText2, tempBuffer);
+      if (s_itemDisplay == LEGENDARY_ID) strcpy(subText2, "VALUE: Timeless"); // Cannot sell legendaries 
 
     }
 
   } else if (section == CHEVO_SECTION_ID) {
 
-    if (row == 0) { // DISPLAY LEGENDARY
-      strcpy(titleText, "LEGENDARIES");        
-    } else if (row == 1) { // DISPLAY CHEVO
-      strcpy(titleText, "ACHIEVEMENTS");        
+    if      (row == 0) strcpy(titleText, "LEGENDARIES");        
+    else if (row == 1) strcpy(titleText, "ACHIEVEMENTS");
+
+  } else if (section == UNLOCK_SECTION_ID) {
+
+    const uint8_t setting = s_unlockSetting[row];
+    const uint8_t lock = s_unlockedTo[row];
+    
+    if (row == UNLOCK_TECH_ID) { 
+    
+      strcpy(titleText, "TECH Addons");
+      snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] ", (int)setting+1, TECH_MAX);
+      if      (setting > lock) strcat(subText1, "LOCKED"); 
+      else if (setting == TECH_NONE)    strcat(subText1, "NONE"); 
+      else if (setting == TECH_BATTERY) strcat(subText1, "BATTERY"); 
+      else if (setting == TECH_MONTH)   strcat(subText1, "BATTERY+MONTH"); 
+      else if (setting == TECH_WEATHER) strcat(subText1, "BATTERY+MONTH+WTHR"); 
+    
+    } else if (row == UNLOCK_LIGHT_ID || row == UNLOCK_VIBE_ID) { // Light or vibe on treasure
+    
+      strcpy(titleText, "LIGHT Notify");
+      if (row == UNLOCK_VIBE_ID) strcpy(titleText, "VIBRATE Notify");
+      snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] ", (int)setting+1, NOTIFY_MAX);
+      if      (setting > lock) strcat(subText1, "LOCKED"); 
+      else if (setting == NOTIFY_NONE)      strcat(subText1, "OFF"); 
+      else if (setting == NOTIFY_COMMON)    strcat(subText1, "COMMON+"); 
+      else if (setting == NOTIFY_MAGIC)     strcat(subText1, "MAGIC+"); 
+      else if (setting == NOTIFY_RARE)      strcat(subText1, "RARE+"); 
+      else if (setting == NOTIFY_EPIC)      strcat(subText1, "EPIC+"); 
+      else if (setting == NOTIFY_LEGENDARY) strcat(subText1, "LEGENDARY"); 
+      
+    } else if (row == UNLOCK_FONT_ID) { // Typeface
+    
+      strcpy(titleText, "CLOCK Typeface");
+      snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] ", (int)setting+1, FONT_MAX);
+      if (setting > lock) snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] LOCKED", (int)setting+1, FONT_MAX);
+      else                snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] TYPEFACE %i", (int)setting+1, FONT_MAX, (int)setting+1);
+
+    } else if (row == UNLOCK_COLOUR_ID) { // Vibe on treasure
+     
+      strcpy(titleText, "PALETTE");
+      snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] ", (int)setting+1, PALETTE_MAX);
+      if      (setting > lock) strcat(subText1, "LOCKED"); 
+      else if (setting == PALETTE_BLUE)   strcat(subText1, "BLUE"); 
+      else if (setting == PALETTE_GREEN)  strcat(subText1, "GREEN"); 
+      else if (setting == PALETTE_YELLOW) strcat(subText1, "YELLOW"); 
+      else if (setting == PALETTE_RED)    strcat(subText1, "RED"); 
+      
     }
 
+    
   } else if (section == SETTINGS_SECTION_ID) {
-
-// Color
-// Typeface
-// Animate
-// Seconds
-// Light on treasure
-// Vibe on treasure
-// Quite start
-// Quiet end
-// new game
-
-
-//TODO - many of these should be locked
-    if (row == 0) { // Color
-      strcpy(titleText, "COLOUR Theme"); 
-      const uint8_t setting = getUserSetting(SETTING_COLOUR);
-      if      (setting == PALETTE_BLUE)   strcpy(subText1, "BLUE---"); 
-      else if (setting == PALETTE_GREEN)  strcpy(subText1, "-GREEN--");
-      else if (setting == PALETTE_YELLOW) strcpy(subText1, "--YELLOW-"); 
-      else if (setting == PALETTE_RED)    strcpy(subText1, "---RED"); 
-    } else if (row == 1) { // Typeface
-      strcpy(titleText, "CLOCK Typeface");
-      const uint8_t setting = getUserSetting(SETTING_TYPE);
-      if      (setting == 0) strcpy(subText1, "0----"); 
-      else if (setting == 1) strcpy(subText1, "-1---");
-      else if (setting == 2) strcpy(subText1, "--2--"); 
-      else if (setting == 3) strcpy(subText1, "---3-"); 
-      else if (setting == 4) strcpy(subText1, "----4"); 
-    } else if (row == 2) { // Animate
-      strcpy(titleText, "ANIMATIONS"); 
-      if (getUserOpt(OPT_ANIMATE)) strcpy(subText1, "ON-"); 
-      else strcpy(subText1, "-OFF"); 
-    } else if (row == 3) { // Seconds
+ 
+ 
+    if (row == SETTINGS_UPDATEF_ID) { // Seconds
+    
       strcpy(titleText, "UPDATE Freq.");
-      if (getUserOpt(OPT_SHOW_SECONDS)) strcpy(subText1, "-SECONDS"); 
-      else strcpy(subText1, "MINUTES-");    
-    } else if (row == 4) { // Light on treasure
-      strcpy(titleText, "LIGHT Notify");
-      const uint8_t setting = getUserSetting(SETTING_LIGHT);
-      if      (setting == 0) strcpy(subText1, "OFF-----"); 
-      else if (setting == 1) strcpy(subText1, "-COMMON+----"); 
-      else if (setting == 2) strcpy(subText1, "--MAGIC+---"); 
-      else if (setting == 3) strcpy(subText1, "---RARE+--"); 
-      else if (setting == 4) strcpy(subText1, "----EPIC+-"); 
-      else if (setting == 5) strcpy(subText1, "----LEGENDARY");
-    } else if (row == 5) { // Vibe on treasure
-      strcpy(titleText, "VIBRATE Notify");
-      const uint8_t setting = getUserSetting(SETTING_VIBE);
-      if      (setting == 0) strcpy(subText1, "OFF-----"); 
-      else if (setting == 1) strcpy(subText1, "-COMMON+----"); 
-      else if (setting == 2) strcpy(subText1, "--MAGIC+---"); 
-      else if (setting == 3) strcpy(subText1, "---RARE+--"); 
-      else if (setting == 4) strcpy(subText1, "----EPIC+-"); 
-      else if (setting == 5) strcpy(subText1, "----LEGENDARY");
-    } else if (row == 6) { // Quite start
+      if (getUserOpt(OPT_SHOW_SECONDS)) strcpy(subText1, "1/2] SECONDS"); 
+      else strcpy(subText1, "2/2] MINUTES"); 
+      
+    } else if (row == SETTINGS_ANIMATE_ID) { // Animate
+    
+      strcpy(titleText, "ANIMATIONS"); 
+      if (getUserOpt(OPT_ANIMATE)) strcpy(subText1, "ON"); 
+      else strcpy(subText1, "OFF"); 
+      
+    } else if (row == SETTINGS_QUIETS_ID) { // Quite start
+    
       strcpy(titleText, "QUIET Start");
-      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "Don't notify from %ih", (int)getUserSetting(SETTING_ZZZ_START) );    
-    } else if (row == 7) { // Quiet end
+      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "Don't notify from %ih", (int)getUserSetting(SETTING_ZZZ_START) );  
+        
+    } else if (row == SETTINGS_QUIETE_ID) { // Quiet end
+    
       strcpy(titleText, "QUIET End");
       snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "... until %ih", (int)getUserSetting(SETTING_ZZZ_END) );    
-    } else if (row == 8) { // new game
+      
+    } else if (row == SETTINGS_RESET_ID) { // new game
+    
       strcpy(titleText, "RESET Game!");
       if (s_restartCheck == 8) strcpy(subText1, "Start again?");
       else if (s_restartCheck == 7) strcpy(subText1, "Are you sure?");
       else if (s_restartCheck == 6) strcpy(subText1, "Really really sure??");
-      else if (s_restartCheck > 0) snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "Click %i more times!", (int)s_restartCheck); 
+      else if (s_restartCheck > 0) snprintf(subText1, TEXT_BUFFER_SIZE, "Click %i more times!", (int)s_restartCheck); 
       else if (s_restartCheck == 0) strcpy(subText1, "GAME RESET!");
-    }
-
+      
+    } 
 
   } else {
     return;
@@ -283,30 +315,53 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
     } else if (row == 1) {
       if (++s_buildingDisplay == 4) s_buildingDisplay = 0;
     } else if (row == 2) {
-      if (++s_itemDisplay == 5) s_itemDisplay = 0;
+      // Only show for categories where we have items - no spoils
+      while (++s_itemDisplay < 5 && getUserTotalItems(s_itemDisplay) == 0) {}
+      if (s_itemDisplay == 5) s_itemDisplay = 0;
     }
   
   } else if (section == CHEVO_SECTION_ID) {
 
+  } else if (section == UNLOCK_SECTION_ID) {
+  
+    ++s_unlockSetting[row];
+    const uint8_t lock = s_unlockedTo[row];
+    if (row == UNLOCK_TECH_ID) { 
+    
+      if (s_unlockSetting[row] >= TECH_MAX) s_unlockSetting[row] = 0;
+      if (s_unlockSetting[row] <= lock)     setUserSetting(SETTING_TECH, s_unlockSetting[row]);
+      
+    } else if (row == UNLOCK_LIGHT_ID) {
+    
+      if (s_unlockSetting[row] >= NOTIFY_MAX) s_unlockSetting[row] = 0;
+      if (s_unlockSetting[row] <= lock)       setUserSetting(SETTING_LIGHT, s_unlockSetting[row]);
+    
+    } else if (row == UNLOCK_VIBE_ID) { // Light or vibe on treasure
+    
+      if (s_unlockSetting[row] >= NOTIFY_MAX) s_unlockSetting[row] = 0;
+      if (s_unlockSetting[row] <= lock)       setUserSetting(SETTING_VIBE, s_unlockSetting[row]); 
+      
+    } else if (row == UNLOCK_FONT_ID) { // Typeface
+    
+      if (s_unlockSetting[row] >= FONT_MAX) s_unlockSetting[row] = 0;
+      if (s_unlockSetting[row] <= lock)     setUserSetting(SETTING_TYPE, s_unlockSetting[row]); 
 
+    } else if (row == UNLOCK_COLOUR_ID) { // Vibe on treasure
+     
+      if (s_unlockSetting[row] >= PALETTE_MAX) s_unlockSetting[row] = 0;
+      if (s_unlockSetting[row] <= lock)        setUserSetting(SETTING_COLOUR, s_unlockSetting[row]); 
+
+    }
 
   } else if (section == SETTINGS_SECTION_ID) {
 
-    if (row == 0) { // Color
-      incrementUserSetting(SETTING_COLOUR);
-    } else if (row == 1) { // Typeface
-      incrementUserSetting(SETTING_TYPE);
-    } else if (row == 2) { // Animate
+    if (row == SETTINGS_ANIMATE_ID) { // Animate
       flipUserOpt(OPT_ANIMATE);
-    } else if (row == 3) { // Seconds
+    } else if (row == SETTINGS_UPDATEF_ID) { // Seconds
       flipUserOpt(OPT_SHOW_SECONDS);
-    } else if (row == 4) { // Light on treasure
-      incrementUserSetting(SETTING_LIGHT);
-    } else if (row == 5) { // Vibe on treasure
-      incrementUserSetting(SETTING_VIBE);
-    } else if (row == 6) { // Quite start
+    } else if (row == SETTINGS_QUIETS_ID) { // Quite start
       incrementUserSetting(SETTING_ZZZ_START);
-    } else if (row == 7) { // Quiet end
+    } else if (row == SETTINGS_QUIETE_ID) { // Quiet end
       incrementUserSetting(SETTING_ZZZ_END);
     } else if (row == 8) { // new game
       if (--s_restartCheck == 0) resetUserData();
@@ -396,6 +451,9 @@ void settings_window_load(Window* parentWindow) {
   // Now we prepare to initialize the menu layer
   Layer* window_layer = window_get_root_layer(parentWindow);
   GRect bounds = layer_get_frame(window_layer);
+  
+  // Get the current settings and the list of what is unlocked
+  loadUserSettings();
 
   // Create the menu layer
   s_settings_layer = menu_layer_create(bounds);

@@ -135,15 +135,10 @@ uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
 }
 
 uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID) {
-  if (treasureID == COMMON_ID) {
-    return s_bufferCommonSellPrice[itemID];
-  } else if (treasureID == MAGIC_ID) {
-    return s_bufferMagicSellPrice[itemID];
-  } else if (treasureID == RARE_ID) {
-    return s_bufferRareSellPrice[itemID];
-  } else if (treasureID == EPIC_ID) {
-    return s_bufferEpicSellPrice[itemID];
-  }
+  if (treasureID == COMMON_ID)     return s_bufferCommonSellPrice[itemID];
+  else if (treasureID == MAGIC_ID) return s_bufferMagicSellPrice[itemID];
+  else if (treasureID == RARE_ID)  return s_bufferRareSellPrice[itemID];
+  else if (treasureID == EPIC_ID)  return s_bufferEpicSellPrice[itemID];
   return 0;
 }
 
@@ -151,6 +146,15 @@ void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigne
   uint64_t basePrice = getItemBasePrice(treasureID, itemID);
   uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
   percentageToString(currentPrice, basePrice, buffer, buffer_size, value);
+}
+
+/**
+ * Get the face value for all items of a given category
+ **/
+uint64_t currentCategorySellPrice(const unsigned treasureID) {
+  uint64_t sellPrice = 0;
+  for (uint8_t i = 0; i < MAX_TREASURES; ++i) sellPrice += getCurrentSellPrice(treasureID, i);
+  return sellPrice;
 }
 
 uint64_t getTimePerMin() {
