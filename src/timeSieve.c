@@ -143,7 +143,7 @@ void create_timeSieve_layer(Window* parentWindow) {
 
   // Create a layer for the treasure
   s_treasureID = -1;
-  s_treasureFrame = GRect(93, 18, 20, 20);
+  s_treasureFrame = GRect(88, 18, 20, 20);
   s_treasureLayer = bitmap_layer_create(s_treasureFrame);
   bitmap_layer_set_compositing_mode(s_treasureLayer, GCompOpSet); // W transparencies
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_treasureLayer));
