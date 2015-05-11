@@ -29,6 +29,8 @@ static int8_t s_sellSections[SELLABLE_CATEGORIES] = {-1};
 
 static MenuLayer* s_sell_layer;  
 
+static Layer* s_sellNotifyLayer;
+
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
 void updateSellMenu() {
@@ -248,6 +250,31 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
 }
 
+// Notify popup
+static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
+  GRect b = layer_get_bounds(this_layer);
+  // Outer box
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, b, 6, GCornersAll);
+  graphics_context_set_fill_color(ctx, GColorBlack);
+  graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
+  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
+  // Image
+  //GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
+  //graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
+  // Text
+  //graphics_context_set_text_color(ctx, GColorBlack);  
+  //graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  //const char* itemName = NULL;
+  //if (s_notifyTreasureID == COMMON_ID) itemName = NAME_COMMON[s_notifyItemID];
+  //else if (s_notifyTreasureID == MAGIC_ID) itemName = NAME_MAGIC[s_notifyItemID];
+  //else if (s_notifyTreasureID == RARE_ID) itemName = NAME_RARE[s_notifyItemID];
+  //else if (s_notifyTreasureID == EPIC_ID) itemName = NAME_EPIC[s_notifyItemID];
+  //else itemName = NAME_LEGENDARY[s_notifyItemID];
+  //graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+}
+
 static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   const uint16_t section = cell_index->section;
   const uint16_t row = cell_index->row;
@@ -299,6 +326,11 @@ void sell_window_load(Window* parentWindow) {
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
+  
+  s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 20) ); 
+  layer_set_update_proc(s_sellNotifyLayer, sellNotifyUpdateProc); 
+  layer_add_child(window_layer, s_sellNotifyLayer);
+
 
 
 }
@@ -306,6 +338,7 @@ void sell_window_load(Window* parentWindow) {
 void sell_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SELL WIN DESTROY");
   menu_layer_destroy(s_sell_layer);
+  layer_destroy(s_sellNotifyLayer);
   s_sell_layer = 0;
   free(s_arrowUp);
   free(s_arrowDown);

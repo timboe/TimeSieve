@@ -98,10 +98,10 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
   // Image
-  //graphics_context_set_text_color(ctx, GColorBlack);  
   //GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
   //graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
   // Text
+  graphics_context_set_text_color(ctx, GColorBlack);  
   graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   const char* itemName = NULL;
   if (s_notifyTreasureID == COMMON_ID) itemName = NAME_COMMON[s_notifyItemID];
@@ -147,8 +147,9 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_gemEpic = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC); 
   s_gemLegendary = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY); 
 
+  // Create a layer for the treasure
   s_treasureID = -1;
-  s_treasureFrame = GRect(95, 23, 15, 15);
+  s_treasureFrame = GRect(93, 18, 20, 20);
   s_treasureLayer = bitmap_layer_create(s_treasureFrame);
   bitmap_layer_set_compositing_mode(s_treasureLayer, GCompOpSet); // W transparencies
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_treasureLayer));
