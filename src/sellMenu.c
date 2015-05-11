@@ -37,6 +37,8 @@ static uint8_t s_soldItemID;
 static uint16_t s_soldNumber;
 static bool s_tankFull;
 
+static BitmapLayer* s_sellBitmapLayer;
+
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
 void updateSellMenu() {
@@ -249,7 +251,10 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   // Image placeholder
   //GRect imageRect = GRect(3, 4,  22, 36);
   //graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
-  menu_cell_basic_draw(ctx, cell_layer, "", "", getItemImage(treasureID, itemID)); 
+  //menu_cell_basic_draw(ctx, cell_layer, "", "", getItemImage(treasureID, itemID)); // Did not do transprency
+  GRect frame = layer_get_frame(cell_layer);
+  layer_set_frame( bitmap_layer_get_layer(s_sellBitmapLayer), GRect(frame.origin.x, frame.origin.y, 22, 36) );
+  bitmap_layer_set_bitmap(s_sellBitmapLayer, getItemImage(treasureID, itemID));
 }
 
 // Notify popup
@@ -270,11 +275,11 @@ static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
   snprintf(soldText, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
   if (s_tankFull) {
     graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,5,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,15,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,40,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,15,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,30,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   } else {
     graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,20,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,20,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   }
 }
 
@@ -350,6 +355,11 @@ void sell_window_load(Window* parentWindow) {
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
   
+  s_sellBitmapLayer = bitmap_layer_create( GRect(0, 0,  22, 36) );
+  bitmap_layer_set_compositing_mode(s_sellBitmapLayer, GCompOpSet); // W transparencies
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_sellBitmapLayer));
+  
+  // Notify layer goes on top, shows sold items
   s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 50) ); 
   layer_set_update_proc(s_sellNotifyLayer, sellNotifyUpdateProc); 
   layer_add_child(window_layer, s_sellNotifyLayer);
@@ -361,6 +371,7 @@ void sell_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinULd");
   menu_layer_destroy(s_sell_layer);
   layer_destroy(s_sellNotifyLayer);
+  bitmap_layer_destroy(s_sellBitmapLayer);
   s_sell_layer = 0;
   free(s_arrowUp);
   free(s_arrowDown);
