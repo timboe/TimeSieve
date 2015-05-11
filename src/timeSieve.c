@@ -32,6 +32,7 @@ static GBitmap* s_sieveBasic;
 static Layer* s_notifyLayer;
 static int8_t s_notifyTreasureID = -1;
 static int8_t s_notifyItemID;
+static BitmapLayer* s_notifyBitmapLayer;
 
 // static BitmapLayer *s_convTopLayer;
 
@@ -97,9 +98,9 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
   // Image
-  graphics_context_set_text_color(ctx, GColorBlack);  
-  GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
-  graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
+  //graphics_context_set_text_color(ctx, GColorBlack);  
+  //GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
+  //graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
   // Text
   graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   const char* itemName = NULL;
@@ -114,6 +115,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
 void stopNotify(void* data) {
   if (s_notifyTreasureID == -1) return;
   s_notifyTreasureID = -1;
+  bitmap_layer_set_bitmap(s_notifyBitmapLayer, NULL);
   layer_mark_dirty(s_notifyLayer);
 }
 
@@ -121,6 +123,7 @@ void showNotify(uint8_t treasureID, uint8_t itemID) {
   s_notifyTreasureID = treasureID;
   s_notifyItemID = itemID;
   app_timer_register(NOTIFY_DISPLAY_TIME, stopNotify, NULL); 
+  bitmap_layer_set_bitmap(s_notifyBitmapLayer, getItemImage(s_notifyTreasureID, s_notifyItemID));
   layer_mark_dirty(s_notifyLayer);
 }
 
@@ -160,6 +163,9 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_notifyLayer = layer_create( GRect(4, 4, layerBounds.size.w-8, 48) ); // border 4 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
+  s_notifyBitmapLayer = bitmap_layer_create( GRect(4+10, 4+6,  22, 36) );
+  bitmap_layer_set_compositing_mode(s_notifyBitmapLayer, GCompOpSet); // W transparencies
+  layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_notifyBitmapLayer));
 }
 
 void stopDisplayItem(void* data) {
@@ -209,7 +215,8 @@ bool collectItem(bool autoCollect) {
 void destroy_timeSieve_layer() {
   layer_destroy(s_timeSieveLayer);
   bitmap_layer_destroy(s_treasureLayer);
-
+  bitmap_layer_destroy(s_notifyBitmapLayer);
+  
   gbitmap_destroy(s_convTopBitmap);
   gbitmap_destroy(s_convBotBitmap);
   gbitmap_destroy(s_convCap);
