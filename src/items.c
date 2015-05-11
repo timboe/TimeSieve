@@ -2,9 +2,7 @@
 #include "constants.h"
 #include "timeSieve.h"
 #include "persistence.h"
-
-
-
+#include "timeStore.h"
 
 /*
 #define SCALE_FACTOR 10000
@@ -92,6 +90,25 @@ bool getItemAutoCollect() {
            getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_2), COLLECTOR_2_CHANCE) );
 }
 
+/**
+ * Check how many we could sell at the current price without filling up the tank.
+ * Sell up to that amount
+ **/
+uint16_t sellItem(const unsigned treasureID, const unsigned itemID, bool sellAll) {
+  uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
+  uint16_t toSell = getUserItems(treasureID, itemID);
+  if (sellAll) toSell = 1;
+  uint64_t capacityLeft = getTankCapacity() - getUserTime();
+  uint16_t couldSell = capacityLeft / currentPrice; // Round down is good, no loss of time
+
+  // Don't sell what we cannot store
+  if (toSell > couldSell) toSell = couldSell;
+  if (toSell == 0) return 0;
+  removeItem(treasureID, itemID, toSell);
+  addTime( toSell * currentPrice );
+  updateDisplayTime( getUserTime() );
+  return toSell;
+}
 
 void checkForItem(TimeUnits units_changed) {
 

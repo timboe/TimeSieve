@@ -198,23 +198,7 @@ void removeTime(uint64_t toSubtract) {
   setUserTime( getUserTime() - toSubtract );
 }
 
-/**
- * Check how many we could sell at the current price without filling up the tank.
- * Sell up to that amount
- **/
-uint16_t sellItem(const unsigned treasureID, const unsigned itemID) {
-  uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
-  uint16_t toSell = getUserItems(treasureID, itemID);
-  uint64_t capacityLeft = getTankCapacity() - getUserTime();
-  uint16_t couldSell = capacityLeft / currentPrice; // Round down is good, no loss of time
 
-  // Don't sell what we cannot store
-  if (toSell > couldSell) toSell = couldSell;
-  removeItem(treasureID, itemID, toSell);
-  addTime( toSell * currentPrice );
-  updateDisplayTime( getUserTime() );
-  return toSell;
-}
 
 /**
  * Check that the desired item can be afforded, and buy it if so

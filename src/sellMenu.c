@@ -43,7 +43,6 @@ void updateSellMenu() {
   if (s_sell_layer) layer_mark_dirty(menu_layer_get_layer(s_sell_layer));
 }
 
-
 int8_t getItemIDFromRow(const unsigned treasureID, const uint16_t row) {
   uint8_t hasItems = 0;
   // Find the row'th item
@@ -147,28 +146,24 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   // Find the row'th item
 
   if (itemID == -1) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "FAILED TO FIND ITEM FOR SELL ROW");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "NoItem4SelRow");
     return;
   }
 
   GColor backColor;
-  const char* itemName = NULL;
+  const char* itemName = getItemName(treasureID, itemID);
   if (treasureID == COMMON_ID) {
-    itemName = NAME_COMMON[itemID];
     if (selected) backColor = GColorDarkGray;
     else backColor = GColorLightGray;
   } else if (treasureID == MAGIC_ID) {
-    itemName = NAME_MAGIC[itemID];
     if (selected) backColor = MENU_BACK_GREEN_SELECT;
     else if (row%2==0) backColor = MENU_BACK_GREEN_EVEN;
     else backColor = MENU_BACK_GREEN_ODD;
   } else if (treasureID == RARE_ID) {
-    itemName = NAME_RARE[itemID];
     if (selected) backColor = MENU_BACK_BLUE_SELECT;
     else if (row%2==0) backColor = MENU_BACK_BLUE_EVEN;
     else backColor = MENU_BACK_BLUE_ODD;
   } else if (treasureID == EPIC_ID) {
-    itemName = NAME_EPIC[itemID];
     if (selected) backColor = MENU_BACK_PURPLE_SELECT;
     else if (row%2==0) backColor = MENU_BACK_PURPLE_EVEN;
     else backColor = MENU_BACK_PURPLE_ODD;
@@ -288,10 +283,7 @@ void removeSellNotify(void* data) {
   layer_mark_dirty(s_sellNotifyLayer);
 }
 
-static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  const uint16_t section = cell_index->section;
-  const uint16_t row = cell_index->row;
-
+void doSell(const uint16_t section, const uint16_t row, bool sellAll) {
   // get type
   if (section == 0 && s_sellSections[0] == -1) return;
 
@@ -300,18 +292,27 @@ static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   if (itemID == -1) return;
 
   uint16_t owned = getUserItems(treasureID, itemID);
-  uint16_t sold = sellItem(treasureID, itemID);
+  uint16_t sold = sellItem(treasureID, itemID, sellAll);
   s_soldTreasureID = treasureID;
   s_soldItemID = itemID;
   s_soldNumber = sold;
   s_tankFull = false;
-  if (sold < owned) s_tankFull = true;
+  if ((sellAll && sold < owned) || sold == 0)  s_tankFull = true;
   // Cancel any current timer and set to future
   app_timer_cancel(s_sellTimer);
   s_sellTimer = app_timer_register(SELL_DISPLAY_TIME, removeSellNotify, NULL);
 
   layer_mark_dirty(s_sellNotifyLayer);
+}
+
+static void sell_select_long_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  doSell(cell_index->section, cell_index->row, true); 
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
+}
+
+static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  doSell(cell_index->section, cell_index->row, false);
+  layer_mark_dirty(menu_layer_get_layer(menu_layer));   
 }
 
 /// 
@@ -320,7 +321,7 @@ static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
 
 
 void sell_window_load(Window* parentWindow) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SELL WIN LOAD");
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinLd");
 
   // Now we prepare to initialize the menu layer
   Layer* window_layer = window_get_root_layer(parentWindow);
@@ -343,6 +344,7 @@ void sell_window_load(Window* parentWindow) {
     .draw_header = sell_draw_header_callback,
     .draw_row = sell_draw_row_callback,
     .select_click = sell_select_callback,
+    .select_long_click = sell_select_long_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
@@ -356,7 +358,7 @@ void sell_window_load(Window* parentWindow) {
 }
 
 void sell_window_unload() {
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SELL WIN DESTROY");
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinULd");
   menu_layer_destroy(s_sell_layer);
   layer_destroy(s_sellNotifyLayer);
   s_sell_layer = 0;

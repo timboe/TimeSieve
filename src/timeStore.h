@@ -13,8 +13,6 @@ uint64_t getPriceOfNext(uint64_t priceOfCurrent);
 
 bool doPurchase(const unsigned typeID, const unsigned resourceID);
 
-uint16_t sellItem(const unsigned treasureID, const unsigned itemID);
-
 uint64_t getTimePerMin();
 void updateTimePerMin();
 
