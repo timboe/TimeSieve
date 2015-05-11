@@ -256,7 +256,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   // this did not work
   //GRect frame = layer_get_frame(cell_layer);
   //layer_set_frame( bitmap_layer_get_layer(s_sellBitmapLayer), GRect(frame.origin.x, frame.origin.y, 22, 36) );
-  bitmap_layer_set_bitmap(s_sellBitmapLayer, getItemImage(treasureID, itemID));
+  if (selected) bitmap_layer_set_bitmap(s_sellBitmapLayer, getItemImage(treasureID, itemID));
 }
 
 // Notify popup
@@ -356,7 +356,7 @@ void sell_window_load(Window* parentWindow) {
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
   
-  s_sellBitmapLayer = bitmap_layer_create( GRect(3, 60,  22, 36) );
+  s_sellBitmapLayer = bitmap_layer_create( GRect(3, 64,  22, 36) );
   bitmap_layer_set_compositing_mode(s_sellBitmapLayer, GCompOpSet); // W transparencies
   layer_add_child(window_layer, bitmap_layer_get_layer(s_sellBitmapLayer));
   
