@@ -254,8 +254,8 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   //menu_cell_basic_draw(ctx, cell_layer, "", "", getItemImage(treasureID, itemID)); // Did not do transprency
   
   // this did not work
-  GRect frame = layer_get_frame(cell_layer);
-  layer_set_frame( bitmap_layer_get_layer(s_sellBitmapLayer), GRect(frame.origin.x, frame.origin.y, 22, 36) );
+  //GRect frame = layer_get_frame(cell_layer);
+  //layer_set_frame( bitmap_layer_get_layer(s_sellBitmapLayer), GRect(frame.origin.x, frame.origin.y, 22, 36) );
   bitmap_layer_set_bitmap(s_sellBitmapLayer, getItemImage(treasureID, itemID));
 }
 
@@ -356,9 +356,9 @@ void sell_window_load(Window* parentWindow) {
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
   
-  s_sellBitmapLayer = bitmap_layer_create( GRect(0, 0,  22, 36) ); // del me!
+  s_sellBitmapLayer = bitmap_layer_create( GRect(3, 60,  22, 36) );
   bitmap_layer_set_compositing_mode(s_sellBitmapLayer, GCompOpSet); // W transparencies
-  layer_add_child(menu_layer_get_layer(s_sell_layer), bitmap_layer_get_layer(s_sellBitmapLayer));
+  layer_add_child(window_layer, bitmap_layer_get_layer(s_sellBitmapLayer));
   
   // Notify layer goes on top, shows sold items
   s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 50) ); 
