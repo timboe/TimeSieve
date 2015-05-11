@@ -4,6 +4,7 @@
 #include "persistence.h"
 #include "timeStore.h"
 #include "resources.h"
+#include "items.h"
 
 // Box is 32x27, ~14 px vert. available
 static const GPathInfo ARROW_DOWN_PATH = {
@@ -30,6 +31,11 @@ static int8_t s_sellSections[SELLABLE_CATEGORIES] = {-1};
 static MenuLayer* s_sell_layer;  
 
 static Layer* s_sellNotifyLayer;
+static AppTimer* s_sellTimer;
+static int8_t s_soldTreasureID;
+static int8_t s_soldItemID;
+static uint16_t s_soldNumber;
+static bool s_tankFull;
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
@@ -252,27 +258,34 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 
 // Notify popup
 static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
+  if (s_soldTreasureID == -1) return; // Not being shown
   GRect b = layer_get_bounds(this_layer);
   // Outer box
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, b, 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorBlack);
+  if (s_tankFull) graphics_context_set_fill_color(ctx, GColorRed);
   graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
-  // Image
-  //GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
-  //graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
-  // Text
-  //graphics_context_set_text_color(ctx, GColorBlack);  
-  //graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  //const char* itemName = NULL;
-  //if (s_notifyTreasureID == COMMON_ID) itemName = NAME_COMMON[s_notifyItemID];
-  //else if (s_notifyTreasureID == MAGIC_ID) itemName = NAME_MAGIC[s_notifyItemID];
-  //else if (s_notifyTreasureID == RARE_ID) itemName = NAME_RARE[s_notifyItemID];
-  //else if (s_notifyTreasureID == EPIC_ID) itemName = NAME_EPIC[s_notifyItemID];
-  //else itemName = NAME_LEGENDARY[s_notifyItemID];
-  //graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  
+  static char soldText[TEXT_BUFFER_SIZE];
+  graphics_context_set_text_color(ctx, GColorBlack);  
+  snprintf(soldText, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
+  if (s_tankFull) {
+    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,5,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,30,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  } else {
+    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,20,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  }
+}
+
+void removeSellNotify(void* data) {
+  s_soldTreasureID = -1;
+  s_sellTimer = NULL;
+  layer_mark_dirty(s_sellNotifyLayer);
 }
 
 static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -286,10 +299,18 @@ static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
   int8_t itemID = getItemIDFromRow(treasureID, row);
   if (itemID == -1) return;
 
+  uint16_t owned = getUserItems(treasureID, itemID);
   uint16_t sold = sellItem(treasureID, itemID);
+  s_soldTreasureID = treasureID;
+  s_soldItemID = itemID;
+  s_soldNumber = sold;
+  s_tankFull = false;
+  if (sold < owned) s_tankFull = true;
+  // Cancel any current timer and set to future
+  app_timer_cancel(s_sellTimer);
+  s_sellTimer = app_timer_register(SELL_DISPLAY_TIME, removeSellNotify, NULL);
 
-  // TODO Display info box
-
+  layer_mark_dirty(s_sellNotifyLayer);
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
 
@@ -327,12 +348,11 @@ void sell_window_load(Window* parentWindow) {
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
   
-  s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 20) ); 
+  s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 40) ); 
   layer_set_update_proc(s_sellNotifyLayer, sellNotifyUpdateProc); 
   layer_add_child(window_layer, s_sellNotifyLayer);
-
-
-
+  s_sellTimer = NULL;
+  
 }
 
 void sell_window_unload() {

@@ -87,6 +87,9 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
 }
 
+/**
+ * Show notify layer. Note that image overlay is done by another gbitmap layer to get transparency
+ **/
 static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   if (s_notifyTreasureID == -1) return; // Nothing to show
   GRect b = layer_get_bounds(this_layer);
@@ -97,19 +100,10 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
-  // Image
-  //GRect imageRect = GRect(b.origin.x+10, b.origin.y+6,  22, 36);
-  //graphics_draw_bitmap_in_rect(ctx, getItemImage(s_notifyTreasureID, s_notifyItemID), imageRect);
   // Text
   graphics_context_set_text_color(ctx, GColorBlack);  
   graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  const char* itemName = NULL;
-  if (s_notifyTreasureID == COMMON_ID) itemName = NAME_COMMON[s_notifyItemID];
-  else if (s_notifyTreasureID == MAGIC_ID) itemName = NAME_MAGIC[s_notifyItemID];
-  else if (s_notifyTreasureID == RARE_ID) itemName = NAME_RARE[s_notifyItemID];
-  else if (s_notifyTreasureID == EPIC_ID) itemName = NAME_EPIC[s_notifyItemID];
-  else itemName = NAME_LEGENDARY[s_notifyItemID];
-  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, getItemName(s_notifyTreasureID, s_notifyItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void stopNotify(void* data) {

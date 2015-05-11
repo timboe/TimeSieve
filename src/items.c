@@ -120,3 +120,11 @@ void checkForItem(TimeUnits units_changed) {
 
   displyItem( treasureID, itemID );
 }
+
+const char* getItemName(uint8_t treasureID, uint8_t itemID) {
+  if (treasureID == COMMON_ID) return NAME_COMMON[itemID];
+  else if (treasureID == MAGIC_ID) return NAME_MAGIC[itemID];
+  else if (treasureID == RARE_ID) return NAME_RARE[itemID];
+  else if (treasureID == EPIC_ID) return NAME_EPIC[itemID];
+  else return NAME_LEGENDARY[itemID];
+ }
