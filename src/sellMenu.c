@@ -254,7 +254,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   // Image placeholder
   //GRect imageRect = GRect(3, 4,  22, 36);
   //graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
-  menu_cell_basic_draw(ctx, cell_layer, "", "", getItemImage(treasureID, itemID));
+  menu_cell_basic_draw(ctx, cell_layer, "", "", getItemImage(treasureID, itemID)); 
 }
 
 // Notify popup
