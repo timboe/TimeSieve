@@ -172,8 +172,8 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
       }
     }
     // Remember a setting of zero means no notify - so we need to add one here (as zero is also common item quality)
-    if (!zzzTime && itemFoundQuality >= 0 && light >= itemFoundQuality+1) light_enable_interaction();
-    if (!zzzTime && itemFoundQuality >= 0 && vibe  >= itemFoundQuality+1) vibes_double_pulse(); // THIS IS WRONG, WANT TO PULSE FOR Q+
+    if (light && !zzzTime && itemFoundQuality >= 0 && itemFoundQuality+1 >= light) light_enable_interaction();
+    if (vibe  && !zzzTime && itemFoundQuality >= 0 && itemFoundQuality+1 >= vibe ) vibes_double_pulse();
     if (!zzzTime && achievementEarned >= 0) {
       light_enable_interaction();
       vibes_long_pulse();

@@ -49,7 +49,7 @@ void modulateSellPrices() {
 
     // Prevent from dropping *too* low
     if (s_bufferCommonSellPrice[item] < SELL_PRICE_COMMON[item]/(uint64_t)4) {
-      s_bufferCommonSellPrice[item] += ( (SELL_PRICE_COMMON[item]/(uint64_t)100) * (1+(rand()%6)) );
+      s_bufferCommonSellPrice[item] += ( (SELL_PRICE_COMMON[item]/(uint64_t)100) * (5+(rand()%6)) );
     }
     if (s_bufferMagicSellPrice[item] < SELL_PRICE_MAGIC[item]/(uint64_t)4) {
       s_bufferMagicSellPrice[item] += ( (SELL_PRICE_MAGIC[item]/(uint64_t)100) * (5+(rand()%6)) );
@@ -139,8 +139,6 @@ uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
     currentPrice = s_bufferRefineryPrice[resourceID];
   } else if (typeID == TANK_ID) {
     currentPrice = s_bufferTankPrice[resourceID];
-  //} else if (typeID == SIEVE_ID) {
-  //  currentPrice = s_bufferSievePrice[resourceID];
   } else if (typeID == WATCHER_ID) {
     currentPrice = s_bufferWatcherPrice[resourceID];
   }
@@ -234,8 +232,6 @@ bool doPurchase(const unsigned typeID, const unsigned resourceID) {
   } else if (typeID == TANK_ID) {
     s_bufferTankPrice[resourceID] = cost;
     updateTankCapacity();
-//  } else if (typeID == SIEVE_ID) {
-//    s_bufferSievePrice[resourceID] = cost;
   } else if (typeID == WATCHER_ID) {
     s_bufferWatcherPrice[resourceID] = cost;
   }
@@ -292,7 +288,7 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   int mins = (time % SEC_IN_HOUR) / SEC_IN_MIN;
 
   if (brief && days) {
-    snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im", days, hours, mins);
+    snprintf(buffer, buffer_size, "%id %ih %im", days, hours, mins);
     return;
   }
 
@@ -310,14 +306,14 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   }
 
   // Full
-  if (eons) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs);
-  else if (eras) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs);
-  else if (epochs) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs);
-  else if (ages) snprintf(buffer, TEXT_BUFFER_SIZE, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs);
-  else if (mills) snprintf(buffer, TEXT_BUFFER_SIZE, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs);
-  else if (years) snprintf(buffer, TEXT_BUFFER_SIZE, "%iy %id %ih %im %is", years, days, hours, mins, secs);
-  else if (days) snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im %is", days, hours, mins, secs);
-  else if (hours) snprintf(buffer, TEXT_BUFFER_SIZE, "%ih %im %is", hours, mins, secs);
+  if (eons) snprintf(buffer, buffer_size, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs);
+  else if (eras) snprintf(buffer, buffer_size, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs);
+  else if (epochs) snprintf(buffer, buffer_size, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs);
+  else if (ages) snprintf(buffer, buffer_size, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs);
+  else if (mills) snprintf(buffer, buffer_size, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs);
+  else if (years) snprintf(buffer, buffer_size, "%iy %id %ih %im %is", years, days, hours, mins, secs);
+  else if (days) snprintf(buffer, buffer_size, "%id %ih %im %is", days, hours, mins, secs);
+  else if (hours) snprintf(buffer, buffer_size, "%ih %im %is", hours, mins, secs);
   else if (mins) snprintf(buffer, buffer_size, "%im %is", mins, secs);
   else snprintf(buffer, buffer_size, "%is", secs);
   return;
