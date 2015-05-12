@@ -2,7 +2,7 @@
 #include "timeStore.h"
 #include "constants.h"
 #include "persistence.h"
-  
+
 static uint64_t* s_bufferRefineryPrice;
 static uint64_t* s_bufferTankPrice;
 static uint64_t* s_bufferWatcherPrice;
@@ -42,10 +42,24 @@ uint64_t getItemBasePrice(const unsigned treasureID, const unsigned itemID) {
  */
 void modulateSellPrices() {
   for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
-    s_bufferCommonSellPrice[item] += ( (s_bufferCommonSellPrice[item]/(uint64_t)100) * (-10+(rand()%21)) ); 
-    s_bufferMagicSellPrice[item]  += ( (s_bufferMagicSellPrice[item]/(uint64_t)100)  * (-10+(rand()%21)) ); 
-    s_bufferRareSellPrice[item]   += ( (s_bufferRareSellPrice[item]/(uint64_t)100)   * (-10+(rand()%21)) ); 
-    s_bufferEpicSellPrice[item]   += ( (s_bufferEpicSellPrice[item]/(uint64_t)100)   * (-10+(rand()%21)) ); 
+    s_bufferCommonSellPrice[item] += ( (SELL_PRICE_COMMON[item]/(uint64_t)100) * (-5+(rand()%11)) );
+    s_bufferMagicSellPrice[item]  += ( (SELL_PRICE_MAGIC[item]/(uint64_t)100)  * (-5+(rand()%11)) );
+    s_bufferRareSellPrice[item]   += ( (SELL_PRICE_RARE[item]/(uint64_t)100)   * (-5+(rand()%11)) );
+    s_bufferEpicSellPrice[item]   += ( (SELL_PRICE_EPIC[item]/(uint64_t)100)   * (-5+(rand()%11)) );
+
+    // Prevent from dropping *too* low
+    if (s_bufferCommonSellPrice[item] < SELL_PRICE_COMMON[item]/(uint64_t)4) {
+      s_bufferCommonSellPrice[item] += ( (SELL_PRICE_COMMON[item]/(uint64_t)100) * (1+(rand()%6)) );
+    }
+    if (s_bufferMagicSellPrice[item] < SELL_PRICE_MAGIC[item]/(uint64_t)4) {
+      s_bufferMagicSellPrice[item] += ( (SELL_PRICE_MAGIC[item]/(uint64_t)100) * (5+(rand()%6)) );
+    }
+    if (s_bufferRareSellPrice[item] < SELL_PRICE_RARE[item]/(uint64_t)4) {
+      s_bufferRareSellPrice[item] += ( (SELL_PRICE_RARE[item]/(uint64_t)100) * (5+(rand()%6)) );
+    }
+    if (s_bufferEpicSellPrice[item] < SELL_PRICE_EPIC[item]/(uint64_t)4) {
+      s_bufferEpicSellPrice[item] += ( (SELL_PRICE_EPIC[item]/(uint64_t)100) * (5+(rand()%6)) );
+    }
   }
 }
 
@@ -74,7 +88,7 @@ void initiateSellPrices() {
 }
 
 void init_timeStore() {
-  
+
   s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
   s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
 
@@ -115,7 +129,7 @@ void destroy_timeStore() {
   free( s_bufferCommonSellPrice );
   free( s_bufferMagicSellPrice );
   free( s_bufferRareSellPrice );
-  free( s_bufferEpicSellPrice );  
+  free( s_bufferEpicSellPrice );
 }
 
 
@@ -163,8 +177,8 @@ uint64_t getTimePerMin() {
 
 /**
  * Redo the calculation about how much time we should be making every min
- * and take into acount all bonuses  
- */ 
+ * and take into acount all bonuses
+ */
 void updateTimePerMin() {
   s_timePerMin = 60; // This is the base level
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
@@ -230,60 +244,60 @@ bool doPurchase(const unsigned typeID, const unsigned resourceID) {
 
 
 void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
-  
+
   int eons = time / SEC_IN_EON;
   int eras = (time % SEC_IN_EON) / SEC_IN_ERA;
-  
+
   if (brief && eons) {
     snprintf(buffer, buffer_size, "%iEon %iEra", eons, eras);
     return;
-  }  
-  
+  }
+
   int epochs = (time % SEC_IN_ERA) / SEC_IN_EPOCH;
-  
+
   if (brief && eras) {
     snprintf(buffer, buffer_size, "%iEra %iEpoch", eras, epochs);
     return;
-  }  
-    
+  }
+
   int ages = (time % SEC_IN_EPOCH) / SEC_IN_AGE;
-  
+
   if (brief && epochs) {
     snprintf(buffer, buffer_size, "%iEpoch %iAge", epochs, ages);
     return;
-  }   
-  
+  }
+
   int mills  =  (time % SEC_IN_AGE) / SEC_IN_MILLENIUM;
-  
+
   if (brief && ages) {
     snprintf(buffer, buffer_size, "%iAge %iM", ages, mills);
     return;
-  }  
-  
+  }
+
   int years = (time % SEC_IN_MILLENIUM) / SEC_IN_YEAR;
-  
+
   if (brief && mills) {
     snprintf(buffer, buffer_size, "%iM %iy", mills, years);
     return;
   }
-  
+
   int days  = (time % SEC_IN_YEAR) / SEC_IN_DAY;
   int hours = (time % SEC_IN_DAY) / SEC_IN_HOUR;
-  
+
   if (brief && years) {
     snprintf(buffer, buffer_size, "%iy %id %ih", years, days, hours);
     return;
-  } 
-  
+  }
+
   int mins = (time % SEC_IN_HOUR) / SEC_IN_MIN;
-  
+
   if (brief && days) {
     snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im", days, hours, mins);
     return;
-  } 
-  
+  }
+
   int secs = time % SEC_IN_MIN;
-  
+
   if (brief && hours) {
     snprintf(buffer, buffer_size, "%ih %im %is", hours, mins, secs);
     return;
@@ -293,16 +307,16 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   } else if (brief) {
     snprintf(buffer, buffer_size, "%is", secs);
     return;
-  } 
+  }
 
   // Full
-  if (eons) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs); 
-  else if (eras) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs); 
-  else if (epochs) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs); 
-  else if (ages) snprintf(buffer, TEXT_BUFFER_SIZE, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs); 
-  else if (mills) snprintf(buffer, TEXT_BUFFER_SIZE, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs); 
-  else if (years) snprintf(buffer, TEXT_BUFFER_SIZE, "%iy %id %ih %im %is", years, days, hours, mins, secs); 
-  else if (days) snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im %is", days, hours, mins, secs); 
+  if (eons) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs);
+  else if (eras) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs);
+  else if (epochs) snprintf(buffer, TEXT_BUFFER_SIZE, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs);
+  else if (ages) snprintf(buffer, TEXT_BUFFER_SIZE, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs);
+  else if (mills) snprintf(buffer, TEXT_BUFFER_SIZE, "%iM %iy %id %ih %im %is", mills, years, days, hours, mins, secs);
+  else if (years) snprintf(buffer, TEXT_BUFFER_SIZE, "%iy %id %ih %im %is", years, days, hours, mins, secs);
+  else if (days) snprintf(buffer, TEXT_BUFFER_SIZE, "%id %ih %im %is", days, hours, mins, secs);
   else if (hours) snprintf(buffer, TEXT_BUFFER_SIZE, "%ih %im %is", hours, mins, secs);
   else if (mins) snprintf(buffer, buffer_size, "%im %is", mins, secs);
   else snprintf(buffer, buffer_size, "%is", secs);
@@ -315,4 +329,3 @@ void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bu
   snprintf(buffer, bufferSize, "%i%%", *value);
   return;
 }
-

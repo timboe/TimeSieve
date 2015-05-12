@@ -279,16 +279,13 @@ void sub_window_load(Window* parentWindow) {
   Layer* window_layer = window_get_root_layer(parentWindow);
   const GRect bounds = layer_get_frame(window_layer);
 
-  MenuLayer* new_layer;
+  MenuLayer* new_layer = menu_layer_create(bounds);
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i CREATE", context);
 
-  if (context == REFINERY_ID)     new_layer = s_refinery_layer;
-//  else if (context == SIEVE_ID)   new_layer = s_sieve_layer;
-  else if (context == TANK_ID)    new_layer = s_tank_layer;
-  else if (context == WATCHER_ID) new_layer = s_watcher_layer;
-  // Create the menu layer
-  new_layer = menu_layer_create(bounds);
+  if (context == REFINERY_ID)     s_refinery_layer = new_layer;
+  else if (context == TANK_ID)    s_tank_layer = new_layer;
+  else if (context == WATCHER_ID) s_watcher_layer = new_layer;
   menu_layer_set_callbacks(new_layer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
     .get_num_sections = sub_menu_get_num_sections_callback,
     .get_num_rows = sub_menu_get_num_rows_callback,

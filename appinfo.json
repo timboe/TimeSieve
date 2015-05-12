@@ -8,99 +8,58 @@
     "projectType": "native",
     "resources": {
         "media": [
-            {
-                "file": "fonts/perfect-dos-vga.ttf",
-                "name": "PERFECT_DOS_21",
-                "type": "font"
-            },
-            {
-                "file": "fonts/Bowman.ttf",
-                "name": "FONT_A_31",
-                "type": "font"
-            },
-            {
-              "file": "images/sieveBasic.png",
-              "name": "SIEVE_BASIC",
-              "type": "png"
-            },
-            {
-              "file": "images/gemCommon.png",
-              "name": "GEM_COMMON",
-              "type": "png"
-            },
-            {
-              "file": "images/gemMagic.png",
-              "name": "GEM_MAGIC",
-              "type": "png"
-            },
-            {
-              "file": "images/gemRare.png",
-              "name": "GEM_RARE",
-              "type": "png"
-            },
-            {
-              "file": "images/gemEpic.png",
-              "name": "GEM_EPIC",
-              "type": "png"
-            },
-            {
-              "file": "images/gemLeg.png",
-              "name": "GEM_LEGENDARY",
-              "type": "png"
-            },
-            {
-              "file": "images/convTop.png",
-              "name": "CONV_TOP",
-              "type": "png"
-            },
-            {
-              "file": "images/convBot.png",
-              "name": "CONV_BOT",
-              "type": "png"
-            },
-            {
-              "file": "images/convCap.png",
-              "name": "CONV_CAP",
-              "type": "png"
-            },
-                        
+            { "file": "fonts/perfect-dos-vga.ttf", "name": "PERFECT_DOS_21", "type": "font" },
+            { "file": "fonts/Bowman.ttf", "name": "FONT_A_31", "type": "font" },
+
+            { "file": "images/sieveBasic.png", "name": "SIEVE_BASIC", "type": "png" },
+            
+            { "file": "images/gemCommon.png", "name": "GEM_COMMON", "type": "png" },
+            { "file": "images/gemMagic.png", "name": "GEM_MAGIC", "type": "png" },
+            { "file": "images/gemRare.png", "name": "GEM_RARE", "type": "png" },
+            { "file": "images/gemEpic.png", "name": "GEM_EPIC", "type": "png" },
+            { "file": "images/gemLeg.png", "name": "GEM_LEGENDARY", "type": "png" },
+
+            { "file": "images/convTop.png", "name": "CONV_TOP", "type": "png" },
+            { "file": "images/convBot.png", "name": "CONV_BOT", "type": "png" },
+            { "file": "images/convCap.png", "name": "CONV_CAP", "type": "png" },
+
             { "file": "images/common0.png", "name": "COMMON_0", "type": "png" },
             { "file": "images/common1.png", "name": "COMMON_1", "type": "png" },
             { "file": "images/common2.png", "name": "COMMON_2", "type": "png" },
             { "file": "images/common3.png", "name": "COMMON_3", "type": "png" },
-            
+
             { "file": "images/magic0.png", "name": "MAGIC_0", "type": "png" },
             { "file": "images/magic1.png", "name": "MAGIC_1", "type": "png" },
             { "file": "images/magic2.png", "name": "MAGIC_2", "type": "png" },
             { "file": "images/magic3.png", "name": "MAGIC_3", "type": "png" },
-            
+
             { "file": "images/rare0.png", "name": "RARE_0", "type": "png" },
             { "file": "images/rare1.png", "name": "RARE_1", "type": "png" },
             { "file": "images/rare2.png", "name": "RARE_2", "type": "png" },
             { "file": "images/rare3.png", "name": "RARE_3", "type": "png" },
-            
+
             { "file": "images/epic0.png", "name": "EPIC_0", "type": "png" },
             { "file": "images/epic1.png", "name": "EPIC_1", "type": "png" },
             { "file": "images/epic2.png", "name": "EPIC_2", "type": "png" },
             { "file": "images/epic3.png", "name": "EPIC_3", "type": "png" },
- 
+
             { "file": "images/legendary0.png", "name": "LEGENDARY_0", "type": "png" },
             { "file": "images/legendary1.png", "name": "LEGENDARY_1", "type": "png" },
             { "file": "images/legendary2.png", "name": "LEGENDARY_2", "type": "png" },
-            { "file": "images/legendary3.png", "name": "LEGENDARY_3", "type": "png" },           
+            { "file": "images/legendary3.png", "name": "LEGENDARY_3", "type": "png" },
             { "file": "images/legendary4.png", "name": "LEGENDARY_4", "type": "png" },
             { "file": "images/legendary5.png", "name": "LEGENDARY_5", "type": "png" },
             { "file": "images/legendary6.png", "name": "LEGENDARY_6", "type": "png" },
-            { "file": "images/legendary7.png", "name": "LEGENDARY_7", "type": "png" }, 
+            { "file": "images/legendary7.png", "name": "LEGENDARY_7", "type": "png" },
             { "file": "images/legendary8.png", "name": "LEGENDARY_8", "type": "png" },
             { "file": "images/legendary9.png", "name": "LEGENDARY_9", "type": "png" },
             { "file": "images/legendary10.png", "name": "LEGENDARY_10", "type": "png" },
-            { "file": "images/legendary11.png", "name": "LEGENDARY_11", "type": "png" }, 
+            { "file": "images/legendary11.png", "name": "LEGENDARY_11", "type": "png" },
             { "file": "images/legendary12.png", "name": "LEGENDARY_12", "type": "png" },
             { "file": "images/legendary13.png", "name": "LEGENDARY_13", "type": "png" },
             { "file": "images/legendary14.png", "name": "LEGENDARY_14", "type": "png" },
             { "file": "images/legendary15.png", "name": "LEGENDARY_15", "type": "png" }
-                        
+
         ]
     },
     "sdkVersion": "3",

@@ -42,7 +42,7 @@ static BitmapLayer* s_notifyBitmapLayer;
 void sieveAnimReset(TimeUnits units_changed) {
   s_sieveTickCount = 0;
   s_treasureFrame.origin.x = 95;
-  s_halo = GPoint(103,30);
+  s_halo = GPoint(104,30);
   s_haloRings = 0;
   layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
 }
@@ -55,8 +55,8 @@ bool sieveAnimCallback(TimeUnits units_changed) {
   --s_treasureFrame.origin.x;
   --s_halo.x;
   layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
-  
-  if (s_sieveTickCount % 12 == 0) ++s_haloRings; 
+
+  if (s_sieveTickCount % 14 == 0) ++s_haloRings;
 
   if (++s_sieveTickCount == ANIM_FRAMES) {
     itemCanBeCollected();
@@ -68,23 +68,22 @@ bool sieveAnimCallback(TimeUnits units_changed) {
 
 static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
-  
+
   // Fill back
 
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
-  
-  if (s_treasureOnShow) {
-    graphics_context_set_stroke_color(ctx, getTrasureColour(s_treasureID));
-    graphics_context_set_stroke_width(ctx, 3);
-    uint8_t r = 9;
-    for (uint8_t h = 0; h < s_haloRings; ++h) {
-      graphics_draw_circle(ctx, s_halo, r);
-      r +=5;
-    }
-    graphics_fill_rect(ctx, GRect(20, 30, 80, 40), 0, GCornersAll); // Masking box
+
+  // Halo
+  graphics_context_set_stroke_color(ctx, getTrasureColour(s_treasureID));
+  graphics_context_set_stroke_width(ctx, 3);
+  uint8_t r = 9;
+  for (uint8_t h = 0; h < s_haloRings; ++h) {
+    graphics_draw_circle(ctx, s_halo, r);
+    r +=5;
   }
-  
+  //graphics_fill_rect(ctx, GRect(20, 30, 80, 40), 0, GCornersAll); // Masking box
+
   GRect convBotBound = GRect(0 + s_convOffset, 42, 94, 6);
   graphics_draw_bitmap_in_rect(ctx, s_convBotBitmap, convBotBound);
 
@@ -109,7 +108,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
   // Text
-  graphics_context_set_text_color(ctx, GColorBlack);  
+  graphics_context_set_text_color(ctx, GColorBlack);
   graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   graphics_draw_text(ctx, getItemName(s_notifyTreasureID, s_notifyItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
@@ -124,7 +123,7 @@ void stopNotify(void* data) {
 void showNotify(uint8_t treasureID, uint8_t itemID) {
   s_notifyTreasureID = treasureID;
   s_notifyItemID = itemID;
-  app_timer_register(NOTIFY_DISPLAY_TIME, stopNotify, NULL); 
+  app_timer_register(NOTIFY_DISPLAY_TIME, stopNotify, NULL);
   bitmap_layer_set_bitmap(s_notifyBitmapLayer, getItemImage(s_notifyTreasureID, s_notifyItemID));
   layer_mark_dirty(s_notifyLayer);
 }
@@ -137,18 +136,18 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_timeSieveLayer = layer_create( layerBounds );
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_timeSieveLayer);
-  layer_set_update_proc(s_timeSieveLayer, timeSieve_update_proc); 
+  layer_set_update_proc(s_timeSieveLayer, timeSieve_update_proc);
 
   s_convTopBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_TOP);
   s_convBotBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_BOT);
   s_convCap = gbitmap_create_with_resource(RESOURCE_ID_CONV_CAP);
 
   s_gemCommon = gbitmap_create_with_resource(RESOURCE_ID_GEM_COMMON);
-  s_gemMagic = gbitmap_create_with_resource(RESOURCE_ID_GEM_MAGIC); 
-  s_gemRare = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE); 
-  s_gemEpic = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC); 
-  s_gemLegendary = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY); 
-  
+  s_gemMagic = gbitmap_create_with_resource(RESOURCE_ID_GEM_MAGIC);
+  s_gemRare = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE);
+  s_gemEpic = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC);
+  s_gemLegendary = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY);
+
   // Hide halo
   s_haloRings = 0;
 
@@ -158,7 +157,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_treasureLayer = bitmap_layer_create(s_treasureFrame);
   bitmap_layer_set_compositing_mode(s_treasureLayer, GCompOpSet); // W transparencies
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_treasureLayer));
-  
+
   // Create layer for the tank
   s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
   s_sieveLayer = bitmap_layer_create(GRect(90, 10, 40, 40));
@@ -167,7 +166,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
 
   s_notifyLayer = layer_create( GRect(4, 4, layerBounds.size.w-8, 48) ); // border 4 top and bottom
-  layer_set_update_proc(s_notifyLayer, notifyUpdateProc); 
+  layer_set_update_proc(s_notifyLayer, notifyUpdateProc);
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
   s_notifyBitmapLayer = bitmap_layer_create( GRect(4+10, 4+6,  22, 36) );
   bitmap_layer_set_compositing_mode(s_notifyBitmapLayer, GCompOpSet); // W transparencies
@@ -178,6 +177,7 @@ void stopDisplayItem(void* data) {
   bitmap_layer_set_bitmap(s_treasureLayer, NULL);
   s_treasureOnShow = false;
   s_treasureID = -1;
+  s_haloRings = 0;
 }
 
 void itemCanBeCollected() {
@@ -201,12 +201,12 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
     case EPIC_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemEpic); break;
     case LEGENDARY_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemLegendary); break;
   }
-  
+
   // No animation? pop right in
   if ( getUserOpt(OPT_ANIMATE) == false ) {
     s_treasureFrame.origin.x = 45;
     layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
-    s_halo = GPoint(53,30);
+    s_halo = GPoint(54,30);
     s_haloRings = 4;
     itemCanBeCollected();
   }
@@ -217,6 +217,7 @@ bool collectItem(bool autoCollect) {
   addItem(s_treasureID, s_itemID, 1);
   showNotify(s_treasureID, s_itemID);
   stopDisplayItem(NULL);
+  if (autoCollect == false) vibes_short_pulse();
   return true;
 }
 
@@ -224,11 +225,11 @@ void destroy_timeSieve_layer() {
   layer_destroy(s_timeSieveLayer);
   bitmap_layer_destroy(s_treasureLayer);
   bitmap_layer_destroy(s_notifyBitmapLayer);
-  
+
   gbitmap_destroy(s_convTopBitmap);
   gbitmap_destroy(s_convBotBitmap);
   gbitmap_destroy(s_convCap);
-  
+
   gbitmap_destroy(s_sieveBasic);
 
   gbitmap_destroy(s_gemCommon);

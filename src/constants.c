@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include "constants.h"
-  
+
 const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES] = {
   SEC_IN_MIN,
   3*SEC_IN_MIN,
@@ -54,62 +54,6 @@ const char* const NAME_REFINERY[MAX_UPGRADES] = {
   "",
   "",
   ""};
-
-/*
-const uint64_t INITIAL_PRICE_SIEVE[MAX_UPGRADES] = {
-  SEC_IN_MIN,
-  SEC_IN_MIN*2,
-  SEC_IN_MIN*10,
-  SEC_IN_MIN*60,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  0,
-  0,
-  0};
-
-const uint64_t REWARD_SIEVE[MAX_UPGRADES] = {
-  SEC_IN_MIN,
-  SEC_IN_MIN*2,
-  SEC_IN_MIN*10,
-  SEC_IN_MIN*60,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0};
-
-const char* const NAME_SIEVE[MAX_UPGRADES] = {
-  "Extra Eyes",
-  "SUPGRADE 2",
-  "SUPGRADE 3",
-  "SUPGRADE 4",
-  "SUPGRADE 5",
-  "SUPGRADE 6",
-  "SUPGRADE 7",
-  "SUPGRADE 8",
-  "SUPGRADE 9",
-  "SUPGRADE 10",
-  "SUPGRADE 11",
-  "SUPGRADE 12",
-  "SUPGRADE 13",
-  "SUPGRADE 14",
-  "SUPGRADE 15",
-  "SUPGRADE 16"};
-*/
 
 const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES] = {
   SEC_IN_MIN,
@@ -183,7 +127,7 @@ const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES] = {
   (uint64_t)0,
   (uint64_t)0};
 
-// remember these prices double each time and some are finite
+// remember these prices x10 each time and some are finite
 const uint64_t REWARD_WATCHER[MAX_UPGRADES] = {
   SEC_IN_MIN,
   SEC_IN_MIN*2,
@@ -206,7 +150,7 @@ const char* const NAME_WATCHER[MAX_UPGRADES] = {
   "", // Increase treasure chance
   "Techie", // Techie - unlock extra clock bits
   "Intern Runner",// XXX - WATCHER_CHANCE_1
-  "Electrician",  // Electrician - light notify 
+  "Electrician",  // Electrician - light notify
   "Archaeologist", // WATCHER_QUALITY_1
   "Typographer", // Typogrgrapher - unlock font
   "Bounty Hunter", // WATCHER_FREQUENCY_2,
@@ -214,7 +158,7 @@ const char* const NAME_WATCHER[MAX_UPGRADES] = {
   "Sniffer Dog", //WATCHER_CHANCE_2
   "Painter", // Painter - unlock theme
   "Professor", // WATCHER_QUALITY_2 better treasure
-  "", 
+  "",
   "",
   "",
   "",
@@ -259,7 +203,7 @@ const char* const NAME_MAGIC[MAX_TREASURES] = {
 const char* const NAME_RARE[MAX_TREASURES] = {
   "RARE 1",
   "RARE 2",
-  "5 Bitcoin",
+  "1 Bitcoin",
   "Man's Soul"};
 
 const char* const NAME_EPIC[MAX_TREASURES] = {
@@ -286,4 +230,58 @@ const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "LEG 15",
   "LEG 16"};
 
-  
+const char* const DESC_LEGENDARY[MAX_UNIQUE] = {
+  "DESC 1",
+  "DESC 2",
+  "DESC 3",
+  "DESC 4",
+  "DESC 5",
+  "DESC 6",
+  "DESC 7",
+  "DESC 8",
+  "DESC 9",
+  "DESC 10",
+  "DESC 11",
+  "DESC 12",
+  "DESC 13",
+  "DESC 14",
+  "DESC 15",
+  "DESC 16"};
+
+
+const char* const NAME_ACHIEVEMENT[MAX_UNIQUE] = {
+  "DESC 1",
+  "DESC 2",
+  "DESC 3",
+  "DESC 4",
+  "DESC 5",
+  "DESC 6",
+  "DESC 7",
+  "DESC 8",
+  "DESC 9",
+  "DESC 10",
+  "DESC 11",
+  "DESC 12",
+  "DESC 13",
+  "DESC 14",
+  "DESC 15",
+  "DESC 16"};
+
+
+const char* const DESC_ACHIEVEMENT[MAX_UNIQUE] = {
+  "DESC 1",
+  "DESC 2",
+  "DESC 3",
+  "DESC 4",
+  "DESC 5",
+  "DESC 6",
+  "DESC 7",
+  "DESC 8",
+  "DESC 9",
+  "DESC 10",
+  "DESC 11",
+  "DESC 12",
+  "DESC 13",
+  "DESC 14",
+  "DESC 15",
+  "DESC 16"};

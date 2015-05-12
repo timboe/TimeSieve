@@ -13,7 +13,7 @@
 #define IS_DEBUG 1
 
 // Used in animations
-#define MS_IN_SEC 1000 
+#define MS_IN_SEC 1000
 // DEFINE DIFFERENT TIME PERIODS
 #define SEC_IN_MIN (uint64_t)60
 #define SEC_IN_HOUR (uint64_t)3600
@@ -29,19 +29,19 @@
 #define SEC_IN_ERA (uint64_t)7884000000000000
 // An eon is defined as 1 billion years
 #define SEC_IN_EON (uint64_t)31536000000000000
-// Warning - 584 billion years is the maximum size of uint64_t  
+// Warning - 584 billion years is the maximum size of uint64_t
 
 // DEFINE EXPONENTIAL INCREASE FACTOR, CURRENTLY 7/6 which is ~x1.16
 #define INCREASE_MULTIPLY 7
 #define INCREASE_DIVIDE 6
 // Watchers increase by a constant factor
-#define INCREASE_WATCHER 2
-  
+#define INCREASE_WATCHER 10
+
 #define MAX_UPGRADES 16
 #define MAX_TREASURES 4
 #define MAX_UNIQUE 16
 #define MAX_CHEVOS 16
-  
+
 #define REFINERY_ID 0
 #define TANK_ID 1
 #define WATCHER_ID 2
@@ -58,11 +58,11 @@
 #define TREASURE_DISPLAY_TIME 5000
 #define NOTIFY_DISPLAY_TIME 3000
 #define SELL_DISPLAY_TIME 3000
-  
+
 #define N_REFINERY_UPGRADES 13
 #define N_TANK_UPGRADES 13
 #define N_WATCHER_UPGRADES 11
-  
+
 extern const char* const NAME_REFINERY[MAX_UPGRADES];
 extern const char* const NAME_TANK[MAX_UPGRADES];
 extern const char* const NAME_WATCHER[MAX_UPGRADES];
@@ -97,13 +97,13 @@ typedef enum {WATCHER_FREQUENCY_1,
               W_13,
               W_14,
               W_15,
-              W_16} WATCHER_TYPE; 
-              
+              W_16} WATCHER_TYPE;
+
 // TREASURE SETTINGS
 
 // Prob max is 1million
 #define PROB_MAX 1000000
-// Basic collectors have a 1% chance 
+// Basic collectors have a 1% chance
 #define COLLECTOR_1_CHANCE 10000
 // Advanced collectors have a 5% chance
 #define COLLECTOR_2_CHANCE 50000
@@ -202,10 +202,10 @@ typedef enum {WATCHER_FREQUENCY_1,
 
 #define TEXT_BUFFER_SIZE 32
 #define TEXT_LARGE_BUFFER_SIZE 128
-  
+
 #define TANK_TEXT_V_OFFSET 5
 #define TANK_TEXT_HEIGHT 20
-  
+
 #define CLOCK_TEXT_SIZE 9
 
 // Bits in the liquid
@@ -214,7 +214,7 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define WATERFALL_SPEED 5
 
 // PARTICLE EFFECTS
-#define N_SPOOGELET 30 
+#define N_SPOOGELET 30
 #define SUB_PIXEL 100
 
 #define WIN_SIZE_X 144
@@ -231,7 +231,7 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define ANIM_MAX_V 300
 #define ANIM_FRAMES ANIM_FPS*ANIM_DURATION
 #define ANIM_DELAY MS_IN_SEC/ANIM_FPS
- 
+
 #define N_USER_OPT 16
 typedef enum {OPT_SHOW_SECONDS,
               OPT_ANIMATE,
@@ -248,8 +248,8 @@ typedef enum {OPT_SHOW_SECONDS,
               OPT_13,
               OPT_14,
               OPT_15,
-              OPT_16} USER_OPT;  
-              
+              OPT_16} USER_OPT;
+
 #define N_USER_SETTING 12
 typedef enum {SETTING_LIGHT,
               SETTING_VIBE,
@@ -263,3 +263,20 @@ typedef enum {SETTING_LIGHT,
               SET_10,
               SET_11,
               SET_12} USER_SETTING;
+
+typedef enum {ACHIEVEMENT_1, // hour/min
+              ACHIEVEMENT_2, //year/min
+              ACHIEVEMENT_3, //millenium/min
+              ACHIEVEMENT_4, // store 1 eon
+              ACHIEVEMENT_5,// store 1 day 'saving a rainy day'
+              ACHIEVEMENT_6, //store human civilisation
+              ACHIEVEMENT_7, // pack rat - own 1000 items
+              ACHIEVEMENT_8, // own items valued > 1 age
+              ACHIEVEMENT_9, // 50 tank upgrades
+              ACHIEVEMENT_10, // 200 tank upg
+              ACHIEVEMENT_11, // 1000 tank upg
+              ACHIEVEMENT_12, // 100 ref up
+              ACHIEVEMENT_13, //400 ref up
+              ACHIEVEMENT_14, // 1500 ref up
+              ACHIEVEMENT_15, //?
+              ACHIEVEMENT_16} CHEVOS; //?

@@ -36,8 +36,8 @@ void clockAnimReset(TimeUnits units_changed) {
 
     int32_t angle = rand() % TRIG_MAX_ANGLE;
     int32_t v = ANIM_MIN_V + (rand() % (ANIM_MAX_V-ANIM_MIN_V));
-    s_spoogeletVx[i] =  sin_lookup(angle)* v / TRIG_MAX_RATIO;
-    s_spoogeletVy[i] = -cos_lookup(angle)* v / TRIG_MAX_RATIO;
+    s_spoogeletVx[i] =  sin_lookup(angle) * v / TRIG_MAX_RATIO;
+    s_spoogeletVy[i] = -cos_lookup(angle) * v / TRIG_MAX_RATIO;
   }
   s_attractor.x = 110;//130
   s_attractor.y = 75;//60
@@ -53,10 +53,18 @@ bool clockAnimCallback(TimeUnits units_changed) {
     s_flashMainFace = !s_flashMainFace;
   }
 
+  // Month+ specific animation
+  if ((units_changed & MONTH_UNIT) > 0 && s_clockTickCount % 6 == 0) {
+    colourOverride( rand() % PALETTE_MAX );
+  }
+  
+  if ((units_changed & YEAR_UNIT) > 0 && s_clockTickCount % 8 == 0) {
+    uint8_t bgColourOverride = rand() % PALETTE_MAX;
+    while ( bgColourOverride == getColour() ) bgColourOverride = rand() % PALETTE_MAX;
+    window_set_background_color( layer_get_window(s_clockLayer), getBGFlashColour(bgColourOverride) );
+  }
+  
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
-
-    //s_spoogeletVx[i] = s_spoogeletVx[i] * 21 / 20;
-    //s_spoogeletVy[i] = s_spoogeletVy[i] * 21 / 20;
 
     s_spoogelet[i].x += s_spoogeletVx[i];
     s_spoogelet[i].y += s_spoogeletVy[i];
@@ -78,6 +86,8 @@ bool clockAnimCallback(TimeUnits units_changed) {
 
   if (++s_clockTickCount == ANIM_FRAMES) {
     s_flashMainFace = false;
+    colourOverride( -1 );
+    window_set_background_color( layer_get_window(s_clockLayer), GColorBlack );
     return false;
   } else {
     return true; // Request more frames

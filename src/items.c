@@ -15,17 +15,17 @@ uint32_t FPMultiply(const uint32_t a, const uint32_t b) {
 uint32_t getBinomalProb(const uint16_t nAttempts, const uint32_t chance) {
   // P = 1-(1-chance)^attempts
   if (nAttempts == 0) return 0;
-  
+
   // (1-chance)
   uint32_t c = PROB_MAX - chance;
-  
+
   // C = c^attempts
   --nAttempts; // If attempts is 1 then ^1 so don't need this loop
   uint32_t C = c;
   for (uint8_t a = 0; a < nAttempts; ++a) {
     C = FPMultiply(C, c);
   }
-  
+
   // P = 1 - C
   return PROB_MAX - C;
 }
@@ -42,7 +42,7 @@ bool getChance(uint16_t nTries, int32_t prob) {
  * Get how rare the found item is - this works a bit differently from the other chances
  * which are binomial.
  * Also, as we don't want an early player hitting the jackpot, we set a minimum
- * threshold of all-time-time which must be met per category. 
+ * threshold of all-time-time which must be met per category.
  * This is arbitrary, and is currently set to the value of the 3rd most expensive
  * item in the category
  **/
@@ -76,7 +76,7 @@ bool getItemAppears(TimeUnits units_changed) {
     if (rand() % PROB_MAX < BASE_CHANCE_HOUR) return true;
   } else {
     if (rand() % PROB_MAX < BASE_CHANCE_MIN) return true;
-  } 
+  }
   // No? OK, try w followers
   return ( getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1), FREQUENCY_1_CHANCE) ||
            getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2), FREQUENCY_2_CHANCE) );
@@ -97,7 +97,7 @@ bool getItemAutoCollect() {
 uint16_t sellItem(const unsigned treasureID, const unsigned itemID, bool sellAll) {
   uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
   uint16_t toSell = getUserItems(treasureID, itemID);
-  if (sellAll) toSell = 1;
+  if (sellAll == false) toSell = 1;
   uint64_t capacityLeft = getTankCapacity() - getUserTime();
   uint16_t couldSell = capacityLeft / currentPrice; // Round down is good, no loss of time
 
@@ -110,13 +110,13 @@ uint16_t sellItem(const unsigned treasureID, const unsigned itemID, bool sellAll
   return toSell;
 }
 
-void checkForItem(TimeUnits units_changed) {
+int8_t checkForItem(TimeUnits units_changed) {
 
-  if (getItemAppears(units_changed) == false) return;
+  if (getItemAppears(units_changed) == false) return -1;
 
   uint8_t treasureID = getItemRarity(units_changed);
   uint8_t itemID = rand() % MAX_TREASURES;
-  
+
   // Legendary is 1/MAX_UNIQUE and there must be one we dont have else downgrade to epic
   if (treasureID == LEGENDARY_ID) {
     if (getUserTotalItems(LEGENDARY_ID) == MAX_UNIQUE) {
@@ -136,6 +136,7 @@ void checkForItem(TimeUnits units_changed) {
   }
 
   displyItem( treasureID, itemID );
+  return treasureID;
 }
 
 const char* getItemName(uint8_t treasureID, uint8_t itemID) {

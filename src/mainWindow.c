@@ -9,6 +9,7 @@
 #include "sellMenu.h"
 #include "persistence.h"
 #include "items.h"
+#include "achievement.h"
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed); //rm me later
 
@@ -35,7 +36,7 @@ void animEnd() {
 /**
  * Function executes at 1/FPS while all areas are still requesting more frames.
  * Each anim function is expected to dirty any layers which need redrawing
- */ 
+ */
 void animCallback(void* data) {
   if (s_tankAnimRequest)  s_tankAnimRequest  = tankAnimCallback(s_units_changed);
   if (s_sieveAnimRequest) s_sieveAnimRequest = sieveAnimCallback(s_units_changed);
@@ -88,10 +89,7 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
   } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
   } else if (IS_DEBUG && BUTTON_ID_BACK == button) {
-    //TimeUnits u;
-    //u |= SECOND_UNIT;
-    //u |= MINI
-    tick_handler(NULL, SECOND_UNIT|MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT);
+    tick_handler(NULL, SECOND_UNIT|MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT|YEAR_UNIT);
   }
 }
 
@@ -110,12 +108,24 @@ void tapHandle(AccelData *data, uint32_t num_samples) {
   collectItem(false);
 }
 
+/**
+ * The Tick Handler is called once per second or once per min, depending on the
+ * user's preferences. It is the main instigator of activity.
+ * Here we:
+ * Reward the user with more time
+ * Run the basic market sim to update sell prices
+ * Check to see if the user found an item
+ * Check if any achievements are earned (note does not run if item found)
+ * Check to see if we should notfiy the user about finding an item/chevo
+ * Finally, if animate is true we insitigate the animation routine which is self-
+ * sustaining until all animations have played out
+ **/
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   s_units_changed = units_changed;
-  // ADD USER TIME
 
   if (getUserOpt(OPT_SHOW_SECONDS) == true) { // seconds always pass
     // Update the user time, but only 1/60 of it (we give the remainder on the min mark)
+    APP_LOG(APP_LOG_LEVEL_INFO,"1s");
     addTime( getTimePerMin() / SEC_IN_MIN );
     updateDisplayTime( getUserTime() ); // We don't animate the time if updating every sec
     update_timeTank_layer();
@@ -123,27 +133,52 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   }
 
   if ((units_changed & MINUTE_UNIT) != 0) { // Has 1m passed?
-    APP_LOG(APP_LOG_LEVEL_INFO,"1m CALLED");
+    APP_LOG(APP_LOG_LEVEL_INFO,"1m");
     if (getUserOpt(OPT_SHOW_SECONDS) == true) { // If we are doing per-sec updates then give the modulo remainder time
       addTime( getTimePerMin() % SEC_IN_MIN );
       updateDisplayTime( getUserTime() );
     } else { // Give the whole 1m allowance
       addTime( getTimePerMin() );
-    } 
+    }
   } else {
-    APP_LOG(APP_LOG_LEVEL_INFO,"1m FAILED");
     return; // WARNING - if only 1s has passed we do not run anything below
   }
 
   // Update prices
   modulateSellPrices();
 
-  // Found treasure?
-  checkForItem( units_changed );
+  // Found treasure? -1 for no
+  int8_t itemFoundQuality = checkForItem( units_changed );
 
-  // Earned chevos?
+  // Only get achievements if we did not find treasure? -1 for no
+  int8_t achievementEarned = -1;
+  if (itemFoundQuality == -1) achievementEarned = checkAchievements();
 
-  // Notification
+  // Notify user
+  uint8_t light = getUserSetting(SETTING_LIGHT);
+  uint8_t vibe = getUserSetting(SETTING_VIBE);
+  if ((itemFoundQuality >= 0 || achievementEarned >= 0) && (light > 0 || vibe > 0)) {
+    uint16_t minIntoDay = (tick_time->tm_hour * 60) + tick_time->tm_min;
+    bool zzzTime = false;
+    if ( getUserSetting(SETTING_ZZZ_END) >= getUserSetting(SETTING_ZZZ_START)) {
+      // Case that start and end are within one day
+      if ( minIntoDay > getUserSetting(SETTING_ZZZ_START)*60 && minIntoDay < getUserSetting(SETTING_ZZZ_END)*60) {
+        zzzTime = true;
+      }
+    } else {
+      // Case that start and end are on different days
+      if ( minIntoDay > getUserSetting(SETTING_ZZZ_START)*60 || minIntoDay < getUserSetting(SETTING_ZZZ_END)*60) {
+        zzzTime = true;
+      }
+    }
+    // Remember a setting of zero means no notify - so we need to add one here (as zero is also common item quality)
+    if (!zzzTime && itemFoundQuality >= 0 && light >= itemFoundQuality+1) light_enable_interaction();
+    if (!zzzTime && itemFoundQuality >= 0 && vibe  >= itemFoundQuality+1) vibes_double_pulse(); // THIS IS WRONG, WANT TO PULSE FOR Q+
+    if (!zzzTime && achievementEarned >= 0) {
+      light_enable_interaction();
+      vibes_long_pulse();
+    }
+  }
 
   // Begin animation?
   if (getUserOpt(OPT_ANIMATE) == true) { // do animation?
@@ -152,7 +187,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     animEnd(); // Just redraw
   }
 
-  APP_LOG(APP_LOG_LEVEL_INFO,"Heap used:%i Heap free:%i",heap_bytes_used(), heap_bytes_free());
+  APP_LOG(APP_LOG_LEVEL_INFO,"used:%i free:%i",heap_bytes_used(), heap_bytes_free());
 
 }
 
@@ -177,28 +212,28 @@ void init_mainWindow() {
   window_set_click_config_provider(s_main_window, (ClickConfigProvider) click_config_provider);
   // Get taps to be able to collect items
   accel_tap_service_subscribe( (AccelTapHandler) tapHandle );
-  
+
   // Create the menu windows
   s_buy_window = window_create();
   window_set_background_color(s_buy_window, MENU_BACK_GREEN_ODD);
   window_set_window_handlers(s_buy_window, (WindowHandlers) {
     .load = buy_window_load,
     .unload = buy_window_unload
-  });  
+  });
 
   s_settings_window = window_create();
   window_set_background_color(s_buy_window, MENU_BACK_YELLOW_ODD);
   window_set_window_handlers(s_settings_window, (WindowHandlers) {
     .load = settings_window_load,
     .unload = settings_window_unload
-  });  
+  });
 
   s_sell_window = window_create();
   window_set_background_color(s_buy_window, MENU_BACK_RED_ODD);
   window_set_window_handlers(s_sell_window, (WindowHandlers) {
     .load = sell_window_load,
     .unload = sell_window_unload
-  });  
+  });
 
   if (s_main_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "MainWin FAIL!");
   if (s_buy_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "BuyWin FAIL!");

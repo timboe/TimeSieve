@@ -14,3 +14,7 @@ GColor getSpoogicalColourA();
 GColor getSpoogicalColourB();
 
 GColor getTrasureColour(uint8_t treasureID);
+GColor getBGFlashColour(uint8_t colourID);
+
+void colourOverride(int8_t palette);
+uint8_t getColour();
