@@ -18,10 +18,46 @@ static uint64_t s_timeCapacity;
 
 #define INITIAL_PRICE_MODULATION 5
 
+/**
+ * Get most significant bit location 2^N
+ * @see safeAdd()
+ **/
+size_t highestOneBitPosition(uint64_t a) {
+    size_t bits=0;
+    while (a!=0) {
+        ++bits;
+        a>>=1;
+    };
+    return bits;
+}
+
+/**
+ * Thanks http://stackoverflow.com/questions/199333/how-to-detect-integer-overflow-in-c-c
+ * While it may seem crazy that an unsigned 64 bit integer with over 631 billion year
+ * capacity (while retaining second precision) could overflow - I know idle game players...
+ *
+ * If we are within a factor two of 'the end' - we jump there, no messing about.
+ * TODO: Behind the scenes, game extension via bit-shift?
+ **/
+uint64_t safeAdd(uint64_t a, uint64_t b) {
+  size_t a_bits=highestOneBitPosition(a), b_bits=highestOneBitPosition(b);
+  if (a_bits<64 && b_bits<64) return (a+b);
+  return ULLONG_MAX;
+}
+
+/**
+ * @see safeAdd()
+ **/
+uint64_t safeMultiply(uint64_t a, uint64_t b) {
+  size_t a_bits=highestOneBitPosition(a), b_bits=highestOneBitPosition(b);
+  if (a_bits+b_bits<=64) return (a*b);
+  return ULLONG_MAX;
+}
+
 // Perform fixed point increase in price by floor of 7/6.
 uint64_t getPriceOfNext(uint64_t priceOfCurrent) {
-  priceOfCurrent *= INCREASE_MULTIPLY;
-  return priceOfCurrent / INCREASE_DIVIDE;
+  priceOfCurrent /= INCREASE_DIVIDE;
+  return safeMultiply(priceOfCurrent, INCREASE_MULTIPLY);
 }
 
 uint64_t getItemBasePrice(const unsigned treasureID, const unsigned itemID) {
@@ -91,7 +127,6 @@ void init_timeStore() {
 
   s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
   s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-
   s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
 
   // Populate the buffer. This could take a little time, do it at the start
@@ -110,7 +145,7 @@ void init_timeStore() {
     // Note watchers increase a lot more, a factor 2 here
     nOwned = getUserOwnsUpgrades(WATCHER_ID, upgrade);
     currentPrice = INITIAL_PRICE_WATCHER[upgrade];
-    for (unsigned i = 0; i < nOwned; ++i) currentPrice *= INCREASE_WATCHER;
+    for (unsigned i = 0; i < nOwned; ++i) currentPrice = safeMultiply(currentPrice, INCREASE_WATCHER);
     s_bufferWatcherPrice[upgrade] = currentPrice;
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FBufr");
@@ -161,12 +196,20 @@ void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigne
 }
 
 /**
- * Get the face value for all items of a given category
+ * Get the face value for all items of a given category. Won't overflow
  **/
 uint64_t currentCategorySellPrice(const unsigned treasureID) {
   uint64_t sellPrice = 0;
   for (uint8_t i = 0; i < MAX_TREASURES; ++i) sellPrice += getCurrentSellPrice(treasureID, i);
   return sellPrice;
+}
+
+uint64_t currentTotalSellPrice() {
+  uint64_t tot = 0;
+  for (uint8_t c = 0; c < SELLABLE_CATEGORIES; ++c) {
+    tot = safeAdd(tot,currentCategorySellPrice(c));
+  }
+  return tot;
 }
 
 uint64_t getTimePerMin() {
@@ -175,8 +218,8 @@ uint64_t getTimePerMin() {
 
 /**
  * Redo the calculation about how much time we should be making every min
- * and take into acount all bonuses
- */
+ * and take into acount all bonuses. Won't overflow
+ **/
 void updateTimePerMin() {
   s_timePerMin = 60; // This is the base level
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
@@ -188,10 +231,13 @@ uint64_t getTankCapacity() {
   return s_timeCapacity;
 }
 
+/**
+ * Total capacity, *COULD OVERFLOW*, devote extra preventative CPU againsts this
+ **/
 void updateTankCapacity() {
   s_timeCapacity = SEC_IN_HOUR; // Base level
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    s_timeCapacity += getUserOwnsUpgrades(TANK_ID, upgrade) * REWARD_TANK[upgrade];
+    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( getUserOwnsUpgrades(TANK_ID, upgrade), REWARD_TANK[upgrade]) );
   }
 }
 
@@ -203,18 +249,21 @@ void updateDisplayTime(uint64_t t) {
   s_displayTime = t;
 }
 
+/**
+ * Update the user's time while respecting their tank size
+ **/
 void addTime(uint64_t toAdd) {
-  if ( getUserTime() + toAdd > getTankCapacity() ) toAdd = getTankCapacity() - getUserTime();
-  setUserTime( getUserTime() + toAdd );
-  setUserTotalTime( getUserTotalTime() + toAdd );
+  setUserTime( safeAdd( getUserTime(), toAdd) );
+  if ( getUserTime() > getTankCapacity() ) setUserTime( getTankCapacity() );
 }
 
+/**
+ * Remove time from user, prevent underflow
+ **/
 void removeTime(uint64_t toSubtract) {
   if (toSubtract > getUserTime()) toSubtract = getUserTime();
   setUserTime( getUserTime() - toSubtract );
 }
-
-
 
 /**
  * Check that the desired item can be afforded, and buy it if so
@@ -243,6 +292,9 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
 
   int eons = time / SEC_IN_EON;
   int eras = (time % SEC_IN_EON) / SEC_IN_ERA;
+
+  // 0_o
+  if (brief && time == ULLONG_MAX) snprintf(buffer, buffer_size, "%iEon: MAX!!!", eons);
 
   if (brief && eons) {
     snprintf(buffer, buffer_size, "%iEon %iEra", eons, eras);
@@ -306,7 +358,8 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   }
 
   // Full
-  if (eons) snprintf(buffer, buffer_size, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs);
+  if (time == ULLONG_MAX) snprintf(buffer, buffer_size, "MAX!:%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs);
+  else if (eons) snprintf(buffer, buffer_size, "%iEon %iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eons, eras, epochs, ages, mills, years, days, hours, mins, secs);
   else if (eras) snprintf(buffer, buffer_size, "%iEra %iEpoch %iAge %iM %iy %id %ih %im %is", eras, epochs, ages, mills, years, days, hours, mins, secs);
   else if (epochs) snprintf(buffer, buffer_size, "%iEpoch %iAge %iM %iy %id %ih %im %is", epochs, ages, mills, years, days, hours, mins, secs);
   else if (ages) snprintf(buffer, buffer_size, "%iAge %iM %iy %id %ih %im %is", ages, mills, years, days, hours, mins, secs);

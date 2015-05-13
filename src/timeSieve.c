@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include <limits.h> // ULLONG_MAX
 #include "timeSieve.h"
 #include "constants.h"
 #include "persistence.h"
@@ -36,8 +37,6 @@ static Layer* s_notifyLayer;
 static int8_t s_notifyTreasureID = -1;
 static int8_t s_notifyItemID;
 static BitmapLayer* s_notifyBitmapLayer;
-
-// static BitmapLayer *s_convTopLayer;
 
 void sieveAnimReset(TimeUnits units_changed) {
   s_sieveTickCount = 0;

@@ -5,7 +5,7 @@
 #include "timeStore.h"
 #include "mainWindow.h"
 
-static struct userData_v1* s_userData;  
+static struct userData_v1* s_userData;
 
 /**
  * Customisable list of things to give for testing.
@@ -52,7 +52,7 @@ void resetUserData() {
   setUserOpt(OPT_ANIMATE, true);
   initSettings();
 }
-  
+
 void init_persistence() {
 
   // Check if first load
@@ -173,6 +173,14 @@ uint16_t getUserTotalItems(const unsigned treasureID) {
     }
   }
   return count;
+}
+
+uint16_t getUserGrandTotalItems() {
+  uint16_t tot = 0;
+  for (uint8_t cat = 0; cat < ITEM_CATEGORIES; ++cat) {
+    tot += getUserTotalItems(cat);
+  }
+  return tot;
 }
 
 /**

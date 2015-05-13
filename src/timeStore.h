@@ -1,8 +1,8 @@
 #pragma once
 #include <pebble.h>
-#include "constants.h"  
-  
-void init_timeStore(); 
+#include "constants.h"
+
+void init_timeStore();
 void destroy_timeStore();
 
 void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief);
@@ -23,6 +23,7 @@ void modulateSellPrices();
 uint64_t getCurrentSellPrice();
 void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigned* value, const unsigned treasureID, const unsigned itemID);
 uint64_t currentCategorySellPrice(const unsigned treasureID);
+uint64_t currentTotalSellPrice();
 
 void addTime(uint64_t toAdd);
 void removeTime(uint64_t toSubtract);

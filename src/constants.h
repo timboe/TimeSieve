@@ -55,7 +55,7 @@
 #define SELLABLE_CATEGORIES 4
 #define ITEM_CATEGORIES 5
 
-#define TREASURE_DISPLAY_TIME 5000
+#define TREASURE_DISPLAY_TIME 50000
 #define NOTIFY_DISPLAY_TIME 3000
 #define SELL_DISPLAY_TIME 3000
 
@@ -264,19 +264,19 @@ typedef enum {SETTING_LIGHT,
               SET_11,
               SET_12} USER_SETTING;
 
-typedef enum {ACHIEVEMENT_1, // hour/min
-              ACHIEVEMENT_2, //year/min
-              ACHIEVEMENT_3, //millenium/min
-              ACHIEVEMENT_4, // store 1 eon
-              ACHIEVEMENT_5,// store 1 day 'saving a rainy day'
-              ACHIEVEMENT_6, //store human civilisation
-              ACHIEVEMENT_7, // pack rat - own 1000 items
-              ACHIEVEMENT_8, // own items valued > 1 age
-              ACHIEVEMENT_9, // 50 tank upgrades
-              ACHIEVEMENT_10, // 200 tank upg
-              ACHIEVEMENT_11, // 1000 tank upg
-              ACHIEVEMENT_12, // 100 ref up
-              ACHIEVEMENT_13, //400 ref up
-              ACHIEVEMENT_14, // 1500 ref up
-              ACHIEVEMENT_15, //?
-              ACHIEVEMENT_16} CHEVOS; //?
+typedef enum {ACHIEVEMENT_INCOME_1, // On The Hour, Every Minute
+              ACHIEVEMENT_INCOME_2, //In The Blink of an Eye (civilisation/min)
+              ACHIEVEMENT_TANK_1, // Saving a Rainy Day
+              ACHIEVEMENT_TANK_2,// Age In The Bank [needs better]
+              ACHIEVEMENT_PACK_RAT, // Pack Rat
+              ACHIEVEMENT_ITEM_VALUE, // Estimed Collector
+              ACHIEVEMENT_TANKUP_1, // Moar Capacatah' ()
+              ACHIEVEMENT_TANKUP_2, // Time, All The Way Down
+              ACHIEVEMENT_REFINARYUP_1, // Smoggy
+              ACHIEVEMENT_REFINARYUP_2, // Blighted Landscapes
+              ACHIEVEMENT_WORKERS_1, // Unionize
+              ACHIEVEMENT_WORKERS_2, // Bells and Whistles
+              ACHIEVEMENT_13, //?
+              ACHIEVEMENT_14, //?
+              ACHIEVEMENT_FULL_TANK, //?
+              ACHIEVEMENT_FULL_HISTORY} CHEVOS; //?
