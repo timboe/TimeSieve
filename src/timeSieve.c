@@ -20,9 +20,9 @@ static GBitmap* s_gemMagic;
 static GBitmap* s_gemRare;
 static GBitmap* s_gemEpic;
 static GBitmap* s_gemLegendary;
+static GBitmap* s_gem = NULL;
 
-static BitmapLayer* s_treasureLayer;
-static GRect s_treasureFrame;
+static GRect s_treasureRect;
 static bool s_treasureOnShow;
 static int8_t s_treasureID;
 static int8_t s_itemID;
@@ -30,20 +30,19 @@ static int8_t s_itemID;
 static GPoint s_halo;
 static uint8_t s_haloRings;
 
-static BitmapLayer* s_sieveLayer;
 static GBitmap* s_sieveBasic;
 
 static Layer* s_notifyLayer;
 static int8_t s_notifyTreasureID = -1;
+static int8_t s_notifyAchievementID = -1;
 static int8_t s_notifyItemID;
 static BitmapLayer* s_notifyBitmapLayer;
 
 void sieveAnimReset(TimeUnits units_changed) {
   s_sieveTickCount = 0;
-  s_treasureFrame.origin.x = 95;
+  s_treasureRect = GRect(94, 18, 20, 20);
   s_halo = GPoint(104,30);
   s_haloRings = 0;
-  layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
 }
 
 bool sieveAnimCallback(TimeUnits units_changed) {
@@ -51,9 +50,8 @@ bool sieveAnimCallback(TimeUnits units_changed) {
   if (s_treasureID == -1) return false;
 
   if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
-  --s_treasureFrame.origin.x;
+  --s_treasureRect.origin.x;
   --s_halo.x;
-  layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
 
   if (s_sieveTickCount % 14 == 0) ++s_haloRings;
 
@@ -91,38 +89,66 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 
   GRect convCapBound = GRect(0, 30, 11, 18);
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
+
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+  graphics_draw_bitmap_in_rect(ctx, s_gem, s_treasureRect);
+  graphics_draw_bitmap_in_rect(ctx, s_sieveBasic, GRect(90, 10, 40, 40));
 }
 
 /**
  * Show notify layer. Note that image overlay is done by another gbitmap layer to get transparency
  **/
 static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
-  if (s_notifyTreasureID == -1) return; // Nothing to show
+  if (s_notifyTreasureID == -1 && s_notifyAchievementID == -1) return; // Nothing to show
+  GColor border = GColorBlack;
+  static char notifyTxtTop[12]; // Just needs to fit largers of these two below
+  const char* notifyTxtBot;
+  if (s_notifyTreasureID >= 0) {
+    border = getTrasureColour(s_notifyTreasureID);
+    strcpy(notifyTxtTop, "Treasure!");
+    notifyTxtBot = getItemName(s_notifyTreasureID, s_notifyItemID);
+  } else {
+    strcpy(notifyTxtTop, "Achievement!");
+    notifyTxtBot = NAME_ACHIEVEMENT[s_notifyAchievementID];
+  }
   GRect b = layer_get_bounds(this_layer);
   // Outer box
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, b, 6, GCornersAll);
-  graphics_context_set_fill_color(ctx, getTrasureColour(s_notifyTreasureID));
+  graphics_context_set_fill_color(ctx, border);
   graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
   // Text
   graphics_context_set_text_color(ctx, GColorBlack);
-  graphics_draw_text(ctx, "Treasure!", fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_draw_text(ctx, getItemName(s_notifyTreasureID, s_notifyItemID), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, notifyTxtTop, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, notifyTxtBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
-void stopNotify(void* data) {
-  if (s_notifyTreasureID == -1) return;
+bool stopNotify() {
+  if (s_notifyTreasureID == -1 && s_notifyAchievementID == -1) return false;
   s_notifyTreasureID = -1;
+  s_notifyAchievementID = -1;
   bitmap_layer_set_bitmap(s_notifyBitmapLayer, NULL);
+  layer_mark_dirty(s_notifyLayer);
+  return true;
+}
+
+void stopNotifyCallback(void* data) {
+  stopNotify();
+}
+
+void showNotifyAchievement(uint8_t notifyAchievementID) {
+  s_notifyAchievementID = notifyAchievementID;
+  app_timer_register(NOTIFY_ACHIEVEMENT_DISPLAY_TIME, stopNotifyCallback, NULL);
+  //bitmap_layer_set_bitmap(s_notifyBitmapLayer, getItemImage(s_notifyTreasureID, s_notifyItemID));
   layer_mark_dirty(s_notifyLayer);
 }
 
-void showNotify(uint8_t treasureID, uint8_t itemID) {
+void showNotifyTreasure(uint8_t treasureID, uint8_t itemID) {
   s_notifyTreasureID = treasureID;
   s_notifyItemID = itemID;
-  app_timer_register(NOTIFY_DISPLAY_TIME, stopNotify, NULL);
+  app_timer_register(NOTIFY_TREASURE_DISPLAY_TIME, stopNotifyCallback, NULL);
   bitmap_layer_set_bitmap(s_notifyBitmapLayer, getItemImage(s_notifyTreasureID, s_notifyItemID));
   layer_mark_dirty(s_notifyLayer);
 }
@@ -146,23 +172,14 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_gemRare = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE);
   s_gemEpic = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC);
   s_gemLegendary = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY);
+  s_gem = s_gemCommon;
 
   // Hide halo
   s_haloRings = 0;
-
-  // Create a layer for the treasure
   s_treasureID = -1;
-  s_treasureFrame = GRect(88, 18, 20, 20);
-  s_treasureLayer = bitmap_layer_create(s_treasureFrame);
-  bitmap_layer_set_compositing_mode(s_treasureLayer, GCompOpSet); // W transparencies
-  layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_treasureLayer));
 
   // Create layer for the tank
   s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
-  s_sieveLayer = bitmap_layer_create(GRect(90, 10, 40, 40));
-  bitmap_layer_set_compositing_mode(s_sieveLayer, GCompOpSet); // W transparencies
-  bitmap_layer_set_bitmap(s_sieveLayer, s_sieveBasic);
-  layer_add_child(s_timeSieveLayer, bitmap_layer_get_layer(s_sieveLayer));
 
   s_notifyLayer = layer_create( GRect(4, 4, layerBounds.size.w-8, 48) ); // border 4 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc);
@@ -173,7 +190,7 @@ void create_timeSieve_layer(Window* parentWindow) {
 }
 
 void stopDisplayItem(void* data) {
-  bitmap_layer_set_bitmap(s_treasureLayer, NULL);
+  s_treasureRect = GRect(94, 18, 20, 20);
   s_treasureOnShow = false;
   s_treasureID = -1;
   s_haloRings = 0;
@@ -194,17 +211,16 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
   s_itemID = itemID;
 
   switch (treasureID) {
-    case COMMON_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemCommon); break;
-    case MAGIC_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemMagic); break;
-    case RARE_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemRare); break;
-    case EPIC_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemEpic); break;
-    case LEGENDARY_ID: bitmap_layer_set_bitmap(s_treasureLayer, s_gemLegendary); break;
+    case COMMON_ID: s_gem = s_gemCommon; break;
+    case MAGIC_ID: s_gem = s_gemMagic; break;
+    case RARE_ID: s_gem = s_gemRare; break;
+    case EPIC_ID: s_gem = s_gemEpic; break;
+    case LEGENDARY_ID: s_gem = s_gemLegendary; break;
   }
 
   // No animation? pop right in
   if ( getUserOpt(OPT_ANIMATE) == false ) {
-    s_treasureFrame.origin.x = 45;
-    layer_set_frame( bitmap_layer_get_layer(s_treasureLayer), s_treasureFrame );
+    s_treasureRect.origin.x = 45;
     s_halo = GPoint(54,30);
     s_haloRings = 4;
     itemCanBeCollected();
@@ -214,7 +230,7 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
 bool collectItem(bool autoCollect) {
   if (s_treasureOnShow == false) return false;
   addItem(s_treasureID, s_itemID, 1);
-  showNotify(s_treasureID, s_itemID);
+  showNotifyTreasure(s_treasureID, s_itemID);
   stopDisplayItem(NULL);
   if (autoCollect == false) vibes_short_pulse();
   return true;
@@ -222,7 +238,6 @@ bool collectItem(bool autoCollect) {
 
 void destroy_timeSieve_layer() {
   layer_destroy(s_timeSieveLayer);
-  bitmap_layer_destroy(s_treasureLayer);
   bitmap_layer_destroy(s_notifyBitmapLayer);
 
   gbitmap_destroy(s_convTopBitmap);

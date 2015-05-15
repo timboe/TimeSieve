@@ -47,15 +47,19 @@ void updateSellMenu() {
 
 int8_t getItemIDFromRow(const unsigned treasureID, const uint16_t row) {
   uint8_t hasItems = 0;
+  uint8_t max = MAX_TREASURES;
+  if (treasureID == LEGENDARY_ID) max = MAX_UNIQUE;
   // Find the row'th item
-  for (uint8_t itemID = 0; itemID < MAX_TREASURES; ++itemID) {
-    if (getUserItems(treasureID, itemID) > 0) {
-      if (hasItems == row) {
-        return itemID;
-      } else {
-        ++hasItems;
-      }
-    }
+  for (uint8_t itemID = 0; itemID < max; ++itemID) {
+    if (getUserItems(treasureID, itemID) > 0 && hasItems++ == row) return itemID;
+  }
+  return -1;
+}
+
+int8_t getAchievementIDFromRow(const uint16_t row) {
+  uint8_t hasChevos = 0;
+  for (uint8_t chevoID = 0; chevoID < MAX_CHEVOS; ++chevoID) {
+    if (getUserChevo(chevoID) && hasChevos++ == row) return chevoID;
   }
   return -1;
 }
@@ -249,14 +253,9 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 
 
   // Image placeholder
-  //GRect imageRect = GRect(3, 4,  22, 36);
-  //graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
-  //menu_cell_basic_draw(ctx, cell_layer, "", "", getItemImage(treasureID, itemID)); // Did not do transprency
-
-  // this did not work
-  //GRect frame = layer_get_frame(cell_layer);
-  //layer_set_frame( bitmap_layer_get_layer(s_sellBitmapLayer), GRect(frame.origin.x, frame.origin.y, 22, 36) );
-  if (selected) bitmap_layer_set_bitmap(s_sellBitmapLayer, getItemImage(treasureID, itemID));
+  GRect imageRect = GRect(3, 4,  22, 36);
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+  graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
 }
 
 // Notify popup

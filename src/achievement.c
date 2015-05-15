@@ -5,6 +5,7 @@
 #include "persistence.h"
 #include "constants.h"
 #include "timeStore.h"
+#include "timeSieve.h"
 
 //
 // ACHIEVEMENT_INCOME_1, // On The Hour, Every Minute
@@ -82,6 +83,9 @@ int8_t checkAchievementsInternal() {
  **/
  int8_t checkAchievements() {
   int8_t result = checkAchievementsInternal();
-  if (result > -1) setUserChevo(result, true);
+  if (result > -1) {
+    setUserChevo(result, true);
+    showNotifyAchievement(result);
+  }
   return result;
 }

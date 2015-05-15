@@ -56,7 +56,8 @@
 #define ITEM_CATEGORIES 5
 
 #define TREASURE_DISPLAY_TIME 50000
-#define NOTIFY_DISPLAY_TIME 3000
+#define NOTIFY_TREASURE_DISPLAY_TIME 3000
+#define NOTIFY_ACHIEVEMENT_DISPLAY_TIME 50000
 #define SELL_DISPLAY_TIME 3000
 
 #define N_REFINERY_UPGRADES 13
@@ -71,6 +72,10 @@ extern const char* const NAME_MAGIC[MAX_TREASURES];
 extern const char* const NAME_RARE[MAX_TREASURES];
 extern const char* const NAME_EPIC[MAX_TREASURES];
 extern const char* const NAME_LEGENDARY[MAX_UNIQUE];
+extern const char* const DESC_LEGENDARY[MAX_UNIQUE];
+extern const char* const NAME_ACHIEVEMENT[MAX_CHEVOS];
+extern const char* const DESC_ACHIEVEMENT[MAX_CHEVOS];
+
 extern const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
 extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
@@ -235,7 +240,7 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define N_USER_OPT 16
 typedef enum {OPT_SHOW_SECONDS,
               OPT_ANIMATE,
-              OPT_3,
+              OPT_CELSIUS,
               OPT_4,
               OPT_5,
               OPT_6,

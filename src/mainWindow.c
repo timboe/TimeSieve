@@ -63,7 +63,6 @@ void animBegin() {
 
 // Main window initialisation
 void main_window_load(Window *window) {
-
   create_timeSieve_layer(window);
   create_clock_layer(window);
   create_timeTank_layer(window);
@@ -80,11 +79,13 @@ void main_window_unload(Window *window) {
 void main_window_single_click_handler(ClickRecognizerRef recognizer, void *context) {
   ButtonId button = click_recognizer_get_button_id(recognizer);
 
-   if (BUTTON_ID_UP == button) {
+  // collectItem takes if this is an auto-collect. As this is button-based the answer is no
+  if (collectItem(false) == true) return; // First see if there is an item to collect
+  if (stopNotify() == true) return; // Second see if there is a notify window to dismiss
+
+  if (BUTTON_ID_UP == button) {
     window_stack_push(s_buy_window, true);
   } else if (BUTTON_ID_SELECT == button) {
-    // collectItem takes if this is an auto-collect. As this is button-based the answer is no
-    if (collectItem(false) == true) return; // First see if there is an item to collect
     window_stack_push(s_settings_window, true);
   } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
@@ -105,7 +106,17 @@ void click_config_provider(Window *window) {
  * Called on every tap. We only use this to collect items manually (the passed false)
  **/
 void tapHandle(AccelData *data, uint32_t num_samples) {
-  collectItem(false);
+  if (collectItem(false) == true) return; // First see if there is an item to collect
+  if (stopNotify() == true) return; // Second see if there is a notify window to dismiss
+}
+
+void doSecond() {
+  // Update the user time, but only 1/60 of it (we give the remainder on the min mark)
+  APP_LOG(APP_LOG_LEVEL_INFO,"1s");
+  addTime( getTimePerMin() / SEC_IN_MIN );
+  updateDisplayTime( getUserTime() ); // We don't animate the time if updating every sec
+  update_timeTank_layer();
+  updateClockLayer();
 }
 
 /**
@@ -121,27 +132,16 @@ void tapHandle(AccelData *data, uint32_t num_samples) {
  * sustaining until all animations have played out
  **/
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  if (getUserOpt(OPT_SHOW_SECONDS) == true) doSecond();
+
+  if ((units_changed & MINUTE_UNIT) == 0) return; // If only 1s
+
   s_units_changed = units_changed;
-
-  if (getUserOpt(OPT_SHOW_SECONDS) == true) { // seconds always pass
-    // Update the user time, but only 1/60 of it (we give the remainder on the min mark)
-    APP_LOG(APP_LOG_LEVEL_INFO,"1s");
-    addTime( getTimePerMin() / SEC_IN_MIN );
-    updateDisplayTime( getUserTime() ); // We don't animate the time if updating every sec
-    update_timeTank_layer();
-    updateClockLayer();
-  }
-
-  if ((units_changed & MINUTE_UNIT) != 0) { // Has 1m passed?
-    APP_LOG(APP_LOG_LEVEL_INFO,"1m");
-    if (getUserOpt(OPT_SHOW_SECONDS) == true) { // If we are doing per-sec updates then give the modulo remainder time
-      addTime( getTimePerMin() % SEC_IN_MIN );
-      updateDisplayTime( getUserTime() );
-    } else { // Give the whole 1m allowance
-      addTime( getTimePerMin() );
-    }
-  } else {
-    return; // WARNING - if only 1s has passed we do not run anything below
+  APP_LOG(APP_LOG_LEVEL_INFO,"1m");
+  if (getUserOpt(OPT_SHOW_SECONDS) == true) { // If we are doing per-sec updates then give the modulo remainder time
+    addTime( getTimePerMin() % SEC_IN_MIN );
+  } else { // Give the whole 1m allowance
+    addTime( getTimePerMin() );
   }
 
   // Update prices
@@ -158,23 +158,23 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   uint8_t light = getUserSetting(SETTING_LIGHT);
   uint8_t vibe = getUserSetting(SETTING_VIBE);
   if ((itemFoundQuality >= 0 || achievementEarned >= 0) && (light > 0 || vibe > 0)) {
-    uint16_t minIntoDay = (tick_time->tm_hour * 60) + tick_time->tm_min;
+    uint16_t minsOfDay = (tick_time->tm_hour * 60) + tick_time->tm_min;
     bool zzzTime = false;
     if ( getUserSetting(SETTING_ZZZ_END) >= getUserSetting(SETTING_ZZZ_START)) {
       // Case that start and end are within one day
-      if ( minIntoDay > getUserSetting(SETTING_ZZZ_START)*60 && minIntoDay < getUserSetting(SETTING_ZZZ_END)*60) {
+      if ( minsOfDay > getUserSetting(SETTING_ZZZ_START)*60 && minsOfDay < getUserSetting(SETTING_ZZZ_END)*60) {
         zzzTime = true;
       }
     } else {
       // Case that start and end are on different days
-      if ( minIntoDay > getUserSetting(SETTING_ZZZ_START)*60 || minIntoDay < getUserSetting(SETTING_ZZZ_END)*60) {
+      if ( minsOfDay > getUserSetting(SETTING_ZZZ_START)*60 || minsOfDay < getUserSetting(SETTING_ZZZ_END)*60) {
         zzzTime = true;
       }
     }
     // Remember a setting of zero means no notify - so we need to add one here (as zero is also common item quality)
-    if (light && !zzzTime && itemFoundQuality >= 0 && itemFoundQuality+1 >= light) light_enable_interaction();
-    if (vibe  && !zzzTime && itemFoundQuality >= 0 && itemFoundQuality+1 >= vibe ) vibes_double_pulse();
-    if (!zzzTime && achievementEarned >= 0) {
+    if (light > 0 && !zzzTime && itemFoundQuality+1 >= light) light_enable_interaction();
+    if (vibe  > 0 && !zzzTime && itemFoundQuality+1 >= vibe ) vibes_double_pulse();
+    if (!zzzTime && achievementEarned >= 0) { // No settings to control these ones, but they're rare
       light_enable_interaction();
       vibes_long_pulse();
     }

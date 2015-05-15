@@ -249,7 +249,7 @@ const char* const DESC_LEGENDARY[MAX_UNIQUE] = {
   "DESC 16"};
 
 
-const char* const NAME_ACHIEVEMENT[MAX_UNIQUE] = {
+const char* const NAME_ACHIEVEMENT[MAX_CHEVOS] = {
   "DESC 1",
   "DESC 2",
   "DESC 3",
@@ -268,7 +268,7 @@ const char* const NAME_ACHIEVEMENT[MAX_UNIQUE] = {
   "DESC 16"};
 
 
-const char* const DESC_ACHIEVEMENT[MAX_UNIQUE] = {
+const char* const DESC_ACHIEVEMENT[MAX_CHEVOS] = {
   "DESC 1",
   "DESC 2",
   "DESC 3",
