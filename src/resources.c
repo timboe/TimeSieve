@@ -35,7 +35,7 @@ void init_resources() {
   s_clock          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_A_31));
   s_clockSmall     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_A_18));
 
-  s_weatherFont    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_18));
+  s_weatherFont    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_21));
 
   s_commonItem[0] = gbitmap_create_with_resource(RESOURCE_ID_COMMON_0);
   s_commonItem[1] = gbitmap_create_with_resource(RESOURCE_ID_COMMON_1);
