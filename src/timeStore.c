@@ -377,6 +377,7 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
 
 void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bufferSize, unsigned* value) {
   *value = (amount*100) / total;
-  snprintf(buffer, bufferSize, "%i%%", *value);
+  unsigned remain = (amount*100) % total;
+  snprintf(buffer, bufferSize, "%i.%i%%", *value, remain);
   return;
 }
