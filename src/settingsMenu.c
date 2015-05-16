@@ -221,7 +221,10 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     const uint8_t setting = s_unlockSetting[row];
     const uint8_t lock = s_unlockedTo[row];
 
-    if (row == UNLOCK_TECH_ID) {
+    if (lock == 0) { // not unlocked... at all
+      strcpy(titleText, "??????");
+      strcat(subText1, "?/?] ????");
+    } else if (row == UNLOCK_TECH_ID) {
 
       strcpy(titleText, "TECH Addons");
       snprintf(subText1, TEXT_BUFFER_SIZE, "%i/%i] ", (int)setting+1, TECH_MAX);
