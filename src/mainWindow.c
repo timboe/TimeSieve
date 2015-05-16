@@ -133,6 +133,7 @@ void doSecond() {
  **/
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if (getUserOpt(OPT_SHOW_SECONDS) == true) doSecond();
+  updateTimeBuffer();
 
   if ((units_changed & MINUTE_UNIT) == 0) return; // If only 1s
 

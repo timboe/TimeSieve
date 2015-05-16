@@ -1,12 +1,13 @@
 #include <pebble.h>
 #include <clock.h>
-#include <resources.h> 
-#include <constants.h> 
-#include <palette.h> 
-#include <persistence.h> 
+#include <resources.h>
+#include <constants.h>
+#include <palette.h>
+#include <persistence.h>
 
 static Layer* s_clockLayer;
 static char s_timeBuffer[CLOCK_TEXT_SIZE];
+static BatteryChargeState s_battery;
 
 static GPoint s_spoogelet[N_SPOOGELET];
 static int16_t s_spoogeletVx[N_SPOOGELET];
@@ -57,13 +58,13 @@ bool clockAnimCallback(TimeUnits units_changed) {
   if ((units_changed & MONTH_UNIT) > 0 && s_clockTickCount % 6 == 0) {
     colourOverride( rand() % PALETTE_MAX );
   }
-  
+
   if ((units_changed & YEAR_UNIT) > 0 && s_clockTickCount % 8 == 0) {
     uint8_t bgColourOverride = rand() % PALETTE_MAX;
     while ( bgColourOverride == getColour() ) bgColourOverride = rand() % PALETTE_MAX;
     window_set_background_color( layer_get_window(s_clockLayer), getBGFlashColour(bgColourOverride) );
   }
-  
+
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
 
     s_spoogelet[i].x += s_spoogeletVx[i];
@@ -104,14 +105,14 @@ void drawClock(GContext *ctx, GRect loc) {
   loc.origin.y += s_clockPixelOffset; // UL
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
-  graphics_context_set_text_color(ctx, getTextColourC()); 
+  graphics_context_set_text_color(ctx, getTextColourC());
   loc.origin.x += s_clockPixelOffset; // CU
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   loc.origin.x += s_clockPixelOffset; // RU
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
 
-  graphics_context_set_text_color(ctx, getTextColourR()); 
+  graphics_context_set_text_color(ctx, getTextColourR());
   loc.origin.y -= s_clockPixelOffset; // CR
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   loc.origin.y -= s_clockPixelOffset; // DR
@@ -124,24 +125,21 @@ void drawClock(GContext *ctx, GRect loc) {
   loc.origin.x -= s_clockPixelOffset; // DR
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
-  graphics_context_set_text_color(ctx, getTextColourL()); 
+  graphics_context_set_text_color(ctx, getTextColourL());
   loc.origin.y += s_clockPixelOffset; // CR
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   // main
-  if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU()); 
-  else graphics_context_set_text_color(ctx, getTextColourC()); 
+  if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU());
+  else graphics_context_set_text_color(ctx, getTextColourC());
   loc.origin.x += s_clockPixelOffset; // O
   graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
-static void clock_update_proc(Layer *this_layer, GContext *ctx) {
-  GRect tank_bounds = layer_get_bounds(this_layer);
-
+void updateTimeBuffer() {
   // Do the clock
-  time_t temp = time(NULL); 
+  time_t temp = time(NULL);
   struct tm *tickTime = localtime(&temp);
- 
   // Write the current hours and minutes and maybe secods into the buffer
   if (getUserOpt(OPT_SHOW_SECONDS) == true) {
     if(clock_is_24h_style() == true) {
@@ -156,6 +154,19 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
       strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%I:%M", tickTime);
     }
   }
+  s_battery = battery_state_service_peek();
+}
+
+static void clock_update_proc(Layer *this_layer, GContext *ctx) {
+  GRect tank_bounds = layer_get_bounds(this_layer);
+
+  // BATTERY
+  graphics_context_set_stroke_color(ctx, GColorWhite);
+  graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
+  graphics_draw_rect(ctx, GRect(115,5,18,7));
+  graphics_draw_rect(ctx, GRect(133,7,2,3));
+  graphics_fill_rect(ctx, GRect(117,7,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
+
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
   drawClock(ctx, timeRect);
@@ -184,7 +195,7 @@ void create_clock_layer(Window* parentWindow) {
   s_clockLayer = layer_create( GRect(0, 0, window_bounds.size.w, 2*window_bounds.size.h/3) );
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_clockLayer);
-  layer_set_update_proc(s_clockLayer, clock_update_proc); 
+  layer_set_update_proc(s_clockLayer, clock_update_proc);
   layer_set_clips(s_clockLayer, false);
 
 }

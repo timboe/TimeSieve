@@ -12,3 +12,4 @@ bool clockAnimCallback(TimeUnits units_changed);
 
 
 void setClockPixelOffset(uint8_t offset);
+void updateTimeBuffer();

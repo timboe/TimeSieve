@@ -3,19 +3,22 @@
 #include "mainWindow.h"
 #include "resources.h"
 #include "persistence.h"
+#include "clock.h"
 
 // Prog initialisation
-void handle_init(void) {
+void handleInit(void) {
   srand(time(NULL)); // init random number gen
   init_resources(); // Load global resources
   init_persistence(); // Load user save
   init_timeStore(); // Buffer upgrade prices
+  updateTimeBuffer(); // Set initial time
   init_mainWindow(); // Create and push to the stack the main window
   DEVMODE(); // Give some debug items
   update_tick_handler(); // Get 1s or 1m callbacks
+  light_enable(1);
 }
 
-void handle_deinit(void) {
+void handleDeinit(void) {
   // Goodbye
   tick_timer_service_unsubscribe();
   destroy_mainWindow();
@@ -25,7 +28,7 @@ void handle_deinit(void) {
 }
 
 int main(void) {
-	handle_init();
+  handleInit();
 	app_event_loop();
-	handle_deinit();
+	handleDeinit();
 }
