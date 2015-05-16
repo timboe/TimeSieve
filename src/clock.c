@@ -184,7 +184,7 @@ void updateBattery(BatteryChargeState charge) {
 }
 
 void updateWeatherBuffer() {
-  strcpy(s_weatherIcon, WEATHER_CLEAR_DAY);
+  strcpy(s_weatherIcon, WEATHER_HGH_RAIN);
   strcpy(s_temperature, "100F");
 }
 
@@ -194,8 +194,8 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   // BATTERY
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
-  //graphics_draw_rect(ctx, GRect(115,5,18,7));
-  //graphics_draw_rect(ctx, GRect(133,7,2,3));
+  graphics_draw_rect(ctx, GRect(115,5,18,7));
+  graphics_draw_rect(ctx, GRect(133,7,2,3));
   graphics_fill_rect(ctx, GRect(117,7,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
 
   // DATE
@@ -205,13 +205,10 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
 
   // WEATHER
   GRect weatherRect1 = GRect(tank_bounds.origin.x - 1, tank_bounds.origin.y+3, 20, 20);
-  GRect weatherRect2 = GRect(tank_bounds.origin.x + 15, tank_bounds.origin.y+3, 30, 20);
-
-  graphics_draw_rect(ctx, weatherRect1);
-  graphics_draw_rect(ctx, weatherRect2);
-
-  graphics_context_set_text_color(ctx, GColorWhite);
+  GRect weatherRect2 = GRect(tank_bounds.origin.x + 16, tank_bounds.origin.y+3, 30, 20);
+  graphics_context_set_text_color(ctx, getLiquidTimeHighlightColour());
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), weatherRect1, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), weatherRect2, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 
 
