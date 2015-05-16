@@ -4,9 +4,31 @@
 #include "persistence.h"
 #include "timeStore.h"
 
-/*
-#define SCALE_FACTOR 10000
+static int32_t s_findChanceBase;
+static int32_t s_findChanceMin;
+static int32_t s_findChanceHour;
+static int32_t s_findChanceDay;
+static int32_t s_findChanceMonth;
+static int32_t s_findChanceYear;
 
+static int32_t s_qualityChanceBase;
+
+static int32_t s_autoCollectChance;
+
+int32_t getAutoCollectChance() {
+  return s_autoCollectChance;
+}
+
+int32_t getQualityBaseChance() {
+  return s_qualityChanceBase;
+}
+
+int32_t getFindBaseChance() {
+  return s_findChanceBase;
+}
+
+//
+/*
 
 uint32_t FPMultiply(const uint32_t a, const uint32_t b) {
   return (a * b )/(SCALE_FACTOR * SCALE_FACTOR);
@@ -31,63 +53,110 @@ uint32_t getBinomalProb(const uint16_t nAttempts, const uint32_t chance) {
 }
 */
 
-bool getChance(uint16_t nTries, int32_t prob) {
-  for (uint16_t t = 0; t < nTries; ++t) {
-    if ( rand() % PROB_MAX < prob) return true;
-  }
-  return false;
+
+uint32_t combineProbability(uint32_t a, uint32_t b) {
+  return (a + b) - (( a * b ) / SCALE_FACTOR);
 }
 
 /**
- * Get how rare the found item is - this works a bit differently from the other chances
- * which are binomial.
+ * Load base probabilities and then increase them based on the user's employees
+ **/
+void updateProbabilities() {
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "SItmBufr");
+
+  s_findChanceBase  = 0;
+  s_findChanceMin   = BASE_CHANCE_MIN;
+  s_findChanceHour  = BASE_CHANCE_HOUR;
+  s_findChanceDay   = BASE_CHANCE_DAY;
+  s_findChanceMonth = BASE_CHANCE_MONTH;
+  s_findChanceYear  = BASE_CHANCE_YEAR;
+
+  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1); ++e) {
+    s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_1_CHANCE);
+    s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_1_CHANCE);
+    s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_1_CHANCE);
+    s_findChanceDay   = combineProbability(s_findChanceDay, FREQUENCY_1_CHANCE);
+    s_findChanceMonth = combineProbability(s_findChanceMonth, FREQUENCY_1_CHANCE);
+    s_findChanceYear  = combineProbability(s_findChanceYear, FREQUENCY_1_CHANCE);
+  }
+  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2); ++e) {
+    s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_1_CHANCE);
+    s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_2_CHANCE);
+    s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_2_CHANCE);
+    s_findChanceDay   = combineProbability(s_findChanceDay, FREQUENCY_2_CHANCE);
+    s_findChanceMonth = combineProbability(s_findChanceMonth, FREQUENCY_2_CHANCE);
+    s_findChanceYear  = combineProbability(s_findChanceYear, FREQUENCY_2_CHANCE);
+  }
+
+  s_qualityChanceBase = 0;
+  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_1); ++e) {
+    s_qualityChanceBase = combineProbability(s_qualityChanceBase, QUALITY_1_CHANCE);
+  }
+  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_2); ++e) {
+    s_qualityChanceBase = combineProbability(s_qualityChanceBase, QUALITY_2_CHANCE);
+  }
+
+  s_autoCollectChance = 0;
+  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_1); ++e) {
+    s_autoCollectChance = combineProbability(s_autoCollectChance, COLLECTOR_1_CHANCE);
+  }
+  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_2); ++e) {
+    s_autoCollectChance = combineProbability(s_autoCollectChance, COLLECTOR_2_CHANCE);
+  }
+
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "EItmBufr");
+
+}
+
+/**
+ * Get how rare the found item is
  * Also, as we don't want an early player hitting the jackpot, we set a minimum
  * threshold of all-time-time which must be met per category.
  * This is arbitrary, and is currently set to the value of the 3rd most expensive
  * item in the category
  **/
 uint8_t getItemRarity(TimeUnits units_changed) {
-  uint32_t chance = rand() % PROB_MAX;
-  uint32_t q1 = getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_1);
-  uint32_t q2 = getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_2);
-  chance *= QUALITY_SCALEFACTOR + (q1 * QUALITY_1_CHANCE) + (q2 * QUALITY_2_CHANCE);
-  chance /= QUALITY_SCALEFACTOR;
-  // Increased chance at larger boundaries
-  if ((units_changed & YEAR_UNIT) != 0)       chance += 900000;
-  else if ((units_changed & MONTH_UNIT) != 0) chance += 500000;
-  else if ((units_changed & DAY_UNIT) != 0)   chance += 100000;
+
+  // Start with random
+  uint32_t chance = rand() % SCALE_FACTOR;
+  // Add on our minions
+  chance = combineProbability(chance, s_qualityChanceBase);
+  // Add on the bonus for the time unit
+  if ((units_changed & YEAR_UNIT) != 0) {
+    chance = combineProbability(chance, QUALITY_YEAR_CHANCE);
+  } else if ((units_changed & MONTH_UNIT) != 0) {
+    chance = combineProbability(chance, QUALITY_MONTH_CHANCE);
+  } else if ((units_changed & DAY_UNIT) != 0) {
+    chance = combineProbability(chance, QUALITY_DAY_CHANCE);
+  } else if ((units_changed & HOUR_UNIT) != 0) {
+    chance = combineProbability(chance, QUALITY_HOUR_CHANCE);
+  }
+
   // Check to see what we win
-  if (chance > BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
-  else if (getUserTotalTime() > SELL_PRICE_EPIC[2] && chance > BASE_CHANCE_EPIC) return EPIC_ID;
-  else if (getUserTotalTime() > SELL_PRICE_RARE[2] && chance > BASE_CHANCE_RARE) return RARE_ID;
-  else if (getUserTotalTime() > SELL_PRICE_MAGIC[2] && chance > BASE_CHANCE_MAGIC) return MAGIC_ID;
+  if (chance >= BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
+  else if (getUserTotalTime() > SELL_PRICE_EPIC[2] && chance >= BASE_CHANCE_EPIC) return EPIC_ID;
+  else if (getUserTotalTime() > SELL_PRICE_RARE[2] && chance >= BASE_CHANCE_RARE) return RARE_ID;
+  else if (getUserTotalTime() > SELL_PRICE_MAGIC[2] && chance >= BASE_CHANCE_MAGIC) return MAGIC_ID;
   return COMMON_ID;
 }
 
 bool getItemAppears(TimeUnits units_changed) {
   // We have five different thresholds, min, hour, day, month year. Always use the larger
-  if ((units_changed & YEAR_UNIT) != 0) {
-    if (rand() % PROB_MAX < BASE_CHANCE_YEAR) return true;
-  } else if ((units_changed & MONTH_UNIT) != 0) {
-    if (rand() % PROB_MAX < BASE_CHANCE_MONTH) return true;
-  } else if ((units_changed & DAY_UNIT) != 0) {
-    if (rand() % PROB_MAX < BASE_CHANCE_DAY) return true;
-  } else if ((units_changed & HOUR_UNIT) != 0) {
-    if (rand() % PROB_MAX < BASE_CHANCE_HOUR) return true;
-  } else {
-    if (rand() % PROB_MAX < BASE_CHANCE_MIN) return true;
-  }
-  // No? OK, try w followers
-  return ( getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1), FREQUENCY_1_CHANCE) ||
-           getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2), FREQUENCY_2_CHANCE) );
+  int32_t prob;
+  if      ((units_changed & YEAR_UNIT)  != 0) prob = s_findChanceYear;
+  else if ((units_changed & MONTH_UNIT) != 0) prob = s_findChanceMonth;
+  else if ((units_changed & DAY_UNIT)   != 0) prob = s_findChanceDay;
+  else if ((units_changed & HOUR_UNIT)  != 0) prob = s_findChanceHour;
+  else                                        prob = s_findChanceMin;
+  return (rand() % SCALE_FACTOR < prob);
 }
 
 /**
  * Give each hired collector in turn a chance at getting the item
  **/
 bool getItemAutoCollect() {
-  return ( getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_1), COLLECTOR_1_CHANCE) ||
-           getChance(getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_2), COLLECTOR_2_CHANCE) );
+  return ( rand() % SCALE_FACTOR < s_autoCollectChance);
 }
 
 /**

@@ -110,10 +110,10 @@ const char* const NAME_TANK[MAX_UPGRADES] = {
   ""};
 
 const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES] = {
-  SEC_IN_MIN,
-  SEC_IN_MIN*2,
-  SEC_IN_MIN*10,
-  SEC_IN_MIN*60,
+  1,
+  1,
+  1,
+  1,
   (uint64_t)0,
   (uint64_t)0,
   (uint64_t)0,

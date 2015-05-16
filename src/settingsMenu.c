@@ -5,6 +5,7 @@
 #include "timeStore.h"
 #include "sellMenu.h"
 #include "resources.h"
+#include "items.h"
 
 #define CHEVO_CONTEXT_ID 0
 #define UNIQUE_CONTEXT_ID 1
@@ -171,25 +172,29 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
       } else if (s_timeDisplay == 1) {
         strcpy(titleText, "ALLTime >");
         timeToString(getUserTotalTime(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
+      } else if (s_timeDisplay == 2) {
+        strcpy(titleText, "REFINERY Bonus >");
+        timeToString(getTimePerMin() - SEC_IN_MIN, subText1, TEXT_LARGE_BUFFER_SIZE, false);
+      } else if (s_timeDisplay == 3) {
+        strcpy(titleText, "TANK Capacity >");
+        timeToString(getTankCapacity(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       }
-
 
     } else if (row == 1) { // DISPLAY BUILDINGS
 
-
+      int v = 0;
       if (s_buildingDisplay == 0) {
-        strcpy(titleText, "REFINERY Bonus >");
-        timeToString(getTimePerMin() - SEC_IN_MIN, subText1, TEXT_LARGE_BUFFER_SIZE, false);
+        strcpy(titleText, "TREASURE Find >");
+        v = getFindBaseChance();
       } else if (s_buildingDisplay == 1) {
-        strcpy(titleText, "TANK Capacity >");
-        timeToString(getTankCapacity(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
+        strcpy(titleText, "TREASURE Quality >");
+        v = getQualityBaseChance();
       } else if (s_buildingDisplay == 2) {
-        strcpy(titleText, "SIEVE Chance >");
-        strcpy(subText1, "TODO");
-      } else if (s_buildingDisplay == 3) {
-        strcpy(titleText, "WATCHER Chance >");
-        strcpy(subText1, "TODO");
+        strcpy(titleText, "TREASURE Auto-Collect >");
+        v = getAutoCollectChance();
       }
+      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "BONUS: %i.%i%%", v/(SCALE_FACTOR/100), v%(SCALE_FACTOR/100) );
+
 
     } else if (row == 2) { // DISPLAY ITEMS
 
@@ -328,9 +333,9 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
   if (section == STAT_SECTION_ID) {
 
     if (row == 0) {
-      if (++s_timeDisplay == 2) s_timeDisplay = 0;
+      if (++s_timeDisplay == 4) s_timeDisplay = 0;
     } else if (row == 1) {
-      if (++s_buildingDisplay == 4) s_buildingDisplay = 0;
+      if (++s_buildingDisplay == 3) s_buildingDisplay = 0;
     } else if (row == 2) {
       // Only show for categories where we have items - no spoils
       while (++s_itemDisplay < 5 && getUserTotalItems(s_itemDisplay) == 0) {}

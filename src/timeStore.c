@@ -2,6 +2,7 @@
 #include "timeStore.h"
 #include "constants.h"
 #include "persistence.h"
+#include "items.h"
 
 static uint64_t* s_bufferRefineryPrice;
 static uint64_t* s_bufferTankPrice;
@@ -283,6 +284,7 @@ bool doPurchase(const unsigned typeID, const unsigned resourceID) {
     updateTankCapacity();
   } else if (typeID == WATCHER_ID) {
     s_bufferWatcherPrice[resourceID] = cost;
+    updateProbabilities();
   }
   return true;
 }

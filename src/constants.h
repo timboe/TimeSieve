@@ -106,44 +106,51 @@ typedef enum {WATCHER_FREQUENCY_1,
 
 // TREASURE SETTINGS
 
-// Prob max is 1million
-#define PROB_MAX 1000000
+//////!!!!!!!!!!!!!!!
+#define SCALE_FACTOR 1000
+//////!!!!!!!!!!!!!!!
+
 // Basic collectors have a 1% chance
-#define COLLECTOR_1_CHANCE 10000
+#define COLLECTOR_1_CHANCE 10
 // Advanced collectors have a 5% chance
-#define COLLECTOR_2_CHANCE 50000
+#define COLLECTOR_2_CHANCE 50
+
 // Basic finders have a 0.5% chance to find an item
-#define FREQUENCY_1_CHANCE 5000
+#define FREQUENCY_1_CHANCE 5
 // Advanced finders have a 3% chance to find an item
-#define FREQUENCY_2_CHANCE 30000
+#define FREQUENCY_2_CHANCE 30
+
 // Basic archeologists increase the chance by 1%
-// This is done via multiplication so needs a divisor
-#define QUALITY_SCALEFACTOR 1000
 #define QUALITY_1_CHANCE 10
 // Advanced achhelogists increase the chance by 2.5%
 #define QUALITY_2_CHANCE 25
+// Time periods also increase the quality chance
+#define QUALITY_YEAR_CHANCE 900
+#define QUALITY_MONTH_CHANCE 500
+#define QUALITY_DAY_CHANCE 100
+#define QUALITY_HOUR_CHANCE 50
 
 // When it comes to finding items, mins have a 0.7% chance (roughly 10 per day)
-#define BASE_CHANCE_MIN 6944
+#define BASE_CHANCE_MIN 7
 // Hours have base chance of 25%
-#define BASE_CHANCE_HOUR 250000
+#define BASE_CHANCE_HOUR 250
 // Days have a base chance of 65%
-#define BASE_CHANCE_DAY 650000
+#define BASE_CHANCE_DAY 650
 // Months have a base chance of 90%
-#define BASE_CHANCE_MONTH 900000
+#define BASE_CHANCE_MONTH 900
 // Years have a base chance of 99%
-#define BASE_CHANCE_YEAR 990000
+#define BASE_CHANCE_YEAR 990
 
 // Note here the probabilities are done cumulativly
 // Common items have a base chance of 70%
+#define BASE_CHANCE_MAGIC 700
 // Magic items have a base chance of 20%
-#define BASE_CHANCE_MAGIC 800000
+#define BASE_CHANCE_RARE 900
 // Rare items have a base chance of 7%
-#define BASE_CHANCE_RARE 920000
+#define BASE_CHANCE_EPIC 970
 // Epic items have a base chance of 2.5%
-#define BASE_CHANCE_EPIC 975000
+#define BASE_CHANCE_LEGENDARY 995
 // Legendary items have a base chance of 0.5%
-#define BASE_CHANCE_LEGENDARY 995000
 
 // !TRESSURE SETTINGS
 
