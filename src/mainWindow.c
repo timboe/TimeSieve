@@ -138,7 +138,6 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if ((units_changed & MINUTE_UNIT) == 0) return; // If no min change then stop here
 
   s_units_changed = units_changed;
-  APP_LOG(APP_LOG_LEVEL_INFO,"1m");
   if (getUserOpt(OPT_SHOW_SECONDS) == true) { // If we are doing per-sec updates then give the modulo remainder time
     addTime( getTimePerMin() % SEC_IN_MIN );
   } else { // Give the whole 1m allowance
