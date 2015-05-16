@@ -153,8 +153,8 @@ void init_timeStore() {
 
   updateTimePerMin();
   updateTankCapacity();
-
   initiateSellPrices();
+  updateProbabilities();
 }
 
 void destroy_timeStore() {

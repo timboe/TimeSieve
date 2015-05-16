@@ -112,7 +112,6 @@ void tapHandle(AccelData *data, uint32_t num_samples) {
 
 void doSecond() {
   // Update the user time, but only 1/60 of it (we give the remainder on the min mark)
-  APP_LOG(APP_LOG_LEVEL_INFO,"1s");
   addTime( getTimePerMin() / SEC_IN_MIN );
   updateDisplayTime( getUserTime() ); // We don't animate the time if updating every sec
   update_timeTank_layer();
