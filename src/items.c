@@ -81,7 +81,7 @@ void updateProbabilities() {
     s_findChanceYear  = combineProbability(s_findChanceYear, FREQUENCY_1_CHANCE);
   }
   for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2); ++e) {
-    s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_1_CHANCE);
+    s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_2_CHANCE);
     s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_2_CHANCE);
     s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_2_CHANCE);
     s_findChanceDay   = combineProbability(s_findChanceDay, FREQUENCY_2_CHANCE);
@@ -149,7 +149,9 @@ bool getItemAppears(TimeUnits units_changed) {
   else if ((units_changed & DAY_UNIT)   != 0) prob = s_findChanceDay;
   else if ((units_changed & HOUR_UNIT)  != 0) prob = s_findChanceHour;
   else                                        prob = s_findChanceMin;
-  return (rand() % SCALE_FACTOR < prob);
+  int r = rand() % SCALE_FACTOR;
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "FndItm r:%i thresh:%i P:%i", r, (int)prob, (int)(r<prob));
+  return (r < prob);
 }
 
 /**

@@ -173,11 +173,11 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         strcpy(titleText, "ALLTime >");
         timeToString(getUserTotalTime(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       } else if (s_timeDisplay == 2) {
-        strcpy(titleText, "REFINERY Bonus >");
-        timeToString(getTimePerMin() - SEC_IN_MIN, subText1, TEXT_LARGE_BUFFER_SIZE, false);
-      } else if (s_timeDisplay == 3) {
         strcpy(titleText, "TANK Capacity >");
         timeToString(getTankCapacity(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
+      } else if (s_timeDisplay == 3) {
+        strcpy(titleText, "REFINERY Bonus >");
+        timeToString(getTimePerMin() - SEC_IN_MIN, subText1, TEXT_LARGE_BUFFER_SIZE, false);
       }
 
     } else if (row == 1) { // DISPLAY BUILDINGS
