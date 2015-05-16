@@ -119,7 +119,7 @@ void updateProbabilities() {
 uint8_t getItemRarity(TimeUnits units_changed) {
 
   // Start with random
-  uint32_t chance = rand() % SCALE_FACTOR;
+  int32_t chance = rand() % SCALE_FACTOR;
   // Add on our minions
   chance = combineProbability(chance, s_qualityChanceBase);
   // Add on the bonus for the time unit
@@ -133,6 +133,7 @@ uint8_t getItemRarity(TimeUnits units_changed) {
     chance = combineProbability(chance, QUALITY_HOUR_CHANCE);
   }
 
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "QItm r:%i", (int)chance);
   // Check to see what we win
   if (chance >= BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
   else if (getUserTotalTime() > SELL_PRICE_EPIC[2] && chance >= BASE_CHANCE_EPIC) return EPIC_ID;
