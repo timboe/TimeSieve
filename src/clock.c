@@ -213,11 +213,12 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   // wRect.origin.y -= 2;
   // graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   // wRect.origin.y += 1;
-  wRect.origin.x += 1;
-  graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  wRect.origin.x -= 2;
+  wRect.origin.x -= 1;
   graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   wRect.origin.x += 1;
+  wRect.origin.y -= 1;
+  graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  wRect.origin.y += 1;
   graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
