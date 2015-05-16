@@ -11,7 +11,6 @@ void handleInit(void) {
   init_resources(); // Load global resources
   init_persistence(); // Load user save
   init_timeStore(); // Buffer upgrade prices
-  updateTimeBuffer(); // Set initial time
   init_mainWindow(); // Create and push to the stack the main window
   DEVMODE(); // Give some debug items
   update_tick_handler(); // Get 1s or 1m callbacks

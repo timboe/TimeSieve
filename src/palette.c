@@ -16,8 +16,8 @@ uint8_t getColour() {
 GColor getTextColourC() {
   switch (getColour()) {
   	case PALETTE_BLUE: return GColorLiberty; // Darkest
-  	case PALETTE_GREEN: return GColorKellyGreen;
-  	case PALETTE_YELLOW: return GColorBrass;
+  	case PALETTE_GREEN: return GColorScreaminGreen;
+  	case PALETTE_YELLOW: return GColorYellow;
   	case PALETTE_RED: return GColorRed;
   	default: return GColorWhite;
   }
@@ -80,7 +80,7 @@ GColor getLiquidTimeHighlightColour() {
   	case PALETTE_YELLOW: return GColorYellow;
   	case PALETTE_RED: return GColorRichBrilliantLavender;
   	default: return GColorWhite;
-  }	
+  }
 }
 
 GColor getSpoogicalColourA() {

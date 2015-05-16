@@ -135,7 +135,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   if (getUserOpt(OPT_SHOW_SECONDS) == true) doSecond();
   updateTimeBuffer();
 
-  if ((units_changed & MINUTE_UNIT) == 0) return; // If only 1s
+  if ((units_changed & MINUTE_UNIT) == 0) return; // If no min change then stop here
 
   s_units_changed = units_changed;
   APP_LOG(APP_LOG_LEVEL_INFO,"1m");
@@ -144,6 +144,9 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   } else { // Give the whole 1m allowance
     addTime( getTimePerMin() );
   }
+
+  // Chance of day?
+  if ((units_changed & DAY_UNIT) > 0) updateDateBuffer();
 
   // Update prices
   modulateSellPrices();

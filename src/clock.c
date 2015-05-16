@@ -7,7 +7,11 @@
 
 static Layer* s_clockLayer;
 static char s_timeBuffer[CLOCK_TEXT_SIZE];
+static char s_dateBuffer[CLOCK_TEXT_SIZE];
+
 static BatteryChargeState s_battery;
+static char s_weatherIcon[1];
+static char s_temperature[5];
 
 static GPoint s_spoogelet[N_SPOOGELET];
 static int16_t s_spoogeletVx[N_SPOOGELET];
@@ -20,6 +24,19 @@ static uint8_t s_clockPixelOffset = 2;
 static bool s_flashMainFace = false;
 
 #define CLOCK_OFFSET 16
+
+#define WEATHER_CLEAR_DAY "1"
+#define WEATHER_CLEAR_NIGHT "2"
+#define WEATHER_LOW_CLOUD_DAY "3"
+#define WEATHER_LOW_CLOUD_NIGHT "4"
+#define WEATHER_MED_CLOUD "5"
+#define WEATHER_HGH_CLOUD "%"
+#define WEATHER_LOW_RAIN "7"
+#define WEATHER_HGH_RAIN "8"
+#define WEATHER_THUNDER "6"
+#define WEATHER_SNOW "$"
+#define WEATHER_MIST "M"
+#define WEATHER_NA ")"
 
 void setClockPixelOffset(uint8_t offset) {
   s_clockPixelOffset = offset;
@@ -95,45 +112,43 @@ bool clockAnimCallback(TimeUnits units_changed) {
   }
 }
 
-void drawClock(GContext *ctx, GRect loc) {
-
-  GFont* f = getClockFont();
+void drawClock(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset) {
 
   // corners
   graphics_context_set_text_color(ctx, getTextColourL());
-  loc.origin.x -= s_clockPixelOffset; // CL
-  loc.origin.y += s_clockPixelOffset; // UL
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.x -= offset; // CL
+  loc.origin.y += offset; // UL
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   graphics_context_set_text_color(ctx, getTextColourC());
-  loc.origin.x += s_clockPixelOffset; // CU
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  loc.origin.x += s_clockPixelOffset; // RU
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.x += offset; // CU
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.x += offset; // RU
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
 
   graphics_context_set_text_color(ctx, getTextColourR());
-  loc.origin.y -= s_clockPixelOffset; // CR
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  loc.origin.y -= s_clockPixelOffset; // DR
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.y -= offset; // CR
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.y -= offset; // DR
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
 
   graphics_context_set_text_color(ctx, getTextColourD());
-  loc.origin.x -= s_clockPixelOffset; // DC
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  loc.origin.x -= s_clockPixelOffset; // DR
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.x -= offset; // DC
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.x -= offset; // DR
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   graphics_context_set_text_color(ctx, getTextColourL());
-  loc.origin.y += s_clockPixelOffset; // CR
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.y += offset; // CR
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   // main
   if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU());
   else graphics_context_set_text_color(ctx, getTextColourC());
-  loc.origin.x += s_clockPixelOffset; // O
-  graphics_draw_text(ctx, s_timeBuffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  loc.origin.x += offset; // O
+  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void updateTimeBuffer() {
@@ -154,7 +169,23 @@ void updateTimeBuffer() {
       strftime(s_timeBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%I:%M", tickTime);
     }
   }
-  s_battery = battery_state_service_peek();
+}
+
+void updateDateBuffer() {
+  time_t temp = time(NULL);
+  struct tm *tickTime = localtime(&temp);
+  strftime(s_dateBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%e %b", tickTime); // 22 May
+
+}
+
+void updateBattery(BatteryChargeState charge) {
+  s_battery = charge;
+  updateClockLayer();
+}
+
+void updateWeatherBuffer() {
+  strcpy(s_weatherIcon, WEATHER_NA);
+  strcpy(s_temperature, "-33F");
 }
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
@@ -167,9 +198,27 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_rect(ctx, GRect(133,7,2,3));
   graphics_fill_rect(ctx, GRect(117,7,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
 
+  // DATE
+  GRect dateRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y, tank_bounds.size.w, 30);
+  //graphics_draw_rect(ctx, dateRect);
+  drawClock(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1);
+
+  // WEATHER
+  GRect weatherRect1 = GRect(tank_bounds.origin.x - 1, tank_bounds.origin.y+3, 20, 20);
+  GRect weatherRect2 = GRect(tank_bounds.origin.x + 15, tank_bounds.origin.y+3, 30, 20);
+
+  graphics_draw_rect(ctx, weatherRect1);
+  graphics_draw_rect(ctx, weatherRect2);
+
+  graphics_context_set_text_color(ctx, GColorWhite);
+  graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), weatherRect1, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), weatherRect2, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+
+
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
-  drawClock(ctx, timeRect);
+  //graphics_draw_rect(ctx, timeRect);
+  drawClock(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset);
 
   if (s_clockTickCount == 0) return; // No animation in progress
 
@@ -192,16 +241,21 @@ void create_clock_layer(Window* parentWindow) {
   // Create the clock layer in the top 1/3 of the screen
   Layer* window_layer = window_get_root_layer(parentWindow);
   GRect window_bounds = layer_get_bounds(window_layer);
-  s_clockLayer = layer_create( GRect(0, 0, window_bounds.size.w, 2*window_bounds.size.h/3) );
+  s_clockLayer = layer_create( GRect(0, 0, window_bounds.size.w, window_bounds.size.h/3) );
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_clockLayer);
   layer_set_update_proc(s_clockLayer, clock_update_proc);
   layer_set_clips(s_clockLayer, false);
-
+  battery_state_service_subscribe(updateBattery);
+  s_battery = battery_state_service_peek();
+  updateTimeBuffer();
+  updateDateBuffer();
+  updateWeatherBuffer();
 }
 
 
 void destroy_clock_layer() {
   layer_destroy(s_clockLayer);
   s_clockLayer = 0;
+  battery_state_service_unsubscribe();
 }

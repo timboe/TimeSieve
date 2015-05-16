@@ -4,11 +4,9 @@
 #include "constants.h"
 
 static GFont s_perfectDOSFont;
-static GFont s_font1;
-//static GFont s_font2;
-//static GFont s_font3;
-//static GFont s_font4;
-//static GFont s_font5;
+static GFont s_clock;
+static GFont s_clockSmall;
+static GFont s_weatherFont;
 
 static GBitmap* s_commonItem[MAX_TREASURES];
 static GBitmap* s_magicItem[MAX_TREASURES];
@@ -21,24 +19,24 @@ GFont* getDOSFont() {
 }
 
 GFont* getClockFont() {
-  return &s_font1;
-  //switch (getUserTypeSetting()) {
-  //  case FONT_1: return &s_font1;
-  //  case FONT_2: return &s_font2;
-  //  case FONT_3: return &s_font3;
-  //  case FONT_4: return &s_font4;
-  //  case FONT_5: return &s_font5;
-  //  default: return &s_font1;
-  //}
+  return &s_clock;
+}
+
+GFont* getClockSmallFont() {
+  return &s_clockSmall;
+}
+
+GFont* getWeatherFont() {
+  return &s_weatherFont;
 }
 
 void init_resources() {
   s_perfectDOSFont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
-  s_font1          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_A_31));
-  //s_font2          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_B_29));
-  //s_font3          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_C_29));
-  //s_font4          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_D_31));
-  //s_font5          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_E_31));
+  s_clock          = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_A_31));
+  s_clockSmall     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_A_18));
+
+  s_weatherFont    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_18));
+
   s_commonItem[0] = gbitmap_create_with_resource(RESOURCE_ID_COMMON_0);
   s_commonItem[1] = gbitmap_create_with_resource(RESOURCE_ID_COMMON_1);
   s_commonItem[2] = gbitmap_create_with_resource(RESOURCE_ID_COMMON_2);
@@ -57,10 +55,10 @@ void init_resources() {
   s_epicItem[0] = gbitmap_create_with_resource(RESOURCE_ID_EPIC_0);
   s_epicItem[1] = gbitmap_create_with_resource(RESOURCE_ID_EPIC_1);
   s_epicItem[2] = gbitmap_create_with_resource(RESOURCE_ID_EPIC_2);
-  s_epicItem[3] = gbitmap_create_with_resource(RESOURCE_ID_EPIC_3); 
+  s_epicItem[3] = gbitmap_create_with_resource(RESOURCE_ID_EPIC_3);
   //
   s_legendaryItem[0] = gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_0);
-  s_legendaryItem[1] = gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_1);  
+  s_legendaryItem[1] = gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_1);
   s_legendaryItem[2] = gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_2);
   s_legendaryItem[3] = gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_3);
   s_legendaryItem[4] = gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_4);
@@ -79,11 +77,11 @@ void init_resources() {
 
 void destroy_resources() {
   fonts_unload_custom_font(s_perfectDOSFont);
-  fonts_unload_custom_font(s_font1);
-  //fonts_unload_custom_font(s_font2);
-  //fonts_unload_custom_font(s_font3);
-  //fonts_unload_custom_font(s_font4);
-  //fonts_unload_custom_font(s_font5); 
+  fonts_unload_custom_font(s_clock);
+  fonts_unload_custom_font(s_clockSmall);
+
+  fonts_unload_custom_font(s_weatherFont);
+
   for (uint8_t i=0; i < MAX_UNIQUE; ++i) {
     gbitmap_destroy( s_legendaryItem[i] );
     if (i >= MAX_TREASURES) continue;

@@ -5,6 +5,8 @@
 
 GFont* getDOSFont();
 GFont* getClockFont();
+GFont* getClockSmallFont();
+GFont* getWeatherFont();
 void init_resources();
 void destroy_resources();
 
