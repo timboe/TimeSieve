@@ -184,8 +184,8 @@ void updateBattery(BatteryChargeState charge) {
 }
 
 void updateWeatherBuffer() {
-  strcpy(s_weatherIcon, WEATHER_NA);
-  strcpy(s_temperature, "-33F");
+  strcpy(s_weatherIcon, WEATHER_CLEAR_DAY);
+  strcpy(s_temperature, "100F");
 }
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
@@ -194,8 +194,8 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   // BATTERY
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
-  graphics_draw_rect(ctx, GRect(115,5,18,7));
-  graphics_draw_rect(ctx, GRect(133,7,2,3));
+  //graphics_draw_rect(ctx, GRect(115,5,18,7));
+  //graphics_draw_rect(ctx, GRect(133,7,2,3));
   graphics_fill_rect(ctx, GRect(117,7,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
 
   // DATE
