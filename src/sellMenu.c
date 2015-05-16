@@ -276,10 +276,10 @@ static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
   snprintf(soldText, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
   if (s_tankFull) {
     graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,4,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,12,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
     graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,34,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   } else {
-    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,6,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,8,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
     graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,20,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   }
 }
