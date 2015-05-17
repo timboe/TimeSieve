@@ -209,6 +209,8 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect wRect = GRect(0, 2, 40, 25);
   graphics_context_set_text_color(ctx, getLiquidTimeHighlightColour());
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  GFont myf = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+  GFont* myFref = &myf;
   draw3DText(ctx, wRect, fonts_get_system_font(FONT_KEY_GOTHIC_14), s_temperature, 1, true);
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
