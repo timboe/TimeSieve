@@ -123,8 +123,8 @@ typedef enum {WATCHER_FREQUENCY_1,
 
 // Basic archeologists increase the chance by 1%
 #define QUALITY_1_CHANCE 10
-// Advanced achhelogists increase the chance by 2.5%
-#define QUALITY_2_CHANCE 25
+// Professors increase the quality by 4%
+#define QUALITY_2_CHANCE 40
 // Time periods also increase the quality chance
 #define QUALITY_YEAR_CHANCE 900
 #define QUALITY_MONTH_CHANCE 500
@@ -209,10 +209,10 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define MENU_CELL_LARGE_HEADER_HEIGHT 32
 #define MENU_X_OFFSET 28
 
-#define MENU_THREE_CELL_HEIGHT 56
+#define MENU_THREE_CELL_HEIGHT 58
 #define MENU_TWO_CELL_HEIGHT 44
 #define MENU_ONE_CELL_HEIGHT 36
-#define MENU_ZERO_CELL_HEIGHT 30
+#define MENU_ZERO_CELL_HEIGHT 28
 
 #define MAX_NOTIFY_SETTINGS 6
 

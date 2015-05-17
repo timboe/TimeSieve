@@ -154,8 +154,8 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
       case WATCHER_CHANCE_2: strcpy(upgradeText, "AUTO-Collect +5%"); break;
       case WATCHER_FREQUENCY_1: strcpy(upgradeText, "ITEM Chance +0.5%"); break;
       case WATCHER_FREQUENCY_2: strcpy(upgradeText, "ITEM Chance +3%"); break;
-      case WATCHER_QUALITY_1: strcpy(upgradeText,   "ITEM Quality 1%"); break;
-      case WATCHER_QUALITY_2: strcpy(upgradeText,   "ITEM Qaulity 2.5%"); break;
+      case WATCHER_QUALITY_1: strcpy(upgradeText,   "ITEM Quality +1%"); break;
+      case WATCHER_QUALITY_2: strcpy(upgradeText,   "ITEM Qaulity +4%"); break;
       case WATCHER_TECH:
         strcpy(upgradeText, "ADDON: ");
         if (owned == TECH_NONE) strcat(upgradeText, "Battery");

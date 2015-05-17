@@ -171,16 +171,16 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     if (row == 0) { // DISPLAY TIME
 
       if (s_timeDisplay == 0) {
-        strcpy(titleText, "TOTAL Time >");
+        strcpy(titleText, "TOTAL Time");
         timeToString(getUserTime(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       } else if (s_timeDisplay == 1) {
-        strcpy(titleText, "ALLTime >");
+        strcpy(titleText, "ALLTime");
         timeToString(getUserTotalTime(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       } else if (s_timeDisplay == 2) {
-        strcpy(titleText, "TANK Capacity >");
+        strcpy(titleText, "TANK Capacity");
         timeToString(getTankCapacity(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       } else if (s_timeDisplay == 3) {
-        strcpy(titleText, "REFINERY Bonus >");
+        strcpy(titleText, "REFINERY Bonus");
         timeToString(getTimePerMin() - SEC_IN_MIN, subText1, TEXT_LARGE_BUFFER_SIZE, false);
       }
 
@@ -188,13 +188,13 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
       int v = 0;
       if (s_buildingDisplay == 0) {
-        strcpy(titleText, "ITEM Find >");
+        strcpy(titleText, "ITEM Find");
         v = getFindBaseChance();
       } else if (s_buildingDisplay == 1) {
-        strcpy(titleText, "ITEM Quality >");
+        strcpy(titleText, "ITEM Quality");
         v = getQualityBaseChance();
       } else if (s_buildingDisplay == 2) {
-        strcpy(titleText, "ITEM Auto-Collect >");
+        strcpy(titleText, "ITEM Auto-Collect");
         v = getAutoCollectChance();
       }
       snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "BONUS: %i.%i%%", v/(SCALE_FACTOR/100), v%(SCALE_FACTOR/100) );
@@ -202,11 +202,11 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
     } else if (row == 2) { // DISPLAY ITEMS
 
-      if      (s_itemDisplay == COMMON_ID)    strcpy(titleText, "COMMON Items >");
-      else if (s_itemDisplay == MAGIC_ID)     strcpy(titleText, "MAGIC Items >");
-      else if (s_itemDisplay == RARE_ID)      strcpy(titleText, "RARE Items >");
-      else if (s_itemDisplay == EPIC_ID)      strcpy(titleText, "EPIC Items >");
-      else if (s_itemDisplay == LEGENDARY_ID) strcpy(titleText, "LEGENDARIES >");
+      if      (s_itemDisplay == COMMON_ID)    strcpy(titleText, "COMMON Items");
+      else if (s_itemDisplay == MAGIC_ID)     strcpy(titleText, "MAGIC Items");
+      else if (s_itemDisplay == RARE_ID)      strcpy(titleText, "RARE Items");
+      else if (s_itemDisplay == EPIC_ID)      strcpy(titleText, "EPIC Items");
+      else if (s_itemDisplay == LEGENDARY_ID) strcpy(titleText, "LEGENDARIES");
       snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(s_itemDisplay) );
       strcpy(subText2, "VALUE:");
       timeToString(currentCategorySellPrice(s_itemDisplay), tempBuffer, TEXT_BUFFER_SIZE, true);
