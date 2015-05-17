@@ -33,11 +33,27 @@ static int8_t s_notifyTreasureID = -1;
 static int8_t s_notifyAchievementID = -1;
 static int8_t s_notifyItemID;
 
+static const GPathInfo FLAIR_PATH = {
+  .num_points = 24,
+  .points = (GPoint []) {{0, 0}, {100,  -10},  {100,  8},
+                         {0, 0}, {-100, -11},  {-100, 7},
+                         {0, 0}, {9,    100},  {-10,  100},
+                         {0, 0}, {12,   -100}, {-9,   -100},
+                         {0, 0}, {95,   100},  {100,  95},
+                         {0, 0}, {-95,  -100}, {-100, -95},
+                         {0, 0}, {95,   -100}, {100,  -95},
+                         {0, 0}, {-95,  100},  {-100, 95}
+                        }
+};
+static GPath* s_flairPath;
+static int32_t s_flairAngle = 0;
+
 void sieveAnimReset(TimeUnits units_changed) {
   s_sieveTickCount = 0;
   s_treasureRect = GRect(94, 18, 20, 20);
   s_halo = GPoint(104,30);
   s_haloRings = 0;
+  s_flairAngle = 0;
 }
 
 bool sieveAnimCallback(TimeUnits units_changed) {
@@ -47,6 +63,9 @@ bool sieveAnimCallback(TimeUnits units_changed) {
   if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
   --s_treasureRect.origin.x;
   --s_halo.x;
+
+  // Day+ spec
+  s_flairAngle += TRIG_MAX_ANGLE/ANIM_FPS/2;
 
   if (s_sieveTickCount % 14 == 0) ++s_haloRings;
 
@@ -61,7 +80,12 @@ bool sieveAnimCallback(TimeUnits units_changed) {
 static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
 
-  // Fill back
+  // Backmost - FLAIR should only be drawn on DAY boundary
+  graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
+  graphics_context_set_stroke_color(ctx, getLiquidTimeColour());
+  gpath_rotate_to(s_flairPath, s_flairAngle);
+  gpath_draw_filled(ctx, s_flairPath);
+  gpath_draw_outline(ctx, s_flairPath);
 
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
@@ -160,6 +184,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_timeSieveLayer);
   layer_set_update_proc(s_timeSieveLayer, timeSieve_update_proc);
+  layer_set_clips(s_timeSieveLayer, false);
 
   s_convTopBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_TOP);
   s_convBotBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_BOT);
@@ -170,6 +195,9 @@ void create_timeSieve_layer(Window* parentWindow) {
   // Hide halo
   s_haloRings = 0;
   s_treasureID = -1;
+
+  s_flairPath = gpath_create(&FLAIR_PATH);
+  gpath_move_to(s_flairPath, GPoint(72, 42));
 
   // Create layer for the tank
   s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
@@ -232,6 +260,8 @@ void destroy_timeSieve_layer() {
   gbitmap_destroy(s_convTopBitmap);
   gbitmap_destroy(s_convBotBitmap);
   gbitmap_destroy(s_convCap);
+
+  free(s_flairPath);
 
   gbitmap_destroy(s_sieveBasic);
 

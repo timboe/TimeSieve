@@ -38,19 +38,6 @@ static bool s_flashMainFace = false;
 #define WEATHER_MIST "M"
 #define WEATHER_NA ")"
 
-static const GPathInfo FLAIR_PATH = {
-  .num_points = 18,
-  .points = (GPoint []) {{0, 0}, {100,  -10},  {100,  8},
-                         {0, 0}, {-100, -11},  {-100, 7},
-                         {0, 0}, {9,    100},  {-10,  100},
-                         {0, 0}, {12,   -100}, {-9,  -100},
-                         {0, 0}, {95,   100},  {100,  95},
-                         {0, 0}, {-95,  -100}, {-100, -95}
-                         }
-};
-static GPath* s_flairPath;
-static int32_t s_flairAngle = 0;
-
 void setClockPixelOffset(uint8_t offset) {
   s_clockPixelOffset = offset;
 }
@@ -61,7 +48,6 @@ void updateClockLayer() {
 
 void clockAnimReset(TimeUnits units_changed) {
   s_clockTickCount = 0;
-  s_flairAngle = 0;
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
     s_spoogelet[i].x = (7*WIN_SIZE_X/16 + (rand() % WIN_SIZE_X/8)) * SUB_PIXEL;
     s_spoogelet[i].y = (30 + (rand() % 10)) * SUB_PIXEL;
@@ -89,9 +75,6 @@ bool clockAnimCallback(TimeUnits units_changed) {
   if ((units_changed & MONTH_UNIT) > 0 && s_clockTickCount % 6 == 0) {
     colourOverride( rand() % PALETTE_MAX );
   }
-
-  // Day+ spec
-  s_flairAngle += TRIG_MAX_ANGLE/ANIM_FPS;
 
   if ((units_changed & YEAR_UNIT) > 0 && s_clockTickCount % 8 == 0) {
     uint8_t bgColourOverride = rand() % PALETTE_MAX;
@@ -235,12 +218,7 @@ void updateWeatherBuffer() {
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
 
-  // FLAIR
-  graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
-  graphics_context_set_stroke_color(ctx, getLiquidTimeColour());
-  gpath_rotate_to(s_flairPath, s_flairAngle);
-  gpath_draw_filled(ctx, s_flairPath);
-  gpath_draw_outline(ctx, s_flairPath);
+
 
   // BATTERY
   graphics_context_set_stroke_color(ctx, GColorWhite);
@@ -295,15 +273,11 @@ void create_clock_layer(Window* parentWindow) {
   updateDateBuffer();
   updateWeatherBuffer();
 
-  s_flairPath = gpath_create(&FLAIR_PATH);
-  gpath_move_to(s_flairPath, GPoint(72, 45));
-
 }
 
 
 void destroy_clock_layer() {
   layer_destroy(s_clockLayer);
   s_clockLayer = 0;
-  free(s_flairPath);
   battery_state_service_unsubscribe();
 }
