@@ -282,7 +282,7 @@ static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
   }
 
   graphics_draw_text(ctx, soldTextTop, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,4,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,12,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   graphics_draw_text(ctx, soldTextBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,34,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 

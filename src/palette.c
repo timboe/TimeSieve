@@ -121,7 +121,7 @@ GColor getBGFlashColour(uint8_t colourID) {
   switch (colourID) {
   	case PALETTE_BLUE: return GColorVividViolet;
    	case PALETTE_GREEN: return GColorMalachite;
-  	case PALETTE_YELLOW: return GColorIcterine;
+  	case PALETTE_YELLOW: return GColorChromeYellow;
   	case PALETTE_RED: return GColorFolly;
   	default: return GColorWhite;
   }

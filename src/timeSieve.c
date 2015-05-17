@@ -184,7 +184,10 @@ void stopDisplayItem(void* data) {
   s_treasureOnShow = false;
   s_treasureID = -1;
   s_haloRings = 0;
-  if (data != NULL) addItemsMissed(1); // Was a timeout
+  if (data != NULL) {
+    addItemsMissed(1); // Was a timeout
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"ItmMissed!");
+  }
   else app_timer_cancel(s_treasureTimeout);
   s_treasureTimeout = NULL;
 }

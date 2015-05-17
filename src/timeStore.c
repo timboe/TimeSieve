@@ -399,7 +399,7 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   int hours = (time % SEC_IN_DAY) / SEC_IN_HOUR;
 
   if (brief && years) {
-    snprintf(buffer, buffer_size, "%iy %id %ih", years, days, hours);
+    snprintf(buffer, buffer_size, "%iy %id", years, days);
     return;
   }
 
