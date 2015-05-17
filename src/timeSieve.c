@@ -74,6 +74,7 @@ bool sieveAnimCallback(TimeUnits units_changed) {
 
   if (++s_sieveTickCount == ANIM_FRAMES) {
     if (s_treasureID != -1) itemCanBeCollected();
+    s_flairAngle = 0;
     return false;
   } else {
     return true; // Request more frames
@@ -84,11 +85,13 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
 
   // Backmost - FLAIR should only be drawn on DAY boundary
-  graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
-  graphics_context_set_stroke_color(ctx, getLiquidTimeColour());
-  gpath_rotate_to(s_flairPath, s_flairAngle);
-  gpath_draw_filled(ctx, s_flairPath);
-  gpath_draw_outline(ctx, s_flairPath);
+  if (s_flairAngle != 0) {
+    graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
+    graphics_context_set_stroke_color(ctx, getLiquidTimeColour());
+    gpath_rotate_to(s_flairPath, s_flairAngle);
+    gpath_draw_filled(ctx, s_flairPath);
+    gpath_draw_outline(ctx, s_flairPath);
+  }
 
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
@@ -200,7 +203,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_treasureID = -1;
 
   s_flairPath = gpath_create(&FLAIR_PATH);
-  gpath_move_to(s_flairPath, GPoint(72, -20));
+  gpath_move_to(s_flairPath, GPoint(72, -18));
 
   // Create layer for the tank
   s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
