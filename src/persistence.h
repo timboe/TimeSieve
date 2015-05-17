@@ -16,6 +16,7 @@ struct userData_v1 {
   uint16_t magicOwned[MAX_TREASURES];
   uint16_t rareOwned[MAX_TREASURES];
   uint16_t epicOwned[MAX_TREASURES];
+  uint32_t itemsMissed;
   char     uniqueOwned[BITNSLOTS(MAX_UNIQUE)];
   char     chevoBitmap[BITNSLOTS(MAX_CHEVOS)];
   // Options
@@ -41,6 +42,9 @@ uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
 void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t n);
 void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
 void removeItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
+
+void addItemsMissed(uint32_t n);
+uint32_t getItemsMissed();
 
 time_t getUserTimeOfSave();
 

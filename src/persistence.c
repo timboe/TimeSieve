@@ -92,6 +92,10 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t 
   }
 }
 
+void addItemsMissed(uint32_t n) { s_userData->itemsMissed += n; }
+
+uint32_t getItemsMissed() { return s_userData->itemsMissed; }
+
 void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n) {
   if (treasureID == COMMON_ID) {
     s_userData->commonOwned[itemID] += n;

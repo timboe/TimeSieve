@@ -38,7 +38,7 @@ static char tempBuffer[TEXT_BUFFER_SIZE];
 
 static uint8_t s_timeDisplay = 0;
 static uint8_t s_buildingDisplay = 0;
-static uint8_t s_itemDisplay = 0;
+static int8_t s_itemDisplay = -1;
 static uint8_t s_restartCheck = RESTART_COUNTDOWN;
 
 #define SETTINGS_UPDATEF_ID 0
@@ -202,17 +202,21 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
     } else if (row == 2) { // DISPLAY ITEMS
 
-      if      (s_itemDisplay == COMMON_ID)    strcpy(titleText, "COMMON Items");
+      if      (s_itemDisplay == -1)           strcpy(titleText, "MISSED Items");
+      else if (s_itemDisplay == COMMON_ID)    strcpy(titleText, "COMMON Items");
       else if (s_itemDisplay == MAGIC_ID)     strcpy(titleText, "MAGIC Items");
       else if (s_itemDisplay == RARE_ID)      strcpy(titleText, "RARE Items");
       else if (s_itemDisplay == EPIC_ID)      strcpy(titleText, "EPIC Items");
       else if (s_itemDisplay == LEGENDARY_ID) strcpy(titleText, "LEGENDARIES");
-      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(s_itemDisplay) );
-      strcpy(subText2, "VALUE:");
-      timeToString(currentCategorySellPrice(s_itemDisplay), tempBuffer, TEXT_BUFFER_SIZE, true);
-      strcat(subText2, tempBuffer);
-      if (s_itemDisplay == LEGENDARY_ID) strcpy(subText2, "VALUE: Timeless"); // Cannot sell legendaries
-
+      if (s_itemDisplay == -1) {
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "TOTAL: %i", (int)getItemsMissed() );
+      } else {
+        snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "OWNED: %i", (int)getUserTotalItems(s_itemDisplay) );
+        strcpy(subText2, "VALUE:");
+        timeToString(currentCategorySellPrice(s_itemDisplay), tempBuffer, TEXT_BUFFER_SIZE, true);
+        strcat(subText2, tempBuffer);
+        if (s_itemDisplay == LEGENDARY_ID) strcpy(subText2, "VALUE: Timeless"); // Cannot sell legendaries
+      }
     }
 
   } else if (section == CHEVO_SECTION_ID) {
@@ -343,7 +347,7 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
     } else if (row == 2) {
       // Only show for categories where we have items - no spoils
       while (++s_itemDisplay < 5 && getUserTotalItems(s_itemDisplay) == 0) {}
-      if (s_itemDisplay == 5) s_itemDisplay = 0;
+      if (s_itemDisplay == 5) s_itemDisplay = -1;
     }
 
   } else if (section == CHEVO_SECTION_ID) {

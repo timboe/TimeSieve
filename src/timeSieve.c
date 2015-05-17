@@ -21,6 +21,7 @@ static GRect s_treasureRect;
 static bool s_treasureOnShow;
 static int8_t s_treasureID;
 static int8_t s_itemID;
+static AppTimer* s_treasureTimeout = NULL;
 
 static GPoint s_halo;
 static uint8_t s_haloRings;
@@ -183,6 +184,9 @@ void stopDisplayItem(void* data) {
   s_treasureOnShow = false;
   s_treasureID = -1;
   s_haloRings = 0;
+  if (data != NULL) addItemsMissed(1); // Was a timeout
+  else app_timer_cancel(s_treasureTimeout);
+  s_treasureTimeout = NULL;
 }
 
 void itemCanBeCollected() {
@@ -192,7 +196,8 @@ void itemCanBeCollected() {
     collectItem(true);
     return;
   }
-  app_timer_register(TREASURE_DISPLAY_TIME, stopDisplayItem, NULL);   // Start timer to remove treasure - player better be fast!
+  // By sending a (junk) but non-null ptr, we let the callback know it was a timeout, not user intervention
+  s_treasureTimeout = app_timer_register(TREASURE_DISPLAY_TIME, stopDisplayItem, (void*)1);   // Start timer to remove treasure - player better be fast!
 }
 
 void displyItem(uint8_t treasureID, uint8_t itemID) {
