@@ -10,6 +10,7 @@
 #include "persistence.h"
 #include "items.h"
 #include "achievement.h"
+#include "resources.h"
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed); //rm me later
 
@@ -66,6 +67,7 @@ void main_window_load(Window *window) {
   create_timeSieve_layer(window);
   create_clock_layer(window);
   create_timeTank_layer(window);
+  initMainWindowRes();
 }
 
 // Main window destructiom
@@ -73,6 +75,7 @@ void main_window_unload(Window *window) {
   destroy_timeSieve_layer();
   destroy_clock_layer();
   destroy_timeTank_layer();
+  deinitMainWindowRes();
 }
 
 // For the main window

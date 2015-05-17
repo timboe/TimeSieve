@@ -41,6 +41,7 @@
 #define MAX_TREASURES 4
 #define MAX_UNIQUE 16
 #define MAX_CHEVOS 16
+#define N_CHEVO_IMAGE 2
 
 #define REFINERY_ID 0
 #define TANK_ID 1
@@ -237,7 +238,6 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define SCHEMA_VERSION 1
 
 #define ANIM_FPS 25
-//#define ANIM_TICK_PER_FRAME 2
 #define ANIM_DURATION 2
 #define ANIM_MIN_V 100
 #define ANIM_MAX_V 300

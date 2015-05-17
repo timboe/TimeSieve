@@ -37,8 +37,6 @@ static uint8_t s_soldItemID;
 static uint16_t s_soldNumber;
 static bool s_tankFull;
 
-static BitmapLayer* s_sellBitmapLayer;
-
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
 void updateSellMenu() {
@@ -252,10 +250,10 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   gpath_draw_outline(ctx, arrow);
 
 
-  // Image placeholder
+  // Image
   GRect imageRect = GRect(3, 4,  22, 36);
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, getItemImage(treasureID, itemID), imageRect);
+  graphics_draw_bitmap_in_rect(ctx, getSellItemImage(treasureID, itemID), imageRect);
 }
 
 // Notify popup
@@ -330,6 +328,8 @@ static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
 void sell_window_load(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinLd");
 
+  initSellWindowRes();
+
   // Now we prepare to initialize the menu layer
   Layer* window_layer = window_get_root_layer(parentWindow);
   GRect bounds = layer_get_frame(window_layer);
@@ -357,11 +357,6 @@ void sell_window_load(Window* parentWindow) {
   menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
   layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
 
-  ScrollLayer* sl = menu_layer_get_scroll_layer(s_sell_layer); //TODO try using this!
-  s_sellBitmapLayer = bitmap_layer_create( GRect(3, 64,  22, 36) );
-  bitmap_layer_set_compositing_mode(s_sellBitmapLayer, GCompOpSet); // W transparencies
-  layer_add_child(window_layer, bitmap_layer_get_layer(s_sellBitmapLayer));
-
   // Notify layer goes on top, shows sold items
   s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 55) );
   layer_set_update_proc(s_sellNotifyLayer, sellNotifyUpdateProc);
@@ -374,9 +369,9 @@ void sell_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinULd");
   menu_layer_destroy(s_sell_layer);
   layer_destroy(s_sellNotifyLayer);
-  bitmap_layer_destroy(s_sellBitmapLayer);
   s_sell_layer = 0;
   free(s_arrowUp);
   free(s_arrowDown);
   free(s_box);
+  deinitSellWindowRes();
 }

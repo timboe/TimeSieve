@@ -2,6 +2,7 @@
 #include "buyMenu.h"
 #include "constants.h"
 #include "persistence.h"
+#include "resources.h"
 #include "timeStore.h"
 
 // Menu layers for my windows
@@ -294,9 +295,16 @@ void sub_window_load(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i CREATE", context);
 
-  if (context == REFINERY_ID)     s_refinery_layer = new_layer;
-  else if (context == TANK_ID)    s_tank_layer = new_layer;
-  else if (context == WATCHER_ID) s_watcher_layer = new_layer;
+  if (context == REFINERY_ID) {
+    s_refinery_layer = new_layer;
+    initRefineryWindowRes();
+  } else if (context == TANK_ID) {
+    s_tank_layer = new_layer;
+    initTankWindowRes();
+  } else if (context == WATCHER_ID) {
+    s_watcher_layer = new_layer;
+    initEmployeeWindowRes();
+  }
   menu_layer_set_callbacks(new_layer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
     .get_num_sections = sub_menu_get_num_sections_callback,
     .get_num_rows = sub_menu_get_num_rows_callback,
@@ -315,11 +323,16 @@ void sub_window_load(Window* parentWindow) {
 void sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i DESTROY", context);
-  if (context == REFINERY_ID)     menu_layer_destroy(s_refinery_layer);
-//  else if (context == SIEVE_ID)   menu_layer_destroy(s_sieve_layer);
-  else if (context == TANK_ID)    menu_layer_destroy(s_tank_layer);
-  else if (context == WATCHER_ID) menu_layer_destroy(s_watcher_layer);
-
+  if (context == REFINERY_ID) {
+    menu_layer_destroy(s_refinery_layer);
+    deinitRefineryWindowRes();
+  } else if (context == TANK_ID) {
+    menu_layer_destroy(s_tank_layer);
+    deinitTankWindowRes();
+  } else if (context == WATCHER_ID) {
+    menu_layer_destroy(s_watcher_layer);
+    deinitEmployeeWindowRes();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

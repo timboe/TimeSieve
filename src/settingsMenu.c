@@ -402,7 +402,7 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
 }
 
 ///
-/// SETTINGS WINDOW CALLBACKS
+/// SETTINGS SUB WINDOW CALLBACKS
 ///
 
 static uint16_t settings_sub_menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) { return 1; }
@@ -435,7 +435,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   int8_t itemID;
   const char* nameText;
   const char* descText;
-  GBitmap* pic;
+  GBitmap* image;
   if (context == UNIQUE_CONTEXT_ID) {
     itemID = getItemIDFromRow(LEGENDARY_ID, row);
     if (itemID == -1) {
@@ -444,7 +444,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
     }
     nameText = NAME_LEGENDARY[itemID];
     descText = DESC_LEGENDARY[itemID];
-    pic = getItemImage(LEGENDARY_ID, itemID);
+    image = getPrestigeItemImage(itemID);
   } else if (context == CHEVO_CONTEXT_ID) { // CHEVO
     itemID = getAchievementIDFromRow(row);
     if (itemID == -1) {
@@ -453,7 +453,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
     }
     nameText = NAME_ACHIEVEMENT[itemID];
     descText = NAME_ACHIEVEMENT[itemID];
-    pic = NULL;
+    image = getAchievementImage(0); // TODO get correct image
   } else {
     return;
   }
@@ -480,7 +480,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   graphics_draw_text(ctx, descText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, pic, imageRect);
+  graphics_draw_bitmap_in_rect(ctx, image, imageRect);
 }
 
 static void settings_sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -501,8 +501,12 @@ void settings_sub_window_load(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SETTINGS SUB-WIN %i LOAD", context);
 
   new_layer = menu_layer_create(bounds);
-  if (context == CHEVO_CONTEXT_ID)       s_chevo_layer = new_layer;
-  else if (context == UNIQUE_CONTEXT_ID) s_unique_layer = new_layer;
+  if (context == CHEVO_CONTEXT_ID) {
+    s_chevo_layer = new_layer;
+  } else if (context == UNIQUE_CONTEXT_ID) {
+    s_unique_layer = new_layer;
+    initPrestigeWindowRes();
+  }
   // Create the menu layer
   menu_layer_set_callbacks(new_layer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
     .get_num_sections = settings_sub_menu_get_num_sections_callback,
@@ -521,8 +525,12 @@ void settings_sub_window_load(Window* parentWindow) {
 void settings_sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SETTINGS SUB-WIN %i DESTROY", context);
-  if (context == CHEVO_CONTEXT_ID)       menu_layer_destroy(s_chevo_layer);
-  else if (context == UNIQUE_CONTEXT_ID) menu_layer_destroy(s_unique_layer);
+  if (context == CHEVO_CONTEXT_ID) {
+    menu_layer_destroy(s_chevo_layer);
+  } else if (context == UNIQUE_CONTEXT_ID) {
+    menu_layer_destroy(s_unique_layer);
+    deinitPrestigeWindowRes();
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////

@@ -4,6 +4,7 @@
 #include "clock.h"
 #include "timeStore.h"
 #include "mainWindow.h"
+#include "resources.h"
 
 static struct userData_v1* s_userData;
 
@@ -127,8 +128,6 @@ uint16_t getUserTotalUpgrades(const unsigned typeID) {
       count += s_userData->refineriesOwned[i];
     } else if (typeID == TANK_ID) {
       count += s_userData->tanksOwned[i];
-//    } else if (typeID == SIEVE_ID) {
-//      count += s_userData->sievesOwned[i];
     } else if (typeID == WATCHER_ID) {
       count += s_userData->watchersOwned[i];
     }
@@ -215,8 +214,6 @@ uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
     return s_userData->refineriesOwned[resourceID];
   } else if (typeID == TANK_ID) {
     return s_userData->tanksOwned[resourceID];
-//  } else if (typeID == SIEVE_ID) {
-//    return s_userData->sievesOwned[resourceID];
   } else if (typeID == WATCHER_ID) {
     return s_userData->watchersOwned[resourceID];
   }
@@ -252,6 +249,7 @@ void setUserSetting(USER_SETTING set, uint8_t value) {
   s_userData->settings[set] = value;
   // Do we need to action on anything that has changed?
   if (set == SETTING_TYPE) {
+    loadClockFont();
     switch(value) {
       case FONT_5: setClockPixelOffset(1); break;
       default: setClockPixelOffset(2);
