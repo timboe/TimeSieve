@@ -235,6 +235,7 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   // FLAIR
   graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
   graphics_context_set_stroke_color(ctx, getLiquidTimeColour());
+  gpath_rotate_to(s_flairPath, s_flairAngle);
   gpath_draw_filled(ctx, s_flairPath);
   gpath_draw_outline(ctx, s_flairPath);
 
