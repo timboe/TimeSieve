@@ -50,6 +50,9 @@ void resetUserData() {
   memset(s_userData, 0, sizeof(struct userData_v1));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "resetUserData");
   setUserOpt(OPT_ANIMATE, true);
+  setUserOpt(OPT_CELSIUS, true);
+  setUserSetting(SETTING_ZZZ_START, 23);
+  setUserSetting(SETTING_ZZZ_END, 8);
   if (IS_DEBUG) DEVMODE();
   initSettings();
 }
