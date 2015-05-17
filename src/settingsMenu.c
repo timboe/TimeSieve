@@ -431,7 +431,7 @@ static int16_t settings_sub_menu_get_header_height_callback(MenuLayer *menu_laye
   return MENU_CELL_BASIC_HEADER_HEIGHT;
 }
 
-static int16_t settings_sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_ONE_CELL_HEIGHT; }
+static int16_t settings_sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_TWO_CELL_HEIGHT; }
 
 static void settings_sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   const int context = *((int*)data);
