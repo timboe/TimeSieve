@@ -394,7 +394,12 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
     } else if (row == SETTINGS_QUIETE_ID) { // Quiet end
       incrementUserSetting(SETTING_ZZZ_END);
     } else if (row == SETTINGS_RESET_ID) { // new game
-      if (--s_restartCheck == 0) resetUserData();
+      if (--s_restartCheck == 0) {
+        // Start afresh!!!
+        resetUserData();
+        destroy_timeStore();
+        init_timeStore();
+      }
     }
 
   }

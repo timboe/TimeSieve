@@ -8,8 +8,8 @@
     "projectType": "native",
     "resources": {
         "media": [
-            { "file": "fonts/perfect-dos-vga.ttf", "name": "PERFECT_DOS_21", "type": "font", "characterRegex": "[0-9:%\.A-Za-z ]" },
-            { "file": "fonts/meteocons.ttf", "name": "WEATHER_24", "type": "font", "characterRegex": "[12345678%\$M\)]" },
+            { "file": "fonts/perfect-dos-vga.ttf", "name": "PERFECT_DOS_21", "type": "font", "characterRegex": "[0-9:%.A-Za-z ]" },
+            { "file": "fonts/meteocons.ttf", "name": "WEATHER_24", "type": "font" },
             { "file": "fonts/Bowman.ttf", "name": "FONT_A_31", "type": "font", "characterRegex": "[0-9:]" },
             { "file": "fonts/Bowman.ttf", "name": "FONT_A_18", "type": "font", "characterRegex": "[0-9:A-Za-z ]" },
 
