@@ -39,11 +39,14 @@ static bool s_flashMainFace = false;
 #define WEATHER_NA ")"
 
 static const GPathInfo FLAIR_PATH = {
-  .num_points = 12,
+  .num_points = 18,
   .points = (GPoint []) {{0, 0}, {100,  -10},  {100,  8},
                          {0, 0}, {-100, -11},  {-100, 7},
                          {0, 0}, {9,    100},  {-10,  100},
-                         {0, 0}, {12,   -100}, {-9,  -100}}
+                         {0, 0}, {12,   -100}, {-9,  -100},
+                         {0, 0}, {95,   100},  {100,  95},
+                         {0, 0}, {-95,  -100}, {-100, -95}
+                         }
 };
 static GPath* s_flairPath;
 static int32_t s_flairAngle = 0;
@@ -88,7 +91,7 @@ bool clockAnimCallback(TimeUnits units_changed) {
   }
 
   // Day+ spec
-  s_flairAngle += TRIG_MAX_ANGLE/ANIM_FRAMES;
+  s_flairAngle += TRIG_MAX_ANGLE/ANIM_FPS;
 
   if ((units_changed & YEAR_UNIT) > 0 && s_clockTickCount % 8 == 0) {
     uint8_t bgColourOverride = rand() % PALETTE_MAX;
