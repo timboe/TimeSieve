@@ -451,21 +451,15 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   GBitmap* image;
   if (context == UNIQUE_CONTEXT_ID) {
     itemID = getItemIDFromRow(LEGENDARY_ID, row);
-    if (itemID == -1) {
-      APP_LOG(APP_LOG_LEVEL_ERROR, "NoItem4SettingRow");
-      return;
-    }
+    if (itemID == -1) return;
     nameText = NAME_LEGENDARY[itemID];
     descText = DESC_LEGENDARY[itemID];
     image = getPrestigeItemImage(itemID);
   } else if (context == CHEVO_CONTEXT_ID) { // CHEVO
     itemID = getAchievementIDFromRow(row);
-    if (itemID == -1) {
-      APP_LOG(APP_LOG_LEVEL_ERROR, "NoItem4SettingRow");
-      return;
-    }
+    if (itemID == -1) return;
     nameText = NAME_ACHIEVEMENT[itemID];
-    descText = NAME_ACHIEVEMENT[itemID];
+    descText = DESC_ACHIEVEMENT[itemID];
     image = getAchievementImage(0); // TODO get correct image
   } else {
     return;

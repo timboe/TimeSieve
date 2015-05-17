@@ -25,7 +25,7 @@
 //               ACHIEVEMENT_FULL_TANK, //?
 //               ACHIEVEMENT_FULL_HISTORY} CHEVOS; //?
 
-#define PACK_RAT_ATHIEVEMENT 1000
+#define PACK_RAT_ACHIEVEMENT 1000
 
 uint16_t getTotalUnlockWorkers() {
   uint16_t tot = 0;
@@ -59,7 +59,7 @@ int8_t checkAchievementsInternal() {
       case ACHIEVEMENT_INCOME_2: if (getTimePerMin() >= 7000*SEC_IN_YEAR) return a; break;
       case ACHIEVEMENT_TANK_1: if (getUserTime() >= SEC_IN_DAY) return a; break;
       case ACHIEVEMENT_TANK_2: if (getUserTime() >= SEC_IN_AGE) return a; break;
-      case ACHIEVEMENT_PACK_RAT: if (getUserGrandTotalItems() >= PACK_RAT_ATHIEVEMENT) return a; break;
+      case ACHIEVEMENT_PACK_RAT: if (getUserGrandTotalItems() >= PACK_RAT_ACHIEVEMENT) return a; break;
       case ACHIEVEMENT_ITEM_VALUE: if (currentTotalSellPrice() >= SEC_IN_EPOCH) return a; break;
       case ACHIEVEMENT_TANKUP_1: if (getUserTotalUpgrades(TANK_ID) >= 200) return a; break;
       case ACHIEVEMENT_TANKUP_2: if (getUserTotalUpgrades(TANK_ID) >= 800) return a; break;

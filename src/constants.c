@@ -249,16 +249,16 @@ const char* const DESC_LEGENDARY[MAX_UNIQUE] = {
   "DESC 16"};
 
 const char* const NAME_ACHIEVEMENT[MAX_CHEVOS] = {
-  "On the hour, every minute",
-  "In the blink of an eye",
-  "Saving a rainy day",
+  "Of the hour",
+  "Blink of an eye",
+  "Save a rainy day",
   "Age in the bank",
   "Pack rat",
   "Estimed Collector",
   "Need moar space!",
   "Time, all the way down",
   "Smoggy",
-  "Blighted landscapes",
+  "Blighted landscape",
   "Uinionise",
   "Bells & Whistles",
   "DESC 13",
