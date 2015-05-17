@@ -39,7 +39,7 @@ static uint64_t s_soldPrice;
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
-void updateSellMenu() {
+void updateSellLayer() {
   if (s_sell_layer) layer_mark_dirty(menu_layer_get_layer(s_sell_layer));
 }
 

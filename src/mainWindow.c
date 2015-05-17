@@ -31,7 +31,9 @@ void animEnd() {
     updateDisplayTime( getUserTime() ); // Make sure correct time is set
     update_timeTank_layer(); // Show the user their new time
     updateClockLayer();  // Update the clock
-    updateSellMenu(); // Update sell prices
+    updateBuyLayer();
+    updateSellLayer();
+    updateSettingsLayer();
 }
 
 /**
@@ -121,6 +123,9 @@ void doSecond() {
   updateDisplayTime( getUserTime() ); // We don't animate the time if updating every sec
   update_timeTank_layer();
   updateClockLayer();
+  updateBuyLayer();
+  updateSellLayer();
+  updateSettingsLayer();
 }
 
 /**

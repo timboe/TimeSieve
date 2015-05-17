@@ -24,12 +24,12 @@
 
 #define RESTART_COUNTDOWN 8
 
-static MenuLayer* s_settings_layer;
-static MenuLayer* s_chevo_layer;
-static MenuLayer* s_unique_layer;
+static MenuLayer* s_settings_layer = NULL;
+static MenuLayer* s_chevo_layer = NULL;
+static MenuLayer* s_unique_layer = NULL;
 
-static Window* s_chevo_window;
-static Window* s_unique_window;
+static Window* s_chevo_window = NULL;
+static Window* s_unique_window = NULL;
 
 static int s_chevo_context = CHEVO_CONTEXT_ID;
 static int s_unique_context = UNIQUE_CONTEXT_ID;
@@ -57,6 +57,12 @@ static uint8_t s_restartCheck = RESTART_COUNTDOWN;
 
 static uint8_t s_unlockSetting[NUM_UNLOCK_ROWS];
 static uint8_t s_unlockedTo[NUM_UNLOCK_ROWS]; // How far has the user actually unlocked?
+
+void updateSettingsLayer() {
+  if (s_settings_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_settings_layer));
+  if (s_chevo_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_chevo_layer));
+  if (s_unique_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_unique_layer));
+}
 
 void loadUserSettings() {
   s_unlockSetting[UNLOCK_TECH_ID]   = getUserSetting(SETTING_TECH);
@@ -530,8 +536,10 @@ void settings_sub_window_unload(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SETNGS SUB-W %i DESTROY", context);
   if (context == CHEVO_CONTEXT_ID) {
     menu_layer_destroy(s_chevo_layer);
+    s_chevo_layer = NULL;
   } else if (context == UNIQUE_CONTEXT_ID) {
     menu_layer_destroy(s_unique_layer);
+    s_unique_layer = NULL;
     deinitPrestigeWindowRes();
   }
 }
@@ -583,6 +591,9 @@ void settings_window_load(Window* parentWindow) {
 void settings_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWinDstry");
   menu_layer_destroy(s_settings_layer);
+  s_settings_layer = NULL;
   window_destroy(s_chevo_window);
   window_destroy(s_unique_window);
+  s_chevo_window = NULL;
+  s_unique_window = NULL;
 }

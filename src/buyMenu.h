@@ -3,3 +3,5 @@
 
 void buy_window_load(Window* parentWindow);
 void buy_window_unload();
+
+void updateBuyLayer();

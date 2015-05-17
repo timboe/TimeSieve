@@ -6,10 +6,10 @@
 #include "timeStore.h"
 
 // Menu layers for my windows
-static MenuLayer* s_menu_layer;
-static MenuLayer* s_refinery_layer;
-static MenuLayer* s_tank_layer;
-static MenuLayer* s_watcher_layer;
+static MenuLayer* s_menu_layer = NULL;
+static MenuLayer* s_refinery_layer = NULL;
+static MenuLayer* s_tank_layer = NULL;
+static MenuLayer* s_watcher_layer = NULL;
 
 // My sub-windows
 static Window* s_refinery_window;
@@ -24,6 +24,13 @@ static bool s_selectedMaxLevel;
 
 // Temp buffer
 static char tempBuffer[TEXT_BUFFER_SIZE];
+
+void updateBuyLayer() {
+  if (s_menu_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
+  if (s_refinery_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_refinery_layer));
+  if (s_tank_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_tank_layer));
+  if (s_watcher_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_watcher_layer));
+}
 
 ///
 /// MAIN BUY WINDOW CALLBACKS
@@ -325,12 +332,15 @@ void sub_window_unload(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i DESTROY", context);
   if (context == REFINERY_ID) {
     menu_layer_destroy(s_refinery_layer);
+    s_refinery_layer = NULL;
     deinitRefineryWindowRes();
   } else if (context == TANK_ID) {
     menu_layer_destroy(s_tank_layer);
+    s_tank_layer = NULL;
     deinitTankWindowRes();
   } else if (context == WATCHER_ID) {
     menu_layer_destroy(s_watcher_layer);
+    s_watcher_layer = NULL;
     deinitEmployeeWindowRes();
   }
 }
@@ -378,10 +388,13 @@ void buy_window_load(Window* parentWindow) {
 void buy_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN DESTROY");
   menu_layer_destroy(s_menu_layer);
+  s_menu_layer = NULL;
 
   // Destroy sub-windows
   window_destroy(s_refinery_window);
   window_destroy(s_tank_window);
- // window_destroy(s_sieve_window);
   window_destroy(s_watcher_window);
+  s_refinery_window = NULL;
+  s_tank_window = NULL;
+  s_watcher_window = NULL;
 }
