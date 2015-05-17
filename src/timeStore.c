@@ -28,22 +28,24 @@ static uint64_t s_timeCapacity;
  * TODO: Behind the scenes, game extension via bit-shift?
  **/
 uint64_t safeAdd(uint64_t a, uint64_t b) {
-  if (a == ULLONG_MAX) return ULLONG_MAX;
-  uint64_t before = a;
-  a += b;
-  if (a >= before) return a;
-  return ULLONG_MAX;
+  return a + b;
+  //if (a == ULLONG_MAX) return ULLONG_MAX;
+  //uint64_t before = a;
+  //a += b;
+  //if (a >= before) return a;
+  //return ULLONG_MAX;
 }
 
 /**
  * @see safeAdd()
  **/
 uint64_t safeMultiply(uint64_t a, uint64_t b) {
-  if (a == ULLONG_MAX) return ULLONG_MAX;
-  uint64_t before = a;
-  a *= b;
-  if (a >= before) return a;
-  return ULLONG_MAX;
+  return a * b;
+  //if (a == ULLONG_MAX) return ULLONG_MAX;
+  //uint64_t before = a;
+  //a *= b;
+  //if (a >= before) return a;
+  //return ULLONG_MAX;
 }
 
 // Perform fixed point increase in price by floor of 7/6.
@@ -355,7 +357,10 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   int eras = (time % SEC_IN_EON) / SEC_IN_ERA;
 
   // 0_o
-  if (brief && time == ULLONG_MAX) snprintf(buffer, buffer_size, "%iEon: MAX!!!", eons);
+  if (brief && time == ULLONG_MAX) {
+    snprintf(buffer, buffer_size, "%iEon: MAX!!!", eons);
+    return;
+  }
 
   if (brief && eons) {
     snprintf(buffer, buffer_size, "%iEon %iEra", eons, eras);
