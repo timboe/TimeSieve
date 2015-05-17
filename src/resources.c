@@ -27,7 +27,7 @@ static GBitmap* s_employeeImage[MAX_UPGRADES];
 
 void initMainWindowRes() {
   s_perfectDOSFont  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
-  s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_24));
+  s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_21));
   s_temperatureFont = fonts_get_system_font(FONT_KEY_GOTHIC_14);
   loadClockFont();
   s_achievementImage[0] = NULL; //TODO

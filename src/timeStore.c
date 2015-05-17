@@ -440,8 +440,8 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
 }
 
 void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bufferSize, unsigned* value) {
-  *value = (amount*100) / total;
-  unsigned remain = (amount*100) % total;
+  *value = (amount / total) * 100;
+  unsigned remain = (amount % total) * 100;
   // We only want the two most signnificant figs
   while (remain > 100) remain /= 10;
   snprintf(buffer, bufferSize, "%i.%i%%", *value, remain);
