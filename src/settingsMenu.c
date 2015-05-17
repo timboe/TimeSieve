@@ -22,8 +22,6 @@
 #define NUM_UNLOCK_ROWS 5
 #define NUM_SETTINGS_ROWS 6
 
-#define SETTINGS_CELL_HEIGHT 57
-
 #define RESTART_COUNTDOWN 8
 
 static MenuLayer* s_settings_layer;
@@ -115,9 +113,9 @@ static void settings_draw_header_callback(GContext* ctx, const Layer *cell_layer
 
 static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   switch(cell_index->section) {
-    case STAT_SECTION_ID: return SETTINGS_CELL_HEIGHT;
-    case CHEVO_SECTION_ID: return 32;
-    case SETTINGS_SECTION_ID: case UNLOCK_SECTION_ID: return 44;
+    case STAT_SECTION_ID: return MENU_TWO_CELL_HEIGHT;
+    case CHEVO_SECTION_ID: return MENU_ZERO_CELL_HEIGHT;
+    case SETTINGS_SECTION_ID: case UNLOCK_SECTION_ID: return MENU_ONE_CELL_HEIGHT;
     default: return 0;
   }
 }
@@ -150,9 +148,9 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
-  GRect ttlTextRect = GRect(0, 0,  size.w, size.h);
-  GRect topTextRect = GRect(0, 22, size.w, size.h-22);
-  GRect botTextRect = GRect(0, 33, size.w, size.h-33);
+  GRect ttlTextRect = GRect(0, -6,  size.w, size.h);
+  GRect topTextRect = GRect(0, 16, size.w, size.h-22);
+  GRect botTextRect = GRect(0, 27, size.w, size.h-33);
 
   static char titleText[TEXT_BUFFER_SIZE];
   static char subText1[TEXT_LARGE_BUFFER_SIZE];
@@ -184,13 +182,13 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
       int v = 0;
       if (s_buildingDisplay == 0) {
-        strcpy(titleText, "TREASURE Find >");
+        strcpy(titleText, "ITEM Find >");
         v = getFindBaseChance();
       } else if (s_buildingDisplay == 1) {
-        strcpy(titleText, "TREASURE Quality >");
+        strcpy(titleText, "ITEM Quality >");
         v = getQualityBaseChance();
       } else if (s_buildingDisplay == 2) {
-        strcpy(titleText, "TREASURE Auto-Collect >");
+        strcpy(titleText, "ITEM Auto-Collect >");
         v = getAutoCollectChance();
       }
       snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "BONUS: %i.%i%%", v/(SCALE_FACTOR/100), v%(SCALE_FACTOR/100) );
@@ -423,7 +421,7 @@ static int16_t settings_sub_menu_get_header_height_callback(MenuLayer *menu_laye
   return MENU_CELL_BASIC_HEADER_HEIGHT;
 }
 
-static int16_t settings_sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_CELL_HEIGHT; }
+static int16_t settings_sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_ONE_CELL_HEIGHT; }
 
 static void settings_sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   const int context = *((int*)data);

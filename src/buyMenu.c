@@ -90,7 +90,7 @@ static uint16_t sub_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t s
 
 static int16_t sub_menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return MENU_CELL_LARGE_HEADER_HEIGHT; }
 
-static int16_t sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_CELL_HEIGHT; }
+static int16_t sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_THREE_CELL_HEIGHT; }
 
 static void sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "HEADER DRAW %i", section_index);

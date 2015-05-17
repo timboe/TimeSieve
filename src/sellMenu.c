@@ -129,7 +129,7 @@ static void sell_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 }
 
 static int16_t sell_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  return MENU_SMALL_CELL_HEIGHT;
+  return MENU_TWO_CELL_HEIGHT;
 }
 
 static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
