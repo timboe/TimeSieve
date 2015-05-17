@@ -1,4 +1,5 @@
 #include <pebble.h>
+#include <limits.h>
 #include "timeStore.h"
 #include "constants.h"
 #include "persistence.h"
@@ -19,30 +20,18 @@ static uint64_t s_timeCapacity;
 
 #define INITIAL_PRICE_MODULATION 5
 
-/**
- * Get most significant bit location 2^N
- * @see safeAdd()
- **/
-size_t highestOneBitPosition(uint64_t a) {
-    size_t bits=0;
-    while (a!=0) {
-        ++bits;
-        a>>=1;
-    };
-    return bits;
-}
 
 /**
- * Thanks http://stackoverflow.com/questions/199333/how-to-detect-integer-overflow-in-c-c
  * While it may seem crazy that an unsigned 64 bit integer with over 631 billion year
  * capacity (while retaining second precision) could overflow - I know idle game players...
- *
- * If we are within a factor two of 'the end' - we jump there, no messing about.
+ * Note: always frame as larger+smaller. Check for modulo overflow
  * TODO: Behind the scenes, game extension via bit-shift?
  **/
 uint64_t safeAdd(uint64_t a, uint64_t b) {
-  size_t a_bits=highestOneBitPosition(a), b_bits=highestOneBitPosition(b);
-  if (a_bits<64 && b_bits<64) return (a+b);
+  if (a == ULLONG_MAX) return ULLONG_MAX;
+  uint64_t before = a;
+  a += b;
+  if (a >= before) return a;
   return ULLONG_MAX;
 }
 
@@ -50,8 +39,10 @@ uint64_t safeAdd(uint64_t a, uint64_t b) {
  * @see safeAdd()
  **/
 uint64_t safeMultiply(uint64_t a, uint64_t b) {
-  size_t a_bits=highestOneBitPosition(a), b_bits=highestOneBitPosition(b);
-  if (a_bits+b_bits<=64) return (a*b);
+  if (a == ULLONG_MAX) return ULLONG_MAX;
+  uint64_t before = a;
+  a *= b;
+  if (a >= before) return a;
   return ULLONG_MAX;
 }
 
@@ -168,6 +159,71 @@ void destroy_timeStore() {
   free( s_bufferEpicSellPrice );
 }
 
+void giveCatchupItems(TimeUnits units, uint32_t n) {
+  for (uint32_t i = 0; i < n; ++i) {
+    uint8_t treasureID = getItemRarity(units);
+    uint8_t itemID = 0;
+    genRandomItem(&treasureID, &itemID); // Both are modified (rarity may need to be downgraded)
+    addItem(treasureID, itemID, 1);
+  }
+}
+
+void doCatchup() {
+  if (getUserTimeOfSave() == 0) return;
+  int32_t timeDiff = time(NULL) - getUserTimeOfSave();
+  APP_LOG(APP_LOG_LEVEL_INFO, "Catchup BGN %i seconds", (int)timeDiff);
+  if (timeDiff < 0) return;
+
+  // Give liquid time. Won't give more than can fit
+  uint32_t nMin = timeDiff / SEC_IN_MIN;
+  addTime( safeMultiply( getTimePerMin(), nMin) );
+
+  // If no chance of autocollect then end here!
+  if (getAutoCollectChance() == 0) return;
+
+  // Items
+  uint32_t nYear = timeDiff / SEC_IN_YEAR;
+  uint32_t nMonth = (timeDiff / (SEC_IN_DAY*31)) - nYear;
+  uint32_t nDay = (timeDiff / SEC_IN_DAY) - nMonth - nYear;
+  uint32_t nHour = (timeDiff / SEC_IN_HOUR) - nDay - nMonth - nYear;
+  nMin = nMin - nHour - nDay - nMonth - nYear;
+  uint32_t itemsFound = 0;
+  // For year, month and day we do it proper, i.e. we check each boundary in turn
+  for (uint8_t N = 0; N < 3; ++N) {
+    uint32_t tries = nYear;
+    TimeUnits unit = YEAR_UNIT;
+    if (N == 1) {
+      tries = nMonth;
+      unit = MONTH_UNIT;
+    } else if (N == 2) {
+      tries = nDay;
+      unit = DAY_UNIT;
+    }
+    for (uint32_t t = 0; t < tries; ++t) {
+      if (getItemAutoCollect() == false) continue;
+      if (checkForItem(unit) == false) continue;
+      giveCatchupItems(unit, 1);
+      ++itemsFound;
+    }
+  }
+  // For hour and min, we cheat, and do it probabailisticaly.
+  // This rounds down to the nearest items boo-hoo to the user
+  // Expected N items
+  uint32_t dayItems = (nDay * getItemAppearChance(DAY_UNIT)) / SCALE_FACTOR;
+  // Now take into account the auto-collect chance
+  dayItems = (dayItems * getAutoCollectChance()) / SCALE_FACTOR;
+  // Finally give the items
+  giveCatchupItems(DAY_UNIT, dayItems);
+  // And do the same for mins
+  uint32_t minItems = (nMin * getItemAppearChance(MINUTE_UNIT)) / SCALE_FACTOR;
+  minItems = (minItems * getAutoCollectChance()) / SCALE_FACTOR;
+  giveCatchupItems(MINUTE_UNIT, minItems);
+  // Done
+  itemsFound += dayItems + minItems;
+  APP_LOG(APP_LOG_LEVEL_INFO, "Catchup END %i items", (int)itemsFound);
+
+}
+
 
 uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
   uint64_t currentPrice = 0;
@@ -238,7 +294,7 @@ uint64_t getTankCapacity() {
 void updateTankCapacity() {
   s_timeCapacity = SEC_IN_HOUR; // Base level
   for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( getUserOwnsUpgrades(TANK_ID, upgrade), REWARD_TANK[upgrade]) );
+    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( REWARD_TANK[upgrade], getUserOwnsUpgrades(TANK_ID, upgrade)) );
   }
 }
 
@@ -254,8 +310,11 @@ void updateDisplayTime(uint64_t t) {
  * Update the user's time while respecting their tank size
  **/
 void addTime(uint64_t toAdd) {
+  if (safeAdd(getUserTime(), toAdd) > getTankCapacity()) {
+    toAdd = getTankCapacity() - getUserTime();
+  }
   setUserTime( safeAdd( getUserTime(), toAdd) );
-  if ( getUserTime() > getTankCapacity() ) setUserTime( getTankCapacity() );
+  setUserTotalTime( safeAdd( getUserTotalTime(), toAdd ));
 }
 
 /**

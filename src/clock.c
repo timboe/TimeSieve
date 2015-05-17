@@ -197,7 +197,8 @@ void updateWeatherBuffer() {
   else  strcat(s_temperature, "C");
 
   //TODO load weather from internet
-  int8_t randW = rand() %12;
+  static uint8_t randW = 11;
+  if (++randW == 12) randW = 0;
   switch (randW) {
     case 0: strcpy(s_weatherIcon, WEATHER_CLEAR_DAY); break;
     case 1: strcpy(s_weatherIcon, WEATHER_CLEAR_NIGHT); break;
@@ -229,9 +230,10 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false);
 
   // WEATHER
-  GRect wRect = GRect(0, 2, 40, 25);
+  GRect wRect = GRect(0, 0, 40, 25);
   graphics_context_set_text_color(ctx, getLiquidTimeHighlightColour());
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  wRect.origin.y += 2;
   draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true);
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);

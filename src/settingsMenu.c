@@ -393,7 +393,7 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
       incrementUserSetting(SETTING_ZZZ_START);
     } else if (row == SETTINGS_QUIETE_ID) { // Quiet end
       incrementUserSetting(SETTING_ZZZ_END);
-    } else if (row == 8) { // new game
+    } else if (row == SETTINGS_RESET_ID) { // new game
       if (--s_restartCheck == 0) resetUserData();
     }
 
@@ -546,7 +546,7 @@ void createSettingsSubWin(Window** w, int* context) {
 }
 
 void settings_window_load(Window* parentWindow) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETTINGS WIN LOAD");
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWLd");
 
   // Now we prepare to initialize the menu layer
   Layer* window_layer = window_get_root_layer(parentWindow);
@@ -578,7 +578,7 @@ void settings_window_load(Window* parentWindow) {
 }
 
 void settings_window_unload() {
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETTINGS WIN DESTROY");
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWinDstry");
   menu_layer_destroy(s_settings_layer);
   window_destroy(s_chevo_window);
   window_destroy(s_unique_window);

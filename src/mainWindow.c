@@ -68,6 +68,7 @@ void main_window_load(Window *window) {
   create_clock_layer(window);
   create_timeTank_layer(window);
   initMainWindowRes();
+  update_tick_handler(); // Get 1s or 1m callbacks
 }
 
 // Main window destructiom
@@ -76,6 +77,7 @@ void main_window_unload(Window *window) {
   destroy_clock_layer();
   destroy_timeTank_layer();
   deinitMainWindowRes();
+  tick_timer_service_unsubscribe();
 }
 
 // For the main window

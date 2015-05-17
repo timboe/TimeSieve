@@ -274,7 +274,7 @@ static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_text_color(ctx, GColorBlack);
   snprintf(soldTextTop, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
   if (s_soldNumber == 0) {
-    strcpy(soldTextBot, "No Space In Time Tank!");
+    strcpy(soldTextBot, "Time Tank Too Small!");
   } else {
     timeToString(s_soldPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
     strcpy(soldTextBot, "For ");

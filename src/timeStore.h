@@ -4,6 +4,7 @@
 
 void init_timeStore();
 void destroy_timeStore();
+void doCatchup();
 
 void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief);
 void percentageToString(uint64_t amount, uint64_t total, char* buffer, const size_t buffer_size, unsigned* value);

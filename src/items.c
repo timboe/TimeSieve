@@ -142,14 +142,17 @@ uint8_t getItemRarity(TimeUnits units_changed) {
   return COMMON_ID;
 }
 
+int32_t getItemAppearChance(TimeUnits units_changed) {
+  if      ((units_changed & YEAR_UNIT)  != 0) return s_findChanceYear;
+  else if ((units_changed & MONTH_UNIT) != 0) return s_findChanceMonth;
+  else if ((units_changed & DAY_UNIT)   != 0) return s_findChanceDay;
+  else if ((units_changed & HOUR_UNIT)  != 0) return s_findChanceHour;
+  else                                        return s_findChanceMin;
+}
+
 bool getItemAppears(TimeUnits units_changed) {
   // We have five different thresholds, min, hour, day, month year. Always use the larger
-  int32_t prob;
-  if      ((units_changed & YEAR_UNIT)  != 0) prob = s_findChanceYear;
-  else if ((units_changed & MONTH_UNIT) != 0) prob = s_findChanceMonth;
-  else if ((units_changed & DAY_UNIT)   != 0) prob = s_findChanceDay;
-  else if ((units_changed & HOUR_UNIT)  != 0) prob = s_findChanceHour;
-  else                                        prob = s_findChanceMin;
+  int32_t prob = getItemAppearChance(units_changed);
   int r = rand() % SCALE_FACTOR;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FndItm r:%i thresh:%i P:%i", r, (int)prob, (int)(r<prob));
   return (r < prob);
@@ -160,6 +163,27 @@ bool getItemAppears(TimeUnits units_changed) {
  **/
 bool getItemAutoCollect() {
   return ( rand() % SCALE_FACTOR < s_autoCollectChance);
+}
+
+void genRandomItem(uint8_t* treasureID, uint8_t* itemID) {
+  *itemID = rand() % MAX_TREASURES;
+  // Legendary is 1/MAX_UNIQUE and there must be one we dont have else downgrade to epic
+  if (*treasureID == LEGENDARY_ID) {
+    if (getUserTotalItems(LEGENDARY_ID) == MAX_UNIQUE) {
+      *treasureID = EPIC_ID;
+    } else {
+      uint8_t loopBreak = 0;
+      while (true) {
+        *itemID = rand() % MAX_UNIQUE;
+        if (getUserItems(*treasureID, *itemID) == 0) break;
+        if (++loopBreak == 100) { // This should never happen! But do not want to risk inf. loop
+          *treasureID = EPIC_ID;
+          *itemID = rand() % MAX_TREASURES;
+          break;
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -187,25 +211,8 @@ int8_t checkForItem(TimeUnits units_changed) {
   if (getItemAppears(units_changed) == false) return -1;
 
   uint8_t treasureID = getItemRarity(units_changed);
-  uint8_t itemID = rand() % MAX_TREASURES;
-
-  // Legendary is 1/MAX_UNIQUE and there must be one we dont have else downgrade to epic
-  if (treasureID == LEGENDARY_ID) {
-    if (getUserTotalItems(LEGENDARY_ID) == MAX_UNIQUE) {
-      treasureID = EPIC_ID;
-    } else {
-      uint8_t loopBreak = 0;
-      while (true) {
-        itemID = rand() % MAX_UNIQUE;
-        if (getUserItems(treasureID, itemID) == 0) break;
-        if (++loopBreak == 100) { // This should never happen! But do not want to risk inf. loop
-          treasureID = EPIC_ID;
-          itemID = rand() % MAX_TREASURES;
-          break;
-        }
-      }
-    }
-  }
+  uint8_t itemID = 0;
+  genRandomItem(&treasureID, &itemID); // Both are modified
 
   displyItem( treasureID, itemID );
   return treasureID;

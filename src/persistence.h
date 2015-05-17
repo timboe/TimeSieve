@@ -42,6 +42,8 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t 
 void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
 void removeItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
 
+time_t getUserTimeOfSave();
+
 void setUserTime(uint64_t newTime);
 uint64_t getUserTime();
 

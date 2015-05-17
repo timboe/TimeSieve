@@ -32,10 +32,9 @@ void DEVMODE() {
   addItem(MAGIC_ID, 2, 3);
   addItem(MAGIC_ID, 3, 3);
 
-  addTime((uint64_t)300);
-  setUserTotalTime(SEC_IN_AGE);
+  addUpgrade(REFINERY_ID, 12, 1);
+  addUpgrade(TANK_ID, 12, 1);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "DEV MODE");
-  updateDisplayTime( getUserTime() );
 }
 
 /**
@@ -51,6 +50,7 @@ void resetUserData() {
   memset(s_userData, 0, sizeof(struct userData_v1));
   APP_LOG(APP_LOG_LEVEL_DEBUG, "resetUserData");
   setUserOpt(OPT_ANIMATE, true);
+  if (IS_DEBUG) DEVMODE();
   initSettings();
 }
 
@@ -62,9 +62,6 @@ void init_persistence() {
     version = persist_read_int(PERSISTENT_VERSION_KEY);
   }
   APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence schema version %i", version);
-
-  // Force new
-  version = 0;
 
   // Allocate user store memory
   s_userData = malloc(sizeof(struct userData_v1));
@@ -87,8 +84,6 @@ void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t 
     s_userData->refineriesOwned[resourceID] += n;
   } else if (typeID == TANK_ID) {
     s_userData->tanksOwned[resourceID] += n;
-//  } else if (typeID == SIEVE_ID) {
-//    s_userData->sievesOwned[resourceID] += n;
   } else if (typeID == WATCHER_ID) {
     s_userData->watchersOwned[resourceID] += n;
   }
@@ -119,6 +114,10 @@ void destroy_persistence() { // Save
   s_userData = 0;
   int versionResult = persist_write_int(PERSISTENT_VERSION_KEY, SCHEMA_VERSION);
   APP_LOG(APP_LOG_LEVEL_DEBUG, "destroy_persistence save code data %i schema %i", dataResult, versionResult);
+}
+
+time_t getUserTimeOfSave() {
+  return s_userData->timeOfSave;
 }
 
 uint16_t getUserTotalUpgrades(const unsigned typeID) {
@@ -207,7 +206,7 @@ uint16_t getUserItemTypes(const unsigned treasureID) {
 
 uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
   if (resourceID >= MAX_UPGRADES) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "getUserOwnsUpgrades resourceID overflow");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "getUserOwnsUpgrades resourceID overflow");
     return 0;
   }
   if (typeID == REFINERY_ID) {
@@ -217,7 +216,7 @@ uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
   } else if (typeID == WATCHER_ID) {
     return s_userData->watchersOwned[resourceID];
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "getUserOwnsUpgrades typeID unknown");
+  APP_LOG(APP_LOG_LEVEL_ERROR, "getUserOwnsUpgrades typeID unknown");
   return 0;
 }
 
@@ -269,6 +268,7 @@ void setUserOpt(USER_OPT opt, bool value) {
   }
   // Do we need to action on anything that has changed?
   if (opt == OPT_SHOW_SECONDS) update_tick_handler();
+  else if (opt == OPT_CELSIUS) updateWeatherBuffer();
 }
 
 void flipUserOpt(USER_OPT opt) {
