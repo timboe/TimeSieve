@@ -57,20 +57,23 @@ void sieveAnimReset(TimeUnits units_changed) {
 }
 
 bool sieveAnimCallback(TimeUnits units_changed) {
-  // No animation if we are not moving a gem into place
-  if (s_treasureID == -1) return false;
+  // No animation if we are not moving a gem into place or doing BG flair
+  if (s_treasureID == -1 && (units_changed & DAY_UNIT) == 0) return false;
 
-  if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
-  --s_treasureRect.origin.x;
-  --s_halo.x;
+  if (s_treasureID != -1) {
+    if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
+    --s_treasureRect.origin.x;
+    --s_halo.x;
+    if (s_sieveTickCount % 14 == 0) ++s_haloRings;
+  }
 
   // Day+ spec
-  s_flairAngle += TRIG_MAX_ANGLE/ANIM_FPS/2;
-
-  if (s_sieveTickCount % 14 == 0) ++s_haloRings;
+  if ((units_changed & DAY_UNIT) > 0) {
+    s_flairAngle += TRIG_MAX_ANGLE/ANIM_FPS/2;
+  }
 
   if (++s_sieveTickCount == ANIM_FRAMES) {
-    itemCanBeCollected();
+    if (s_treasureID != -1) itemCanBeCollected();
     return false;
   } else {
     return true; // Request more frames
@@ -197,7 +200,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   s_treasureID = -1;
 
   s_flairPath = gpath_create(&FLAIR_PATH);
-  gpath_move_to(s_flairPath, GPoint(72, 42));
+  gpath_move_to(s_flairPath, GPoint(72, -20));
 
   // Create layer for the tank
   s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
