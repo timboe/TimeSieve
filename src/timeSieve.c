@@ -106,6 +106,8 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   }
   //graphics_fill_rect(ctx, GRect(20, 30, 80, 40), 0, GCornersAll); // Masking box
 
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+
   GRect convBotBound = GRect(0 + s_convOffset, 42, 94, 6);
   graphics_draw_bitmap_in_rect(ctx, s_convBotBitmap, convBotBound);
 
@@ -115,7 +117,6 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect convCapBound = GRect(0, 30, 11, 18);
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
 
-  graphics_context_set_compositing_mode(ctx, GCompOpSet);
   graphics_draw_bitmap_in_rect(ctx, s_gem, s_treasureRect);
   graphics_draw_bitmap_in_rect(ctx, s_sieveBasic, GRect(90, 10, 40, 40));
 }
