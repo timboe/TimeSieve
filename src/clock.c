@@ -38,6 +38,15 @@ static bool s_flashMainFace = false;
 #define WEATHER_MIST "M"
 #define WEATHER_NA ")"
 
+static const GPathInfo FLAIR_PATH = {
+  .num_points = 12,
+  .points = (GPoint []) {{0, 0}, {100,  -10},  {100,  8},
+                         {0, 0}, {-100, -11},  {-100, 7},
+                         {0, 0}, {9,    100},  {-10,  100},
+                         {0, 0}, {12,   -100}, {-9,  -100}}
+};
+static GPath* s_flairPath;
+
 void setClockPixelOffset(uint8_t offset) {
   s_clockPixelOffset = offset;
 }
@@ -218,6 +227,12 @@ void updateWeatherBuffer() {
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
 
+  // FLAIR
+  graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
+  graphics_context_set_stroke_color(ctx, getLiquidTimeColour());
+  gpath_draw_filled(ctx, s_flairPath);
+  gpath_draw_outline(ctx, s_flairPath);
+
   // BATTERY
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
@@ -270,11 +285,16 @@ void create_clock_layer(Window* parentWindow) {
   updateTimeBuffer();
   updateDateBuffer();
   updateWeatherBuffer();
+
+  s_flairPath = gpath_create(&FLAIR_PATH);
+  gpath_move_to(s_flairPath, GPoint(77, 60));
+
 }
 
 
 void destroy_clock_layer() {
   layer_destroy(s_clockLayer);
   s_clockLayer = 0;
+  free(s_flairPath);
   battery_state_service_unsubscribe();
 }
