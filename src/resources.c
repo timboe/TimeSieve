@@ -8,6 +8,7 @@ static bool s_clockLoaded = false;
 static GFont s_clock;
 static GFont s_clockSmall;
 static GFont s_weatherFont;
+static GFont s_temperatureFont;
 static GBitmap* s_singleItemImage = NULL;
 static GBitmap* s_achievementImage[N_CHEVO_IMAGE];
 static GBitmap* s_gem[ITEM_CATEGORIES];
@@ -25,8 +26,9 @@ static GBitmap* s_employeeImage[MAX_UPGRADES];
 //////////////////////////
 
 void initMainWindowRes() {
-  s_perfectDOSFont = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
-  s_weatherFont    = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_24));
+  s_perfectDOSFont  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
+  s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_24));
+  s_temperatureFont = fonts_get_system_font(FONT_KEY_GOTHIC_14);
   loadClockFont();
   s_achievementImage[0] = NULL; //TODO
   s_achievementImage[1] = NULL; //TODO
@@ -84,6 +86,8 @@ GFont* getClockFont() { return &s_clock; }
 GFont* getClockSmallFont() { return &s_clockSmall; }
 
 GFont* getWeatherFont() { return &s_weatherFont; }
+
+GFont* getTemperatureFont() { return &s_temperatureFont; }
 
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID) {
   gbitmap_destroy( s_singleItemImage );

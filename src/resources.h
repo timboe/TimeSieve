@@ -11,6 +11,7 @@ GFont* getDOSFont();
 GFont* getClockFont();
 GFont* getClockSmallFont();
 GFont* getWeatherFont();
+GFont* getTemperatureFont();
 
 GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID); // Internal
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID);
