@@ -88,7 +88,7 @@ bool clockAnimCallback(TimeUnits units_changed) {
   }
 
   // Day+ spec
-  s_flairAngle += 2*TRIG_MAX_ANGLE/ANIM_FRAMES;
+  s_flairAngle += TRIG_MAX_ANGLE/ANIM_FRAMES;
 
   if ((units_changed & YEAR_UNIT) > 0 && s_clockTickCount % 8 == 0) {
     uint8_t bgColourOverride = rand() % PALETTE_MAX;
