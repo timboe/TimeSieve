@@ -108,17 +108,17 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
 
-  GRect convBotBound = GRect(0+3 + s_convOffset, 42, 94, 6);
+  GRect convBotBound = GRect(0+4 + s_convOffset, 42, 94, 6);
   graphics_draw_bitmap_in_rect(ctx, s_convBotBitmap, convBotBound);
 
-  GRect convTopBound = GRect(8+3 - s_convOffset, 30, 94, 12);
+  GRect convTopBound = GRect(8+4 - s_convOffset, 30, 94, 12);
   graphics_draw_bitmap_in_rect(ctx, s_convTopBitmap, convTopBound);
 
   GRect convCapBound = GRect(0, 30, 14, 18);
   graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
 
   graphics_draw_bitmap_in_rect(ctx, s_gem, s_treasureRect);
-  graphics_draw_bitmap_in_rect(ctx, s_sieveBasic, GRect(90, 10, 40, 40));
+  graphics_draw_bitmap_in_rect(ctx, s_sieveBasic, GRect(88, 10, 50, 40));
 }
 
 /**
