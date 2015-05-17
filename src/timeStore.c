@@ -443,7 +443,7 @@ void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bu
   *value = (amount * 100) / total;
   unsigned remain = (amount * 100) % total;
   // We only want the two most signnificant figs
-  if (extraDigits) snprintf(buffer, 6*sizeof(char), "%i.%i%%", *value, remain);
+  if (0 && extraDigits) snprintf(buffer, 6*sizeof(char), "%i.%i%%", *value, remain); // totally not working!!!
   else snprintf(buffer, bufferSize, "%i", *value);
   return;
 }
