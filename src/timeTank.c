@@ -6,8 +6,8 @@
 
 #include "palette.h"
 #include "persistence.h"
-  
-// Frame to hold tank gfx 
+
+// Frame to hold tank gfx
 static Layer* s_tankLayer;
 
 static uint8_t s_tankTickCount;
@@ -38,7 +38,7 @@ void randomiseWaterfallBits() {
 
 void update_timeTank_layer() {
   layer_mark_dirty(s_tankLayer);
-}  
+}
 
 void tankAnimReset(TimeUnits units_changed) {
   if (getDisplayTime() > getUserTime()) APP_LOG(APP_LOG_LEVEL_DEBUG, "DISP > USER ?!?!");
@@ -72,21 +72,21 @@ bool tankAnimCallback(TimeUnits units_changed) {
     return true; // Request more frames
   }
 }
-  
+
 /**
  * Draw the TimeTank which occupies the bottom 1/3 of the screen and holds how much liquid time the user has
  * along with how full the tank is
  */
 static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
-  
+
   static char s_tankFullPercetText[TEXT_BUFFER_SIZE];
   static char s_tankContentText[TEXT_BUFFER_SIZE];
-  
+
   unsigned _percentage;
-  percentageToString(getDisplayTime(), getTankCapacity(), s_tankFullPercetText, TEXT_BUFFER_SIZE, &_percentage);
+  percentageToString(getDisplayTime(), getTankCapacity(), s_tankFullPercetText, TEXT_BUFFER_SIZE, &_percentage, true);
   timeToString(getDisplayTime(), s_tankContentText, TEXT_BUFFER_SIZE, true);
-  
+
   // Fill back
   graphics_context_set_fill_color(ctx, GColorLightGray);
   graphics_fill_rect(ctx, tank_bounds, 10, GCornersAll);
@@ -104,7 +104,7 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_stroke_width(ctx, 1);
   graphics_draw_line(ctx, GPoint(screw_one.x-2, screw_one.y-2), GPoint(screw_one.x+2, screw_one.y+2));
   graphics_draw_line(ctx, GPoint(screw_two.x+3, screw_two.y-1), GPoint(screw_two.x-3, screw_two.y+1));
-  graphics_context_set_stroke_width(ctx, 1); 
+  graphics_context_set_stroke_width(ctx, 1);
 
   graphics_context_set_fill_color(ctx, getLiquidTimeColour());
   graphics_context_set_stroke_color(ctx, getLiquidTimeHighlightColour());
@@ -142,28 +142,28 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_round_rect(ctx, inner_wall, 10);
 
   // Fill the text
-  GRect text_percentage_rect = GRect(tank_bounds.origin.x + 5, 
-                                     tank_bounds.origin.y + TANK_TEXT_V_OFFSET, 
-                                     tank_bounds.size.w-10, 
+  GRect text_percentage_rect = GRect(tank_bounds.origin.x + 5,
+                                     tank_bounds.origin.y + TANK_TEXT_V_OFFSET,
+                                     tank_bounds.size.w-10,
                                      TANK_TEXT_HEIGHT);
-  
-  GRect text_content_rect = GRect(tank_bounds.origin.x + 5, 
-                                  tank_bounds.origin.y + TANK_TEXT_V_OFFSET + TANK_TEXT_HEIGHT, 
-                                  tank_bounds.size.w - 10, 
+
+  GRect text_content_rect = GRect(tank_bounds.origin.x + 5,
+                                  tank_bounds.origin.y + TANK_TEXT_V_OFFSET + TANK_TEXT_HEIGHT,
+                                  tank_bounds.size.w - 10,
                                   TANK_TEXT_HEIGHT);
 
 
   graphics_context_set_text_color(ctx, GColorWhite);
   graphics_draw_text(ctx,
-                     s_tankContentText, 
-                     *getDOSFont(), 
+                     s_tankContentText,
+                     *getDOSFont(),
                      text_content_rect,
                      GTextOverflowModeWordWrap,
                      GTextAlignmentLeft,
                      NULL);
     graphics_draw_text(ctx,
-                     s_tankFullPercetText, 
-                     *getDOSFont(), 
+                     s_tankFullPercetText,
+                     *getDOSFont(),
                      text_percentage_rect,
                      GTextOverflowModeWordWrap,
                      GTextAlignmentCenter,
@@ -179,7 +179,7 @@ void create_timeTank_layer(Window* parentWindow) {
   s_tankLayer = layer_create( GRect(0, 2*(window_bounds.size.h/3), window_bounds.size.w, window_bounds.size.h/3) );
   // Add as child of the main window layer and set callback
   layer_add_child(window_layer, s_tankLayer);
-  layer_set_update_proc(s_tankLayer, timeTank_update_proc); 
+  layer_set_update_proc(s_tankLayer, timeTank_update_proc);
 
   // Randomise liquid bits
   for (unsigned i = 0; i < N_LIQUID_BITS; ++i) {

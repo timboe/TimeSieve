@@ -248,10 +248,10 @@ uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID) {
   return 0;
 }
 
-void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigned* value, const unsigned treasureID, const unsigned itemID) {
+void currentSellPricePercentage(char* buffer, const size_t buffer_size, unsigned* value, const unsigned treasureID, const unsigned itemID) {
   uint64_t basePrice = getItemBasePrice(treasureID, itemID);
   uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
-  percentageToString(currentPrice, basePrice, buffer, buffer_size, value);
+  percentageToString(currentPrice, basePrice, buffer, buffer_size, value, false);
 }
 
 /**
@@ -439,11 +439,12 @@ void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief) {
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Did time %iy %id %ih %im %is", _years, days, hours, mins, secs);
 }
 
-void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bufferSize, unsigned* value) {
+void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bufferSize, unsigned* value, bool extraDigits) {
   *value = (amount / total) * 100;
   unsigned remain = (amount % total) * 100;
   // We only want the two most signnificant figs
   while (remain > 100) remain /= 10;
-  snprintf(buffer, bufferSize, "%i.%i%%", *value, remain);
+  if (extraDigits) snprintf(buffer, bufferSize, "%i.%i%%", *value, remain);
+  else snprintf(buffer, bufferSize, "%i", *value);
   return;
 }
