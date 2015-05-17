@@ -112,40 +112,43 @@ bool clockAnimCallback(TimeUnits units_changed) {
   }
 }
 
-void drawClock(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset) {
+void draw3DText(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset, bool BWMode) {
+
+  if (BWMode) graphics_context_set_text_color(ctx, GColorBlack);
 
   // corners
-  graphics_context_set_text_color(ctx, getTextColourL());
+  if (!BWMode) graphics_context_set_text_color(ctx, getTextColourL());
   loc.origin.x -= offset; // CL
   loc.origin.y += offset; // UL
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
-  graphics_context_set_text_color(ctx, getTextColourC());
+  if (!BWMode) graphics_context_set_text_color(ctx, getTextColourC());
   loc.origin.x += offset; // CU
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   loc.origin.x += offset; // RU
-  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  if (!BWMode) graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
 
-  graphics_context_set_text_color(ctx, getTextColourR());
+  if (!BWMode) graphics_context_set_text_color(ctx, getTextColourR());
   loc.origin.y -= offset; // CR
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   loc.origin.y -= offset; // DR
-  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  if (!BWMode) graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
 
-  graphics_context_set_text_color(ctx, getTextColourD());
+  if (!BWMode) graphics_context_set_text_color(ctx, getTextColourD());
   loc.origin.x -= offset; // DC
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   loc.origin.x -= offset; // DR
-  graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  if (!BWMode) graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   graphics_context_set_text_color(ctx, getTextColourL());
   loc.origin.y += offset; // CR
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   // main
-  if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU());
+  if (BWMode) graphics_context_set_text_color(ctx, GColorWhite);
+  else if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU());
   else graphics_context_set_text_color(ctx, getTextColourC());
   loc.origin.x += offset; // O
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
@@ -200,28 +203,16 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
 
   // DATE
   GRect dateRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y, tank_bounds.size.w, 30);
-  //graphics_draw_rect(ctx, dateRect);
-  drawClock(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1);
+  draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false);
 
   // WEATHER
-  GRect wRect = GRect(-2, 2, tank_bounds.size.w/3, 25);
+  GRect wRect = GRect(0, 2, 40, 25);
   graphics_context_set_text_color(ctx, getLiquidTimeHighlightColour());
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_context_set_text_color(ctx, GColorBlack);
-  wRect.origin.x -= 1;
-  graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  wRect.origin.x += 1;
-  wRect.origin.y -= 1;
-  graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  wRect.origin.y += 1;
-  graphics_context_set_text_color(ctx, GColorWhite);
-  graphics_draw_text(ctx, s_temperature, fonts_get_system_font(FONT_KEY_GOTHIC_14), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-
-
+  draw3DText(ctx, wRect, fonts_get_system_font(FONT_KEY_GOTHIC_14), s_temperature, 1, true);
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
-  //graphics_draw_rect(ctx, timeRect);
-  drawClock(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset);
+  draw3DText(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset, false);
 
   if (s_clockTickCount == 0) return; // No animation in progress
 
