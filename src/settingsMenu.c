@@ -439,7 +439,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   if (context == UNIQUE_CONTEXT_ID) {
     itemID = getItemIDFromRow(LEGENDARY_ID, row);
     if (itemID == -1) {
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "NoItem4SettingRow");
+      APP_LOG(APP_LOG_LEVEL_ERROR, "NoItem4SettingRow");
       return;
     }
     nameText = NAME_LEGENDARY[itemID];
@@ -448,7 +448,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   } else if (context == CHEVO_CONTEXT_ID) { // CHEVO
     itemID = getAchievementIDFromRow(row);
     if (itemID == -1) {
-      APP_LOG(APP_LOG_LEVEL_DEBUG, "NoItem4SettingRow");
+      APP_LOG(APP_LOG_LEVEL_ERROR, "NoItem4SettingRow");
       return;
     }
     nameText = NAME_ACHIEVEMENT[itemID];
@@ -498,7 +498,7 @@ void settings_sub_window_load(Window* parentWindow) {
 
   MenuLayer* new_layer;
   const int context = *((int*) window_get_user_data(parentWindow));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETTINGS SUB-WIN %i LOAD", context);
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETNGS SUB-W %i LOAD", context);
 
   new_layer = menu_layer_create(bounds);
   if (context == CHEVO_CONTEXT_ID) {
@@ -524,7 +524,7 @@ void settings_sub_window_load(Window* parentWindow) {
 
 void settings_sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETTINGS SUB-WIN %i DESTROY", context);
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETNGS SUB-W %i DESTROY", context);
   if (context == CHEVO_CONTEXT_ID) {
     menu_layer_destroy(s_chevo_layer);
   } else if (context == UNIQUE_CONTEXT_ID) {

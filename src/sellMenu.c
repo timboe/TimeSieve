@@ -35,7 +35,7 @@ static AppTimer* s_sellTimer;
 static uint8_t s_soldTreasureID;
 static uint8_t s_soldItemID;
 static uint16_t s_soldNumber;
-static bool s_tankFull;
+static uint64_t s_soldPrice;
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
@@ -264,22 +264,26 @@ static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, b, 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorBlack);
-  if (s_tankFull) graphics_context_set_fill_color(ctx, GColorRed);
+  if (s_soldNumber == 0) graphics_context_set_fill_color(ctx, GColorRed);
   graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
 
-  static char soldText[TEXT_BUFFER_SIZE];
+  static char soldTextTop[TEXT_BUFFER_SIZE];
+  static char soldTextBot[TEXT_BUFFER_SIZE];
   graphics_context_set_text_color(ctx, GColorBlack);
-  snprintf(soldText, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
-  if (s_tankFull) {
-    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,4,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,12,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, "Time Tank is Full!", fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,34,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  snprintf(soldTextTop, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
+  if (s_soldNumber == 0) {
+    strcpy(soldTextBot, "No Space In Time Tank!");
   } else {
-    graphics_draw_text(ctx, soldText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,8,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-    graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,20,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    timeToString(s_soldPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
+    strcpy(soldTextBot, "For ");
+    strcat(soldTextBot, tempBuffer);
   }
+
+  graphics_draw_text(ctx, soldTextTop, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,4,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,12,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, soldTextBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,34,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 }
 
 void removeSellNotify(void* data) {
@@ -295,13 +299,11 @@ void doSell(const uint16_t section, const uint16_t row, bool sellAll) {
   int8_t itemID = getItemIDFromRow(treasureID, row);
   if (itemID == -1) return;
 
-  uint16_t owned = getUserItems(treasureID, itemID);
   uint16_t sold = sellItem(treasureID, itemID, sellAll);
   s_soldTreasureID = treasureID;
   s_soldItemID = itemID;
   s_soldNumber = sold;
-  s_tankFull = false;
-  if ((sellAll && sold < owned) || sold == 0)  s_tankFull = true;
+  s_soldPrice = sold * getCurrentSellPrice(treasureID, itemID);
   // Cancel any current timer and set to future
   app_timer_cancel(s_sellTimer);
   s_sellTimer = app_timer_register(SELL_DISPLAY_TIME, removeSellNotify, NULL);

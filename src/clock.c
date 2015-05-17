@@ -187,8 +187,31 @@ void updateBattery(BatteryChargeState charge) {
 }
 
 void updateWeatherBuffer() {
-  strcpy(s_weatherIcon, WEATHER_THUNDER);
-  strcpy(s_temperature, "22C");
+
+  int16_t temp = -30 + rand()%80; // TODO load from internet
+  if (getUserOpt(OPT_CELSIUS) == false) {
+    temp = ((temp*5)/9) + 32; // Convert to F
+  }
+  snprintf(s_temperature, CLOCK_TEXT_SIZE*sizeof(char), "%i", temp);
+  if (getUserOpt(OPT_CELSIUS) == false) strcat(s_temperature, "F");
+  else  strcat(s_temperature, "C");
+
+  //TODO load weather from internet
+  int8_t randW = rand() %12;
+  switch (randW) {
+    case 0: strcpy(s_weatherIcon, WEATHER_CLEAR_DAY); break;
+    case 1: strcpy(s_weatherIcon, WEATHER_CLEAR_NIGHT); break;
+    case 2: strcpy(s_weatherIcon, WEATHER_HGH_CLOUD); break;
+    case 3: strcpy(s_weatherIcon, WEATHER_HGH_RAIN); break;
+    case 4: strcpy(s_weatherIcon, WEATHER_LOW_CLOUD_DAY); break;
+    case 5: strcpy(s_weatherIcon, WEATHER_LOW_CLOUD_NIGHT); break;
+    case 6: strcpy(s_weatherIcon, WEATHER_LOW_RAIN); break;
+    case 7: strcpy(s_weatherIcon, WEATHER_MED_CLOUD); break;
+    case 8: strcpy(s_weatherIcon, WEATHER_MIST); break;
+    case 9: strcpy(s_weatherIcon, WEATHER_NA); break;
+    case 10: strcpy(s_weatherIcon, WEATHER_SNOW); break;
+    case 11: strcpy(s_weatherIcon, WEATHER_THUNDER); break;
+  }
 }
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {

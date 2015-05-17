@@ -15,3 +15,4 @@ void setClockPixelOffset(uint8_t offset);
 void updateTimeBuffer();
 void updateDateBuffer();
 void updateBattery(BatteryChargeState charge);
+void updateWeatherBuffer();
