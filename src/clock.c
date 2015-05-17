@@ -46,6 +46,7 @@ static const GPathInfo FLAIR_PATH = {
                          {0, 0}, {12,   -100}, {-9,  -100}}
 };
 static GPath* s_flairPath;
+static int32_t s_flairAngle = 0;
 
 void setClockPixelOffset(uint8_t offset) {
   s_clockPixelOffset = offset;
@@ -57,6 +58,7 @@ void updateClockLayer() {
 
 void clockAnimReset(TimeUnits units_changed) {
   s_clockTickCount = 0;
+  s_flairAngle = 0;
   for (unsigned i = 0; i < N_SPOOGELET; ++i) {
     s_spoogelet[i].x = (7*WIN_SIZE_X/16 + (rand() % WIN_SIZE_X/8)) * SUB_PIXEL;
     s_spoogelet[i].y = (30 + (rand() % 10)) * SUB_PIXEL;
@@ -84,6 +86,9 @@ bool clockAnimCallback(TimeUnits units_changed) {
   if ((units_changed & MONTH_UNIT) > 0 && s_clockTickCount % 6 == 0) {
     colourOverride( rand() % PALETTE_MAX );
   }
+
+  // Day+ spec
+  s_flairAngle += 2*TRIG_MAX_ANGLE/ANIM_FRAMES;
 
   if ((units_changed & YEAR_UNIT) > 0 && s_clockTickCount % 8 == 0) {
     uint8_t bgColourOverride = rand() % PALETTE_MAX;
@@ -287,7 +292,7 @@ void create_clock_layer(Window* parentWindow) {
   updateWeatherBuffer();
 
   s_flairPath = gpath_create(&FLAIR_PATH);
-  gpath_move_to(s_flairPath, GPoint(77, 60));
+  gpath_move_to(s_flairPath, GPoint(72, 45));
 
 }
 
