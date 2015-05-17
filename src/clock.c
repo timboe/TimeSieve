@@ -204,7 +204,7 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   drawClock(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1);
 
   // WEATHER
-  GRect wRect = GRect(0, 2, tank_bounds.size.w/3, 25);
+  GRect wRect = GRect(-2, 2, tank_bounds.size.w/3, 25);
   graphics_context_set_text_color(ctx, getLiquidTimeHighlightColour());
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   graphics_context_set_text_color(ctx, GColorBlack);

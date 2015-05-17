@@ -122,7 +122,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_draw_text(ctx, notifyTxtBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, image, GRect(b.origin.x+4+10, b.origin.y+4+6, 22, 36));
+  graphics_draw_bitmap_in_rect(ctx, image, GRect(b.origin.x+10, b.origin.y+6, 22, 36));
 }
 
 bool stopNotify() {
