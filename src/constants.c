@@ -203,7 +203,7 @@ const char* const NAME_MAGIC[MAX_TREASURES] = {
 const char* const NAME_RARE[MAX_TREASURES] = {
   "RARE 1",
   "RARE 2",
-  "1 Bitcoin",
+  "Bitcoin",
   "Man's Soul"};
 
 const char* const NAME_EPIC[MAX_TREASURES] = {
@@ -231,21 +231,21 @@ const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "LEG 16"};
 
 const char* const DESC_LEGENDARY[MAX_UNIQUE] = {
-  "DESC 1",
-  "DESC 2",
-  "DESC 3",
-  "DESC 4",
-  "DESC 5",
-  "DESC 6",
-  "DESC 7",
-  "DESC 8",
-  "DESC 9",
-  "DESC 10",
-  "DESC 11",
-  "DESC 12",
-  "DESC 13",
-  "DESC 14",
-  "DESC 15",
+  "Extra 1% time per minute",
+  "Extra 2% time per minute",
+  "Tank holds 5% more",
+  "Tank holds 10% more",
+  "2% bonus to item find",
+  "10% item find bonus on the hour",
+  "20% auto-collect bonus at midnight",
+  "3% auto-collect bonus",
+  "2% discount on refinery upgrades",
+  "3% discount on tank upgrades",
+  "4% discount on employees",
+  "3% increased item quality",
+  "Markets shift in your favour",
+  "Items sell for 5% more",
+  "5% chance to find two of an item",
   "DESC 16"};
 
 const char* const NAME_ACHIEVEMENT[MAX_CHEVOS] = {

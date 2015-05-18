@@ -129,16 +129,17 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   GColor border = GColorBlack;
   static char notifyTxtTop[12]; // Just needs to fit largers of these two below
   const char* notifyTxtBot;
-  GBitmap* image;
+  uint8_t offset = 0;
+  GBitmap* image = NULL;
   if (s_notifyTreasureID >= 0) {
     border = getTrasureColour(s_notifyTreasureID);
     strcpy(notifyTxtTop, "Treasure!");
     notifyTxtBot = getItemName(s_notifyTreasureID, s_notifyItemID);
     image = getSingleItemImage(s_notifyTreasureID, s_notifyItemID);
+    offset = 35;
   } else {
     strcpy(notifyTxtTop, "Achievement!");
     notifyTxtBot = NAME_ACHIEVEMENT[s_notifyAchievementID];
-    image = getAchievementImage(0); // TODO get correct image
   }
   GRect b = layer_get_bounds(this_layer);
   // Outer box
@@ -150,11 +151,11 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
   // Text
   graphics_context_set_text_color(ctx, GColorBlack);
-  graphics_draw_text(ctx, notifyTxtTop, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+35, b.origin.y,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_draw_text(ctx, notifyTxtBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+35, b.origin.y+25,b.size.w-40,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, notifyTxtTop, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(b.origin.x+offset, b.origin.y,b.size.w-offset,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, notifyTxtBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+offset, b.origin.y+25,b.size.w-offset,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, image, GRect(b.origin.x+10, b.origin.y+6, 22, 36));
+  if (image != NULL) graphics_draw_bitmap_in_rect(ctx, image, GRect(b.origin.x+10, b.origin.y+6, 22, 36));
 }
 
 bool stopNotify() {

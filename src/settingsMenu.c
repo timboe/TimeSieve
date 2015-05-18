@@ -449,37 +449,37 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   const char* nameText;
   const char* descText;
   GBitmap* image;
+  GColor backColor;
+  GRect ttlTextRect = GRect(MENU_X_OFFSET, -6, size.w-MENU_X_OFFSET, size.h);
+  GRect topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
+  GRect imageRect = GRect(3, 4,  22, 36);
   if (context == UNIQUE_CONTEXT_ID) {
     itemID = getItemIDFromRow(LEGENDARY_ID, row);
     if (itemID == -1) return;
     nameText = NAME_LEGENDARY[itemID];
     descText = DESC_LEGENDARY[itemID];
     image = getPrestigeItemImage(itemID);
+    if (row%2==0) {
+      ttlTextRect = GRect(3, -6, size.w-MENU_X_OFFSET, size.h);
+      topTextRect = GRect(3, 16, size.w-MENU_X_OFFSET, size.h-22);
+      imageRect = GRect(size.w-MENU_X_OFFSET+3, 4,  22, 36);
+    }
   } else if (context == CHEVO_CONTEXT_ID) { // CHEVO
     itemID = getAchievementIDFromRow(row);
     if (itemID == -1) return;
     nameText = NAME_ACHIEVEMENT[itemID];
     descText = DESC_ACHIEVEMENT[itemID];
-    image = getAchievementImage(0); // TODO get correct image
+    image = NULL;
+    ttlTextRect = GRect(3, -6, size.w-3, size.h);
+    topTextRect = GRect(3, 16, size.w-3, size.h-22);
   } else {
     return;
   }
 
-  GColor backColor;
-  GRect ttlTextRect, topTextRect, imageRect;
   if (selected) backColor = MENU_BACK_GREEN_SELECT;
   else if (row%2==0) backColor = MENU_BACK_GREEN_EVEN;
   else backColor = MENU_BACK_GREEN_ODD;
 
-  if (row%2==0) {
-    ttlTextRect = GRect(MENU_X_OFFSET, -6, size.w-MENU_X_OFFSET, size.h);
-    topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
-    imageRect = GRect(3, 4,  22, 36);
-  } else {
-    ttlTextRect = GRect(3, -6, size.w-MENU_X_OFFSET, size.h);
-    topTextRect = GRect(3, 16, size.w-MENU_X_OFFSET, size.h-22);
-    imageRect = GRect(size.w-MENU_X_OFFSET+3, 4,  22, 36);
-  }
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
@@ -487,7 +487,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   graphics_draw_text(ctx, descText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, image, imageRect);
+  if (image != NULL) graphics_draw_bitmap_in_rect(ctx, image, imageRect);
 }
 
 static void settings_sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
