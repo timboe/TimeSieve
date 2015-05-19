@@ -129,7 +129,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
   //Get details
   const unsigned location = cell_index->row;
-  const int owned = getUserOwnsUpgrades(context, location);
+  const int owned = getUserUpgrades(context, location);
   const uint64_t priceNext = getPriceOfUpgrade(context, location);
   const char* upgradeName = NULL;
   uint64_t reward = 0;
@@ -148,7 +148,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     upgradeName = NAME_WATCHER[location];
     reward = REWARD_WATCHER[location];
     bool doneNotifyTxt = false;
-    uint8_t owned = getUserOwnsUpgrades(WATCHER_ID, row);
+    uint8_t owned = getUserUpgrades(WATCHER_ID, row);
     switch (row) {
       case WATCHER_CHANCE_1: strcpy(upgradeText, "AUTO-Collect +1%"); break;
       case WATCHER_CHANCE_2: strcpy(upgradeText, "AUTO-Collect +5%"); break;

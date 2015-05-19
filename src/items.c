@@ -47,7 +47,7 @@ void updateProbabilities() {
   s_findChanceMonth = BASE_CHANCE_MONTH;
   s_findChanceYear  = BASE_CHANCE_YEAR;
 
-  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1); ++e) {
+  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1); ++e) {
     s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_1_CHANCE);
     s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_1_CHANCE);
     s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_1_CHANCE);
@@ -55,7 +55,7 @@ void updateProbabilities() {
     s_findChanceMonth = combineProbability(s_findChanceMonth, FREQUENCY_1_CHANCE);
     s_findChanceYear  = combineProbability(s_findChanceYear, FREQUENCY_1_CHANCE);
   }
-  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2); ++e) {
+  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2); ++e) {
     s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_2_CHANCE);
     s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_2_CHANCE);
     s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_2_CHANCE);
@@ -65,18 +65,18 @@ void updateProbabilities() {
   }
 
   s_qualityChanceBase = 0;
-  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_1); ++e) {
+  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_QUALITY_1); ++e) {
     s_qualityChanceBase = combineProbability(s_qualityChanceBase, QUALITY_1_CHANCE);
   }
-  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_2); ++e) {
+  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_QUALITY_2); ++e) {
     s_qualityChanceBase = combineProbability(s_qualityChanceBase, QUALITY_2_CHANCE);
   }
 
   s_autoCollectChance = 0;
-  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_1); ++e) {
+  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_CHANCE_1); ++e) {
     s_autoCollectChance = combineProbability(s_autoCollectChance, COLLECTOR_1_CHANCE);
   }
-  for (uint e = 0; e < getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_2); ++e) {
+  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_CHANCE_2); ++e) {
     s_autoCollectChance = combineProbability(s_autoCollectChance, COLLECTOR_2_CHANCE);
   }
 
@@ -89,7 +89,7 @@ void updateProbabilities() {
  * Also, as we don't want an early player hitting the jackpot, we set a minimum
  * threshold of all-time-time which must be met per category.
  * This is arbitrary, and is currently set to the value of the 3rd most expensive
- * item in the category
+ * item in the category. Also must have gotten > 1 yr for legendaries
  **/
 uint8_t getItemRarity(TimeUnits units_changed) {
 
@@ -115,10 +115,10 @@ uint8_t getItemRarity(TimeUnits units_changed) {
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "QItm r:%i", (int)chance);
   // Check to see what we win
-  if (chance >= BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
-  else if (getUserTotalTime() > SELL_PRICE_EPIC[2] && chance >= BASE_CHANCE_EPIC) return EPIC_ID;
-  else if (getUserTotalTime() > SELL_PRICE_RARE[2] && chance >= BASE_CHANCE_RARE) return RARE_ID;
-  else if (getUserTotalTime() > SELL_PRICE_MAGIC[2] && chance >= BASE_CHANCE_MAGIC) return MAGIC_ID;
+  if      (getUserTotalTime() > SEC_IN_YEAR             && chance >= BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
+  else if (getUserTotalTime() > SELL_PRICE[EPIC_ID][2]  && chance >= BASE_CHANCE_EPIC)      return EPIC_ID;
+  else if (getUserTotalTime() > SELL_PRICE[RARE_ID][2]  && chance >= BASE_CHANCE_RARE)      return RARE_ID;
+  else if (getUserTotalTime() > SELL_PRICE[MAGIC_ID][2] && chance >= BASE_CHANCE_MAGIC)     return MAGIC_ID;
   return COMMON_ID;
 }
 

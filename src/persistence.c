@@ -64,7 +64,7 @@ void init_persistence() {
   if (persist_exists(PERSISTENT_VERSION_KEY)) {
     version = persist_read_int(PERSISTENT_VERSION_KEY);
   }
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence schema version %i", version);
+  APP_LOG(APP_LOG_LEVEL_INFO, "init_persistence schema version %i", version);
 
   // Allocate user store memory
   s_userData = malloc(sizeof(struct userData_v1));
@@ -73,44 +73,35 @@ void init_persistence() {
   } else if (version == 1) {
     // Load from memory
     int result = persist_read_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence read code %i", result);
+    APP_LOG(APP_LOG_LEVEL_INFO, "init_persistence read code %i", result);
     initSettings();
   } else {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "init_persistence unknown save version!");
+    APP_LOG(APP_LOG_LEVEL_ERROR, "init_persistence unknown save version!");
     // todo return an error
   }
 
 }
 
-void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t n) {
-  if (typeID == REFINERY_ID) {
-    s_userData->refineriesOwned[resourceID] += n;
-  } else if (typeID == TANK_ID) {
-    s_userData->tanksOwned[resourceID] += n;
-  } else if (typeID == WATCHER_ID) {
-    s_userData->watchersOwned[resourceID] += n;
-  }
+void addUpgrade(const uint32_t typeID, const uint32_t resourceID, const int32_t n) {
+  s_userData->upgradesOwned[typeID][resourceID] += n;
 }
 
 void addItemsMissed(uint32_t n) { s_userData->itemsMissed += n; }
 
 uint32_t getItemsMissed() { return s_userData->itemsMissed; }
 
-void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n) {
-  if (treasureID == COMMON_ID) {
-    s_userData->commonOwned[itemID] += n;
-  } else if (treasureID == MAGIC_ID) {
-    s_userData->magicOwned[itemID] += n;
-  } else if (treasureID == RARE_ID) {
-    s_userData->rareOwned[itemID] += n;
-  } else if (treasureID == EPIC_ID) {
-    s_userData->epicOwned[itemID] += n;
-  } else if (treasureID == LEGENDARY_ID) {
-    BITSET(s_userData->uniqueOwned, itemID);
+void addItem(const uint32_t treasureID, const uint32_t itemID, const int32_t n) {
+  if (treasureID == LEGENDARY_ID) {
+    BITSET(s_userData->legendaryOwned, itemID);
+  } else {
+    s_userData->itemsOwned[treasureID][itemID] += n;
   }
 }
 
-void removeItem(const unsigned treasureID, const unsigned itemID, const int16_t n) {
+/**
+ * Remember we cannot ever take a legendary off of the user
+ **/
+void removeItem(const uint32_t treasureID, const uint32_t itemID, const int32_t n) {
   addItem(treasureID, itemID, -n);
 }
 
@@ -127,54 +118,33 @@ time_t getUserTimeOfSave() {
   return s_userData->timeOfSave;
 }
 
-uint16_t getUserTotalUpgrades(const unsigned typeID) {
+uint16_t getUserTotalUpgrades(const uint32_t typeID) {
   uint16_t count = 0;
-  for (unsigned i = 0; i < MAX_UPGRADES; ++i) {
-    if (typeID == REFINERY_ID) {
-      count += s_userData->refineriesOwned[i];
-    } else if (typeID == TANK_ID) {
-      count += s_userData->tanksOwned[i];
-    } else if (typeID == WATCHER_ID) {
-      count += s_userData->watchersOwned[i];
+  for (uint32_t i = 0; i < MAX_UPGRADES; ++i) {
+    for (uint32_t j = 0; j < UPGRADE_CATEGORIES; ++j) {
+      count += s_userData->upgradesOwned[j][i];
     }
   }
   return count;
 }
 
-uint16_t getUserItems(const unsigned treasureID, const unsigned itemID) {
+uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID) {
   if (treasureID == LEGENDARY_ID) {
-    return (uint16_t) BITTEST(s_userData->uniqueOwned, itemID); // Going to be either 1 or 0
+    return (uint16_t) BITTEST(s_userData->legendaryOwned, itemID); // Going to be either 1 or 0
   } else {
-    if (treasureID == COMMON_ID) {
-      return s_userData->commonOwned[itemID];
-    } else if (treasureID == MAGIC_ID) {
-      return s_userData->magicOwned[itemID];
-    } else if (treasureID == RARE_ID) {
-      return s_userData->rareOwned[itemID];
-    } else if (treasureID == EPIC_ID) {
-      return s_userData->epicOwned[itemID];
-    }
+    return s_userData->itemsOwned[treasureID][itemID];
   }
-  return 0;
 }
 
-uint16_t getUserTotalItems(const unsigned treasureID) {
+uint16_t getUserTotalItems(const uint32_t treasureID) {
   uint16_t count = 0;
   if (treasureID == LEGENDARY_ID) {
-    for (unsigned i = 0; i < MAX_UNIQUE; ++i) {
-      if ( BITTEST(s_userData->uniqueOwned, i) ) ++count;
+    for (uint32_t i = 0; i < MAX_UNIQUE; ++i) {
+      if ( BITTEST(s_userData->legendaryOwned, i) ) ++count;
     }
   } else {
-    for (unsigned i = 0; i < MAX_TREASURES; ++i) {
-      if (treasureID == COMMON_ID) {
-        count += s_userData->commonOwned[i];
-      } else if (treasureID == MAGIC_ID) {
-        count += s_userData->magicOwned[i];
-      } else if (treasureID == RARE_ID) {
-        count += s_userData->rareOwned[i];
-      } else if (treasureID == EPIC_ID) {
-        count += s_userData->epicOwned[i];
-      }
+    for (uint32_t i = 0; i < MAX_TREASURES; ++i) {
+      count += s_userData->itemsOwned[treasureID][i];
     }
   }
   return count;
@@ -191,40 +161,20 @@ uint16_t getUserGrandTotalItems() {
 /**
  * For a given treasure type, how many different items do we have at least one of
  */
-uint16_t getUserItemTypes(const unsigned treasureID) {
+uint16_t getUserItemTypes(const uint32_t treasureID) {
   uint16_t count = 0;
   if (treasureID == LEGENDARY_ID) {
     return getUserTotalItems(treasureID);
   } else {
-    for (unsigned i = 0; i < MAX_TREASURES; ++i) {
-      if (treasureID == COMMON_ID && s_userData->commonOwned[i] > 0) {
-        ++count;
-      } else if (treasureID == MAGIC_ID && s_userData->magicOwned[i] > 0) {
-        ++count;
-      } else if (treasureID == RARE_ID && s_userData->rareOwned[i] > 0) {
-        ++count;
-      } else if (treasureID == EPIC_ID && s_userData->epicOwned[i] > 0) {
-        ++count;
-      }
+    for (uint32_t i = 0; i < MAX_TREASURES; ++i) {
+      if (s_userData->itemsOwned[treasureID][i] > 0) ++count;
     }
   }
   return count;
 }
 
-uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID) {
-  if (resourceID >= MAX_UPGRADES) {
-    APP_LOG(APP_LOG_LEVEL_ERROR, "getUserOwnsUpgrades resourceID overflow");
-    return 0;
-  }
-  if (typeID == REFINERY_ID) {
-    return s_userData->refineriesOwned[resourceID];
-  } else if (typeID == TANK_ID) {
-    return s_userData->tanksOwned[resourceID];
-  } else if (typeID == WATCHER_ID) {
-    return s_userData->watchersOwned[resourceID];
-  }
-  APP_LOG(APP_LOG_LEVEL_ERROR, "getUserOwnsUpgrades typeID unknown");
-  return 0;
+uint16_t getUserUpgrades(const uint32_t typeID, const uint32_t resourceID) {
+  return s_userData->upgradesOwned[typeID][resourceID];
 }
 
 void setUserTime(uint64_t newTime) {

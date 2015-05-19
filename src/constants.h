@@ -41,11 +41,11 @@
 #define MAX_TREASURES 4
 #define MAX_UNIQUE 16
 #define MAX_CHEVOS 16
-#define N_CHEVO_IMAGE 2
 
 #define REFINERY_ID 0
 #define TANK_ID 1
 #define WATCHER_ID 2
+#define UPGRADE_CATEGORIES 3
 
 #define COMMON_ID 0
 #define MAGIC_ID 1
@@ -77,16 +77,12 @@ extern const char* const DESC_LEGENDARY[MAX_UNIQUE];
 extern const char* const NAME_ACHIEVEMENT[MAX_CHEVOS];
 extern const char* const DESC_ACHIEVEMENT[MAX_CHEVOS];
 
-extern const uint64_t INITIAL_PRICE_REFINERY[MAX_UPGRADES];
-extern const uint64_t INITIAL_PRICE_TANK[MAX_UPGRADES];
-extern const uint64_t INITIAL_PRICE_WATCHER[MAX_UPGRADES];
+extern const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES];
 extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
 extern const uint64_t REWARD_TANK[MAX_UPGRADES];
 extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
-extern const uint64_t SELL_PRICE_COMMON[MAX_TREASURES];
-extern const uint64_t SELL_PRICE_MAGIC[MAX_TREASURES];
-extern const uint64_t SELL_PRICE_RARE[MAX_TREASURES];
-extern const uint64_t SELL_PRICE_EPIC[MAX_TREASURES];
+extern const uint64_t SELL_PRICE[SELLABLE_CATEGORIES][MAX_TREASURES];
+
 
 typedef enum {WATCHER_FREQUENCY_1,
               WATCHER_TECH,

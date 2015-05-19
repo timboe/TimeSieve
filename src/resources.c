@@ -10,7 +10,6 @@ static GFont s_clockSmall;
 static GFont s_weatherFont;
 static GFont s_temperatureFont;
 static GBitmap* s_singleItemImage = NULL;
-static GBitmap* s_achievementImage[N_CHEVO_IMAGE];
 static GBitmap* s_gem[ITEM_CATEGORIES];
 
 static GBitmap* s_commonItem[MAX_TREASURES];
@@ -30,8 +29,6 @@ void initMainWindowRes() {
   s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_21));
   s_temperatureFont = fonts_get_system_font(FONT_KEY_GOTHIC_14);
   loadClockFont();
-  s_achievementImage[0] = NULL; //TODO
-  s_achievementImage[1] = NULL; //TODO
   s_gem[COMMON_ID]    = gbitmap_create_with_resource(RESOURCE_ID_GEM_COMMON);
   s_gem[MAGIC_ID]     = gbitmap_create_with_resource(RESOURCE_ID_GEM_MAGIC);
   s_gem[RARE_ID]      = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE);
@@ -47,8 +44,6 @@ void deinitMainWindowRes() {
   s_clockLoaded = false;
   gbitmap_destroy( s_singleItemImage );
   s_singleItemImage = NULL;
-  gbitmap_destroy(s_achievementImage[0]);
-  gbitmap_destroy(s_achievementImage[1]);
   for (uint8_t i = 0; i < ITEM_CATEGORIES; ++i) {
     gbitmap_destroy(s_gem[i]);
   }
@@ -94,8 +89,6 @@ GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID) {
   s_singleItemImage = loadItemImage(treasureID, itemID);
   return s_singleItemImage;
 }
-
-GBitmap* getAchievementImage(uint8_t achievementID) { return s_achievementImage[achievementID]; }
 
 GBitmap* getGemImage(uint8_t treasureID) { return s_gem[treasureID]; }
 
@@ -197,8 +190,6 @@ void deinitPrestigeWindowRes() {
 }
 
 GBitmap* getPrestigeItemImage(uint8_t itemID) { return s_legendaryItem[itemID]; }
-
-//GBitmap* getAchievementImage(uint8_t achievementID); // Also used here
 
 //////////////////////////
 

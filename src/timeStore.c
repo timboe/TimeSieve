@@ -5,14 +5,8 @@
 #include "persistence.h"
 #include "items.h"
 
-static uint64_t* s_bufferRefineryPrice;
-static uint64_t* s_bufferTankPrice;
-static uint64_t* s_bufferWatcherPrice;
-
-static uint64_t* s_bufferCommonSellPrice;
-static uint64_t* s_bufferMagicSellPrice;
-static uint64_t* s_bufferRareSellPrice;
-static uint64_t* s_bufferEpicSellPrice;
+static uint64_t* s_bufferUpgradePrice;
+static uint64_t* s_bufferItemSellPrice;
 
 static uint64_t s_timePerMin;
 static uint64_t s_displayTime;
@@ -49,22 +43,15 @@ uint64_t safeMultiply(uint64_t a, uint64_t b) {
 }
 
 // Perform fixed point increase in price by floor of 7/6.
-uint64_t getPriceOfNext(uint64_t priceOfCurrent) {
+// Watchers have their own upgrade path, nominally x10
+uint64_t getPriceOfNext(uint64_t priceOfCurrent, uint32_t typeID) {
+  if (typeID == WATCHER_ID) return safeMultiply(priceOfCurrent, INCREASE_WATCHER);
   priceOfCurrent /= INCREASE_DIVIDE;
   return safeMultiply(priceOfCurrent, INCREASE_MULTIPLY);
 }
 
-uint64_t getItemBasePrice(const unsigned treasureID, const unsigned itemID) {
-  uint64_t price = 0;
-  if (treasureID == COMMON_ID) {
-    price = SELL_PRICE_COMMON[itemID];
-  } else if (treasureID == MAGIC_ID) {
-    price = SELL_PRICE_MAGIC[itemID];
-  } else if (treasureID == RARE_ID) {
-    price = SELL_PRICE_RARE[itemID];
-  } else if (treasureID == EPIC_ID) {
-    price = SELL_PRICE_EPIC[itemID];
-  }
+uint64_t getItemBasePrice(const uint32_t treasureID, const uint32_t itemID) {
+  uint64_t price = SELL_PRICE[treasureID][itemID];
   // LEGENDARY BONUS - items base price up by 5%
   if ( getUserItems(LEGENDARY_ID, ITEMSELL_5PERC) == 1 ) {
     price = (price * 21) / 20;
@@ -85,24 +72,13 @@ void modulateSellPrices() {
     range = 10;
   }
 
-  for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
-    s_bufferCommonSellPrice[item] += ( (getItemBasePrice(COMMON_ID,item)/(uint64_t)100) * (lower+(rand()%range)) );
-    s_bufferMagicSellPrice[item]  += ( (getItemBasePrice(MAGIC_ID,item)/(uint64_t)100)  * (lower+(rand()%range)) );
-    s_bufferRareSellPrice[item]   += ( (getItemBasePrice(RARE_ID,item)/(uint64_t)100)   * (lower+(rand()%range)) );
-    s_bufferEpicSellPrice[item]   += ( (getItemBasePrice(EPIC_ID,item)/(uint64_t)100)   * (lower+(rand()%range)) );
-
-    // Prevent from dropping *too* low
-    if (s_bufferCommonSellPrice[item] < getItemBasePrice(COMMON_ID,item)/(uint64_t)4) {
-      s_bufferCommonSellPrice[item] += ( (getItemBasePrice(COMMON_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
-    }
-    if (s_bufferMagicSellPrice[item] < getItemBasePrice(MAGIC_ID,item)/(uint64_t)4) {
-      s_bufferMagicSellPrice[item] += ( (getItemBasePrice(MAGIC_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
-    }
-    if (s_bufferRareSellPrice[item] < getItemBasePrice(RARE_ID,item)/(uint64_t)4) {
-      s_bufferRareSellPrice[item] += ( (getItemBasePrice(RARE_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
-    }
-    if (s_bufferEpicSellPrice[item] < getItemBasePrice(EPIC_ID,item)/(uint64_t)4) {
-      s_bufferEpicSellPrice[item] += ( (getItemBasePrice(EPIC_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
+  for (uint32_t item = 0; item < MAX_TREASURES; ++item ) {
+    for (uint32_t cat = 0; cat < SELLABLE_CATEGORIES; ++cat) {
+      s_bufferItemSellPrice[(cat*MAX_TREASURES)+item] += ( (getItemBasePrice(cat,item)/(uint64_t)100) * (lower+(rand()%range)) );
+      // Prevent from dropping *too* low
+      if (s_bufferItemSellPrice[(cat*MAX_TREASURES)+item] < getItemBasePrice(cat,item)/(uint64_t)4) {
+        s_bufferItemSellPrice[(cat*MAX_TREASURES)+item] += ( (getItemBasePrice(cat,item)/(uint64_t)100) * (5+(rand()%6)) );
+      }
     }
   }
 }
@@ -111,51 +87,37 @@ void modulateSellPrices() {
  * Load the const default prices into a buffer so we can play with them
  */
 void initiateSellPrices() {
-
-  s_bufferCommonSellPrice = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
-  s_bufferMagicSellPrice  = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
-  s_bufferRareSellPrice   = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
-  s_bufferEpicSellPrice   = (uint64_t*) malloc( MAX_TREASURES*sizeof(uint64_t) );
+  s_bufferItemSellPrice = (uint64_t*) malloc( SELLABLE_CATEGORIES*MAX_TREASURES*sizeof(uint64_t) );
 
   // Load defaults
-  for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
-    s_bufferCommonSellPrice[item] = getItemBasePrice(COMMON_ID, item);
-    s_bufferMagicSellPrice[item]  = getItemBasePrice(MAGIC_ID, item);
-    s_bufferRareSellPrice[item]   = getItemBasePrice(RARE_ID, item);
-    s_bufferEpicSellPrice[item]   = getItemBasePrice(EPIC_ID, item);
+  for (uint32_t item = 0; item < MAX_TREASURES; ++item ) {
+    for (uint32_t cat = 0; cat < SELLABLE_CATEGORIES; ++cat) {
+      s_bufferItemSellPrice[(cat*MAX_TREASURES)+item] = getItemBasePrice(cat, item);
+    }
   }
 
   // Do initial permuting
-  for (uint16_t n = 0; n < INITIAL_PRICE_MODULATION; ++n) {
+  for (uint32_t n = 0; n < INITIAL_PRICE_MODULATION; ++n) {
     modulateSellPrices();
   }
 }
 
 void init_timeStore() {
 
-  s_bufferRefineryPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  s_bufferTankPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
-  s_bufferWatcherPrice = (uint64_t*) malloc( MAX_UPGRADES*sizeof(uint64_t) );
+  s_bufferUpgradePrice = (uint64_t*) malloc( UPGRADE_CATEGORIES*MAX_UPGRADES*sizeof(uint64_t) );
 
   // Populate the buffer. This could take a little time, do it at the start
   APP_LOG(APP_LOG_LEVEL_DEBUG, "SBufr");
-  for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    uint16_t nOwned = getUserOwnsUpgrades(REFINERY_ID, upgrade);
-    uint64_t currentPrice = INITIAL_PRICE_REFINERY[upgrade];
-    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
-    s_bufferRefineryPrice[upgrade] = currentPrice;
-    //
-    nOwned = getUserOwnsUpgrades(TANK_ID, upgrade);
-    currentPrice = INITIAL_PRICE_TANK[upgrade];
-    for (unsigned i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice);
-    s_bufferTankPrice[upgrade] = currentPrice;
-    //
-    // Note watchers increase a lot more, a factor 2 here
-    nOwned = getUserOwnsUpgrades(WATCHER_ID, upgrade);
-    currentPrice = INITIAL_PRICE_WATCHER[upgrade];
-    for (unsigned i = 0; i < nOwned; ++i) currentPrice = safeMultiply(currentPrice, INCREASE_WATCHER);
-    s_bufferWatcherPrice[upgrade] = currentPrice;
+  for (uint32_t upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
+    for (uint32_t cat = 0; cat < UPGRADE_CATEGORIES; ++cat) {
+      uint16_t nOwned = getUserUpgrades(cat, upgrade);
+      uint64_t currentPrice = UPGRADE_PRICE[cat][upgrade];
+      //APP_LOG(APP_LOG_LEVEL_INFO,"%i,%i price is %u", (int)cat, (int) upgrade, (unsigned int)currentPrice);
+      for (uint32_t i = 0; i < nOwned; ++i) currentPrice = getPriceOfNext(currentPrice, cat);
+      s_bufferUpgradePrice[(cat*MAX_UPGRADES)+upgrade] = currentPrice;
+    }
   }
+
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FBufr");
 
   updateTimePerMin();
@@ -165,14 +127,8 @@ void init_timeStore() {
 }
 
 void destroy_timeStore() {
-  free( s_bufferRefineryPrice );
-  free( s_bufferTankPrice );
-  free( s_bufferWatcherPrice );
-
-  free( s_bufferCommonSellPrice );
-  free( s_bufferMagicSellPrice );
-  free( s_bufferRareSellPrice );
-  free( s_bufferEpicSellPrice );
+  free( s_bufferItemSellPrice );
+  free( s_bufferUpgradePrice );
 }
 
 void giveCatchupItems(TimeUnits units, uint32_t n) {
@@ -242,15 +198,11 @@ void doCatchup() {
 }
 
 
-uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
-  uint64_t price = 0;
-  if (typeID == REFINERY_ID) {
-    price = getPriceOfNext(s_bufferRefineryPrice[resourceID]);
-  } else if (typeID == TANK_ID) {
-    price = getPriceOfNext(s_bufferTankPrice[resourceID]);
-  } else if (typeID == WATCHER_ID) {
-    price = safeMultiply(s_bufferWatcherPrice[resourceID], INCREASE_WATCHER);
-  }
+uint64_t getPriceOfUpgrade(const uint32_t typeID, const uint32_t resourceID) {
+  uint64_t price = getPriceOfNext(s_bufferUpgradePrice[(typeID*MAX_UPGRADES)+resourceID], typeID);
+
+  //APP_LOG(APP_LOG_LEVEL_INFO,"%i,%i PRICE OF NEXT %u -> %u", (int)typeID, (int) resourceID, (unsigned int)s_bufferUpgradePrice[(typeID*MAX_UPGRADES)+resourceID], (unsigned int) price);
+
 
   // LEGENDARY BONUS - 2% discount on refineries
   if ( getUserItems(LEGENDARY_ID, REFINERY_2PERC) == 1 ) {
@@ -267,15 +219,11 @@ uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
   return price;
 }
 
-uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID) {
-  if (treasureID == COMMON_ID)     return s_bufferCommonSellPrice[itemID];
-  else if (treasureID == MAGIC_ID) return s_bufferMagicSellPrice[itemID];
-  else if (treasureID == RARE_ID)  return s_bufferRareSellPrice[itemID];
-  else if (treasureID == EPIC_ID)  return s_bufferEpicSellPrice[itemID];
-  return 0;
+uint64_t getCurrentSellPrice(const uint32_t treasureID, const uint32_t itemID) {
+  return s_bufferItemSellPrice[(treasureID*MAX_TREASURES)+itemID];
 }
 
-void currentSellPricePercentage(char* buffer, const size_t buffer_size, unsigned* value, const unsigned treasureID, const unsigned itemID) {
+void currentSellPricePercentage(char* buffer, const size_t buffer_size, unsigned* value, const uint32_t treasureID, const uint32_t itemID) {
   uint64_t basePrice = getItemBasePrice(treasureID, itemID);
   uint64_t currentPrice = getCurrentSellPrice(treasureID, itemID);
   percentageToString(currentPrice, basePrice, buffer, buffer_size, value, false);
@@ -284,18 +232,20 @@ void currentSellPricePercentage(char* buffer, const size_t buffer_size, unsigned
 /**
  * Get the face value for all items of a given category. Won't overflow
  **/
-uint64_t currentCategorySellPrice(const unsigned treasureID) {
+uint64_t currentCategorySellPrice(const uint32_t treasureID) {
   uint64_t sellPrice = 0;
-  for (uint8_t i = 0; i < MAX_TREASURES; ++i) sellPrice += getCurrentSellPrice(treasureID, i);
+  for (uint8_t i = 0; i < MAX_TREASURES; ++i) {
+    sellPrice += s_bufferItemSellPrice[(treasureID*MAX_TREASURES)+i];
+  }
   return sellPrice;
 }
 
 uint64_t currentTotalSellPrice() {
-  uint64_t tot = 0;
-  for (uint8_t c = 0; c < SELLABLE_CATEGORIES; ++c) {
-    tot = safeAdd(tot,currentCategorySellPrice(c));
+  uint64_t total = 0;
+  for (uint32_t c = 0; c < SELLABLE_CATEGORIES; ++c) {
+    total = safeAdd(total, currentCategorySellPrice(c));
   }
-  return tot;
+  return total;
 }
 
 uint64_t getTimePerMin() {
@@ -315,8 +265,8 @@ uint64_t getTimePerMin() {
  **/
 void updateTimePerMin() {
   s_timePerMin = 60; // This is the base level
-  for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    s_timePerMin += getUserOwnsUpgrades(REFINERY_ID, upgrade) * REWARD_REFINERY[upgrade];
+  for (uint32_t upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
+    s_timePerMin += getUserUpgrades(REFINERY_ID, upgrade) * REWARD_REFINERY[upgrade];
   }
 }
 
@@ -333,8 +283,8 @@ uint64_t getTankCapacity() {
  **/
 void updateTankCapacity() {
   s_timeCapacity = SEC_IN_HOUR; // Base level
-  for (unsigned upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( REWARD_TANK[upgrade], getUserOwnsUpgrades(TANK_ID, upgrade)) );
+  for (uint32_t upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
+    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( REWARD_TANK[upgrade], getUserUpgrades(TANK_ID, upgrade)) );
   }
 }
 
@@ -368,23 +318,17 @@ void removeTime(uint64_t toSubtract) {
 /**
  * Check that the desired item can be afforded, and buy it if so
  */
-bool doPurchase(const unsigned typeID, const unsigned resourceID) {
+bool doPurchase(const uint32_t typeID, const uint32_t resourceID) {
   uint64_t cost = getPriceOfUpgrade(typeID, resourceID);
   if (cost > getUserTime()) return false;
   removeTime( cost ); // Debit the user
   addUpgrade(typeID, resourceID, 1); // Give them their upgrade
   // Update the price in the buffer so the next one becomes more expensive
   // And recalculate factors
-  if (typeID == REFINERY_ID) {
-    s_bufferRefineryPrice[resourceID] = cost;
-    updateTimePerMin();
-  } else if (typeID == TANK_ID) {
-    s_bufferTankPrice[resourceID] = cost;
-    updateTankCapacity();
-  } else if (typeID == WATCHER_ID) {
-    s_bufferWatcherPrice[resourceID] = cost;
-    updateProbabilities();
-  }
+  s_bufferUpgradePrice[(typeID*MAX_UPGRADES)+resourceID] = cost;
+  if (typeID == REFINERY_ID) updateTimePerMin();
+  else if (typeID == TANK_ID) updateTankCapacity();
+  else if (typeID == WATCHER_ID) updateProbabilities();
   return true;
 }
 
@@ -481,7 +425,7 @@ void percentageToString(uint64_t amount, uint64_t total, char* buffer, size_t bu
   *value = (amount * 100) / total;
   unsigned remain = (amount * 100) % total;
   // We only want the two most signnificant figs
-  if (0 && extraDigits) snprintf(buffer, bufferSize, "%i.%i%%", *value, remain); // totally not working!!!
+  if (0 && extraDigits) snprintf(buffer, bufferSize, "%i.%i%%", *value, remain); // totally not working!!! TODO
   else snprintf(buffer, bufferSize, "%i%%", *value);
   return;
 }

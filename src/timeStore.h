@@ -9,10 +9,10 @@ void doCatchup();
 void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief);
 void percentageToString(uint64_t amount, uint64_t total, char* buffer, const size_t buffer_size, unsigned* value, bool extraDigits);
 
-uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID);
-uint64_t getPriceOfNext(uint64_t priceOfCurrent);
+uint64_t getPriceOfUpgrade(const uint32_t typeID, const uint32_t resourceID);
+uint64_t getPriceOfNext(uint64_t priceOfCurrent, uint32_t typeID);
 
-bool doPurchase(const unsigned typeID, const unsigned resourceID);
+bool doPurchase(const uint32_t typeID, const uint32_t resourceID);
 
 uint64_t getTimePerMin();
 void updateTimePerMin();
@@ -21,9 +21,9 @@ uint64_t getTankCapacity();
 void updateTankCapacity();
 
 void modulateSellPrices();
-uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID);
-void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigned* value, const unsigned treasureID, const unsigned itemID);
-uint64_t currentCategorySellPrice(const unsigned treasureID);
+uint64_t getCurrentSellPrice(const uint32_t treasureID, const uint32_t itemID);
+void currentSellPricePercentage(char* buffer, const size_t buffer_size, unsigned* value, const uint32_t treasureID, const uint32_t itemID);
+uint64_t currentCategorySellPrice(const uint32_t treasureID);
 uint64_t currentTotalSellPrice();
 
 void addTime(uint64_t toAdd);

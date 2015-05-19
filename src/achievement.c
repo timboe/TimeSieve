@@ -29,22 +29,22 @@
 
 uint16_t getTotalUnlockWorkers() {
   uint16_t tot = 0;
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_TECH);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_LIGHT);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_FONT);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_VIBE);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_COLOUR);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_TECH);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_LIGHT);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_FONT);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_VIBE);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_COLOUR);
   return tot;
 }
 
 uint16_t getTotalItemWorkers() {
   uint16_t tot = 0;
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_1);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_1);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_CHANCE_2);
-  tot += getUserOwnsUpgrades(WATCHER_ID, WATCHER_QUALITY_2);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_CHANCE_1);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_QUALITY_1);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_CHANCE_2);
+  tot += getUserUpgrades(WATCHER_ID, WATCHER_QUALITY_2);
   return tot;
 }
 

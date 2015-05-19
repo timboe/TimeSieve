@@ -15,7 +15,6 @@ GFont* getTemperatureFont();
 
 GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID); // Internal
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID);
-GBitmap* getAchievementImage(uint8_t achievementID);
 GBitmap* getGemImage(uint8_t treasureID);
 
 void init_resources();
@@ -34,7 +33,6 @@ void initPrestigeWindowRes();
 void deinitPrestigeWindowRes();
 
 GBitmap* getPrestigeItemImage(uint8_t itemID);
-//GBitmap* getAchievementImage(uint8_t achievementID); // Also used here
 
 //////////////////////////
 

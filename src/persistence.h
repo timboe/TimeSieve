@@ -9,15 +9,10 @@ struct userData_v1 {
   uint64_t totalTime;
   time_t timeOfSave;
   // Things owned
-  uint16_t refineriesOwned[MAX_UPGRADES];
-  uint16_t tanksOwned[MAX_UPGRADES];
-  uint16_t watchersOwned[MAX_UPGRADES];
-  uint16_t commonOwned[MAX_TREASURES];
-  uint16_t magicOwned[MAX_TREASURES];
-  uint16_t rareOwned[MAX_TREASURES];
-  uint16_t epicOwned[MAX_TREASURES];
+  uint16_t upgradesOwned[UPGRADE_CATEGORIES][MAX_UPGRADES];
+  uint16_t itemsOwned[SELLABLE_CATEGORIES][MAX_TREASURES];
   uint32_t itemsMissed;
-  char     uniqueOwned[BITNSLOTS(MAX_UNIQUE)];
+  char     legendaryOwned[BITNSLOTS(MAX_UNIQUE)];
   char     chevoBitmap[BITNSLOTS(MAX_CHEVOS)];
   // Options
   uint8_t settings[N_USER_SETTING];
@@ -30,18 +25,18 @@ void destroy_persistence(); // Save
 void resetUserData(); // Reset
 void DEVMODE();
 
-uint16_t getUserTotalUpgrades(const unsigned typeID);
 
-uint16_t getUserItems(const unsigned treasureID, const unsigned itemID);
-uint16_t getUserTotalItems(const unsigned treasureID);
+uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID);
+uint16_t getUserTotalItems(const uint32_t treasureID);
 uint16_t getUserGrandTotalItems();
-uint16_t getUserItemTypes(const unsigned treasureID);
+uint16_t getUserItemTypes(const uint32_t treasureID);
 
-uint16_t getUserOwnsUpgrades(const unsigned typeID, const unsigned resourceID);
+uint16_t getUserUpgrades(const uint32_t typeID, const uint32_t resourceID);
+uint16_t getUserTotalUpgrades(const uint32_t typeID);
 
-void addUpgrade(const unsigned typeID, const unsigned resourceID, const int16_t n);
-void addItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
-void removeItem(const unsigned treasureID, const unsigned itemID, const int16_t n);
+void addUpgrade(const uint32_t typeID, const uint32_t resourceID, const int32_t n);
+void addItem(const uint32_t treasureID, const uint32_t itemID, const int32_t n);
+void removeItem(const uint32_t treasureID, const uint32_t itemID, const int32_t n);
 
 void addItemsMissed(uint32_t n);
 uint32_t getItemsMissed();

@@ -71,11 +71,11 @@ void loadUserSettings() {
   s_unlockSetting[UNLOCK_VIBE_ID]   = getUserSetting(SETTING_VIBE);
   s_unlockSetting[UNLOCK_COLOUR_ID] = getUserSetting(SETTING_COLOUR);
 
-  s_unlockedTo[UNLOCK_TECH_ID]   = getUserOwnsUpgrades(WATCHER_ID, WATCHER_TECH);
-  s_unlockedTo[UNLOCK_LIGHT_ID]  = getUserOwnsUpgrades(WATCHER_ID, WATCHER_LIGHT);
-  s_unlockedTo[UNLOCK_FONT_ID]   = getUserOwnsUpgrades(WATCHER_ID, WATCHER_FONT);
-  s_unlockedTo[UNLOCK_VIBE_ID]   = getUserOwnsUpgrades(WATCHER_ID, WATCHER_VIBE);
-  s_unlockedTo[UNLOCK_COLOUR_ID] = getUserOwnsUpgrades(WATCHER_ID, WATCHER_COLOUR);
+  s_unlockedTo[UNLOCK_TECH_ID]   = getUserUpgrades(WATCHER_ID, WATCHER_TECH);
+  s_unlockedTo[UNLOCK_LIGHT_ID]  = getUserUpgrades(WATCHER_ID, WATCHER_LIGHT);
+  s_unlockedTo[UNLOCK_FONT_ID]   = getUserUpgrades(WATCHER_ID, WATCHER_FONT);
+  s_unlockedTo[UNLOCK_VIBE_ID]   = getUserUpgrades(WATCHER_ID, WATCHER_VIBE);
+  s_unlockedTo[UNLOCK_COLOUR_ID] = getUserUpgrades(WATCHER_ID, WATCHER_COLOUR);
 }
 
 ///
