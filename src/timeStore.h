@@ -21,7 +21,7 @@ uint64_t getTankCapacity();
 void updateTankCapacity();
 
 void modulateSellPrices();
-uint64_t getCurrentSellPrice();
+uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID);
 void currentSellPricePercentage(char* buffer, const size_t buffer_size,  unsigned* value, const unsigned treasureID, const unsigned itemID);
 uint64_t currentCategorySellPrice(const unsigned treasureID);
 uint64_t currentTotalSellPrice();

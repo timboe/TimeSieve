@@ -9,3 +9,5 @@ void main_window_unload(Window *window);
 void animBegin();
 
 void update_tick_handler();
+
+TimeUnits getLastTimeUnit();

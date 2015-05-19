@@ -64,6 +64,10 @@ void animBegin() {
   animCallback(NULL);
 }
 
+TimeUnits getLastTimeUnit() {
+  return s_units_changed;
+}
+
 // Main window initialisation
 void main_window_load(Window *window) {
   create_timeSieve_layer(window);
@@ -146,6 +150,16 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   if ((units_changed & MINUTE_UNIT) == 0) return; // If no min change then stop here
 
+  // Chance of day?
+  if ((units_changed & DAY_UNIT) > 0) updateDateBuffer();
+
+  // For everthing else, we take midday as a new 'day' as well
+  if (tick_time->tm_hour == 12) {
+    units_changed = units_changed | DAY_UNIT; // Add day unit
+    // Remove second unit - this is used internally to tell true day boundaries from midday ones
+    units_changed = units_changed & (MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT|YEAR_UNIT);
+  }
+
   s_units_changed = units_changed;
   if (getUserOpt(OPT_SHOW_SECONDS) == true) { // If we are doing per-sec updates then give the modulo remainder time
     addTime( getTimePerMin() % SEC_IN_MIN );
@@ -153,8 +167,10 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
     addTime( getTimePerMin() );
   }
 
-  // Chance of day?
-  if ((units_changed & DAY_UNIT) > 0) updateDateBuffer();
+  // LEGENDARY BONUS - collect 3x the time on the hour
+  if ( getUserItems(LEGENDARY_ID, TPM_3HOURBONUS) == 1 ) {
+    addTime( getTimePerMin() * 3 );
+  }
 
   // Update prices
   modulateSellPrices();

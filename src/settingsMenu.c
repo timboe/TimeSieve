@@ -180,8 +180,8 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         strcpy(titleText, "TANK Capacity");
         timeToString(getTankCapacity(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       } else if (s_timeDisplay == 3) {
-        strcpy(titleText, "REFINERY Bonus");
-        timeToString(getTimePerMin() - SEC_IN_MIN, subText1, TEXT_LARGE_BUFFER_SIZE, false);
+        strcpy(titleText, "REFINERY Output");
+        timeToString(getTimePerMin(), subText1, TEXT_LARGE_BUFFER_SIZE, false);
       }
 
     } else if (row == 1) { // DISPLAY BUILDINGS
@@ -428,15 +428,27 @@ static uint16_t settings_sub_menu_get_num_rows_callback(MenuLayer *menu_layer, u
 }
 
 static int16_t settings_sub_menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  return MENU_CELL_BASIC_HEADER_HEIGHT;
+  return MENU_CELL_LARGE_HEADER_HEIGHT;
 }
 
 static int16_t settings_sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_TWO_CELL_HEIGHT; }
 
 static void settings_sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
   const int context = *((int*)data);
-  if (context == CHEVO_CONTEXT_ID)       menu_cell_basic_header_draw(ctx, cell_layer, "ACHIEVEMENTS");
-  else if (context == UNIQUE_CONTEXT_ID) menu_cell_basic_header_draw(ctx, cell_layer, "LEGENDARIES");
+  const GSize size = layer_get_frame(cell_layer).size;
+  const GRect topTextRect = GRect(2, 0, size.w-2, size.h);
+  const GRect botTextRect = GRect(2, 14, size.w-2, size.h-14);
+  static char s_subTitle1[TEXT_BUFFER_SIZE];
+  static char s_subTitle2[TEXT_BUFFER_SIZE];
+  if (context == CHEVO_CONTEXT_ID) {
+    strcpy(s_subTitle1, "ACHIEVEMENTS");
+    strcpy(s_subTitle2, "1% time bonus each");
+  } else if (context == UNIQUE_CONTEXT_ID) {
+    strcpy(s_subTitle1, "LEGENDARIES");
+    strcpy(s_subTitle2, "With unique bonuses");
+  }
+  graphics_draw_text(ctx, s_subTitle1, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, s_subTitle2, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 }
 
 static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {

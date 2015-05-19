@@ -247,6 +247,25 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define ANIM_FRAMES ANIM_FPS*ANIM_DURATION
 #define ANIM_DELAY MS_IN_SEC/ANIM_FPS
 
+
+typedef enum {ITEM_MISSBONUS, // done
+              TANKCAP_5PERC, //done
+              MIDNIGHT_20PERC, // done
+              ITEMQ_3PERC, // done
+              LEG_5, // TODO
+              ITEMF_2PERC, // done
+              ITEMF_HOUR_10PERC, // done
+              ITEMSELL_5PERC, // done
+              REFINERY_2PERC, // done
+              AUTOCOLLECT_3PERC, // done
+              TPM_3HOURBONUS, // done
+              TANKUP_4PERC, // done
+              MARKET, //done
+              TWOITEM, // done
+              EMPLOYEE_4PERC, // done
+              TPSBONUS_100ITEM} LEGENDARY_TYPE; // done
+
+
 #define N_USER_OPT 16
 typedef enum {OPT_SHOW_SECONDS,
               OPT_ANIMATE,

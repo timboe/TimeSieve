@@ -3,6 +3,7 @@
 #include "timeSieve.h"
 #include "persistence.h"
 #include "timeStore.h"
+#include "mainWindow.h"
 
 static int32_t s_findChanceBase;
 static int32_t s_findChanceMin;
@@ -26,32 +27,6 @@ int32_t getQualityBaseChance() {
 int32_t getFindBaseChance() {
   return s_findChanceBase;
 }
-
-//
-/*
-
-uint32_t FPMultiply(const uint32_t a, const uint32_t b) {
-  return (a * b )/(SCALE_FACTOR * SCALE_FACTOR);
-}
-
-uint32_t getBinomalProb(const uint16_t nAttempts, const uint32_t chance) {
-  // P = 1-(1-chance)^attempts
-  if (nAttempts == 0) return 0;
-
-  // (1-chance)
-  uint32_t c = PROB_MAX - chance;
-
-  // C = c^attempts
-  --nAttempts; // If attempts is 1 then ^1 so don't need this loop
-  uint32_t C = c;
-  for (uint8_t a = 0; a < nAttempts; ++a) {
-    C = FPMultiply(C, c);
-  }
-
-  // P = 1 - C
-  return PROB_MAX - C;
-}
-*/
 
 
 uint32_t combineProbability(uint32_t a, uint32_t b) {
@@ -133,6 +108,11 @@ uint8_t getItemRarity(TimeUnits units_changed) {
     chance = combineProbability(chance, QUALITY_HOUR_CHANCE);
   }
 
+  // LEGENDARY BONUS - 3% item quality bonus
+  if ( getUserItems(LEGENDARY_ID, ITEMQ_3PERC) == 1 ) {
+    chance = combineProbability(chance, 30);
+  }
+
   APP_LOG(APP_LOG_LEVEL_DEBUG, "QItm r:%i", (int)chance);
   // Check to see what we win
   if (chance >= BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
@@ -153,6 +133,14 @@ int32_t getItemAppearChance(TimeUnits units_changed) {
 bool getItemAppears(TimeUnits units_changed) {
   // We have five different thresholds, min, hour, day, month year. Always use the larger
   int32_t prob = getItemAppearChance(units_changed);
+  // LEGENDARY BONUS - 2% item find bonus
+  if ( getUserItems(LEGENDARY_ID, ITEMF_2PERC) == 1 ) {
+    prob = combineProbability(prob, 20);
+  }
+  // LEGENDARY BONUS - 10% item find bonus on the hour
+  if ( getUserItems(LEGENDARY_ID, ITEMF_HOUR_10PERC) == 1) {
+    if ((units_changed & HOUR_UNIT) > 0) prob = combineProbability(prob, 100);
+  }
   int r = rand() % SCALE_FACTOR;
   APP_LOG(APP_LOG_LEVEL_DEBUG, "FndItm r:%i thresh:%i P:%i", r, (int)prob, (int)(r<prob));
   return (r < prob);
@@ -162,7 +150,20 @@ bool getItemAppears(TimeUnits units_changed) {
  * Give each hired collector in turn a chance at getting the item
  **/
 bool getItemAutoCollect() {
-  return ( rand() % SCALE_FACTOR < s_autoCollectChance);
+  // LEGENDARY BONUS - 20% auto collect only at midnight
+  int32_t chance = s_autoCollectChance;
+  if ( getUserItems(LEGENDARY_ID, MIDNIGHT_20PERC) == 1 ) {
+    // We set the DAY_UNIT bit to midday as well. But we also unset the second bit to let us
+    // know that it's midday not midnight
+    if ((getLastTimeUnit() & DAY_UNIT) > 0 && (getLastTimeUnit() & SECOND_UNIT) == 0) {
+      chance = combineProbability(chance, 200);
+    }
+  }
+  // LEGENDARY BONUS - 3% auto collect
+  if ( getUserItems(LEGENDARY_ID, AUTOCOLLECT_3PERC) == 1 ) {
+    chance = combineProbability(chance, 30);
+  }
+  return ( rand() % SCALE_FACTOR < chance);
 }
 
 void genRandomItem(uint8_t* treasureID, uint8_t* itemID) {

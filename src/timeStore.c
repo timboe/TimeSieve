@@ -55,40 +55,54 @@ uint64_t getPriceOfNext(uint64_t priceOfCurrent) {
 }
 
 uint64_t getItemBasePrice(const unsigned treasureID, const unsigned itemID) {
+  uint64_t price = 0;
   if (treasureID == COMMON_ID) {
-    return SELL_PRICE_COMMON[itemID];
+    price = SELL_PRICE_COMMON[itemID];
   } else if (treasureID == MAGIC_ID) {
-    return SELL_PRICE_MAGIC[itemID];
+    price = SELL_PRICE_MAGIC[itemID];
   } else if (treasureID == RARE_ID) {
-    return SELL_PRICE_RARE[itemID];
+    price = SELL_PRICE_RARE[itemID];
   } else if (treasureID == EPIC_ID) {
-    return SELL_PRICE_EPIC[itemID];
+    price = SELL_PRICE_EPIC[itemID];
   }
-  return 0;
+  // LEGENDARY BONUS - items base price up by 5%
+  if ( getUserItems(LEGENDARY_ID, ITEMSELL_5PERC) == 1 ) {
+    price = (price * 21) / 20;
+  }
+  return price;
 }
 
 /**
  * Every 1m, we modulate the prices, very basic
  */
 void modulateSellPrices() {
+  int8_t lower = -5; //[-5 ... 5]
+  int8_t range = 11;
+
+  // LEGENDARY BONUS - markets move more in your favour
+  if ( getUserItems(LEGENDARY_ID, MARKET) == 1 ) {
+    lower = -4; //[-4 ... 5]
+    range = 10;
+  }
+
   for (unsigned item = 0; item < MAX_TREASURES; ++item ) {
-    s_bufferCommonSellPrice[item] += ( (SELL_PRICE_COMMON[item]/(uint64_t)100) * (-5+(rand()%11)) );
-    s_bufferMagicSellPrice[item]  += ( (SELL_PRICE_MAGIC[item]/(uint64_t)100)  * (-5+(rand()%11)) );
-    s_bufferRareSellPrice[item]   += ( (SELL_PRICE_RARE[item]/(uint64_t)100)   * (-5+(rand()%11)) );
-    s_bufferEpicSellPrice[item]   += ( (SELL_PRICE_EPIC[item]/(uint64_t)100)   * (-5+(rand()%11)) );
+    s_bufferCommonSellPrice[item] += ( (getItemBasePrice(COMMON_ID,item)/(uint64_t)100) * (lower+(rand()%range)) );
+    s_bufferMagicSellPrice[item]  += ( (getItemBasePrice(MAGIC_ID,item)/(uint64_t)100)  * (lower+(rand()%range)) );
+    s_bufferRareSellPrice[item]   += ( (getItemBasePrice(RARE_ID,item)/(uint64_t)100)   * (lower+(rand()%range)) );
+    s_bufferEpicSellPrice[item]   += ( (getItemBasePrice(EPIC_ID,item)/(uint64_t)100)   * (lower+(rand()%range)) );
 
     // Prevent from dropping *too* low
-    if (s_bufferCommonSellPrice[item] < SELL_PRICE_COMMON[item]/(uint64_t)4) {
-      s_bufferCommonSellPrice[item] += ( (SELL_PRICE_COMMON[item]/(uint64_t)100) * (5+(rand()%6)) );
+    if (s_bufferCommonSellPrice[item] < getItemBasePrice(COMMON_ID,item)/(uint64_t)4) {
+      s_bufferCommonSellPrice[item] += ( (getItemBasePrice(COMMON_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
     }
-    if (s_bufferMagicSellPrice[item] < SELL_PRICE_MAGIC[item]/(uint64_t)4) {
-      s_bufferMagicSellPrice[item] += ( (SELL_PRICE_MAGIC[item]/(uint64_t)100) * (5+(rand()%6)) );
+    if (s_bufferMagicSellPrice[item] < getItemBasePrice(MAGIC_ID,item)/(uint64_t)4) {
+      s_bufferMagicSellPrice[item] += ( (getItemBasePrice(MAGIC_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
     }
-    if (s_bufferRareSellPrice[item] < SELL_PRICE_RARE[item]/(uint64_t)4) {
-      s_bufferRareSellPrice[item] += ( (SELL_PRICE_RARE[item]/(uint64_t)100) * (5+(rand()%6)) );
+    if (s_bufferRareSellPrice[item] < getItemBasePrice(RARE_ID,item)/(uint64_t)4) {
+      s_bufferRareSellPrice[item] += ( (getItemBasePrice(RARE_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
     }
-    if (s_bufferEpicSellPrice[item] < SELL_PRICE_EPIC[item]/(uint64_t)4) {
-      s_bufferEpicSellPrice[item] += ( (SELL_PRICE_EPIC[item]/(uint64_t)100) * (5+(rand()%6)) );
+    if (s_bufferEpicSellPrice[item] < getItemBasePrice(EPIC_ID,item)/(uint64_t)4) {
+      s_bufferEpicSellPrice[item] += ( (getItemBasePrice(EPIC_ID,item)/(uint64_t)100) * (5+(rand()%6)) );
     }
   }
 }
@@ -179,6 +193,7 @@ void doCatchup() {
   // Give liquid time. Won't give more than can fit
   uint32_t nMin = timeDiff / SEC_IN_MIN;
   addTime( safeMultiply( getTimePerMin(), nMin) );
+  updateDisplayTime( getUserTime() );
 
   // If no chance of autocollect then end here!
   if (getAutoCollectChance() == 0) return;
@@ -228,16 +243,28 @@ void doCatchup() {
 
 
 uint64_t getPriceOfUpgrade(const unsigned typeID, const unsigned resourceID) {
-  uint64_t currentPrice = 0;
+  uint64_t price = 0;
   if (typeID == REFINERY_ID) {
-    currentPrice = s_bufferRefineryPrice[resourceID];
+    price = getPriceOfNext(s_bufferRefineryPrice[resourceID]);
   } else if (typeID == TANK_ID) {
-    currentPrice = s_bufferTankPrice[resourceID];
+    price = getPriceOfNext(s_bufferTankPrice[resourceID]);
   } else if (typeID == WATCHER_ID) {
-    currentPrice = s_bufferWatcherPrice[resourceID];
+    price = safeMultiply(s_bufferWatcherPrice[resourceID], INCREASE_WATCHER);
   }
 
-  return getPriceOfNext(currentPrice);
+  // LEGENDARY BONUS - 2% discount on refineries
+  if ( getUserItems(LEGENDARY_ID, REFINERY_2PERC) == 1 ) {
+    price = safeMultiply(price, 49) / 50;
+  }
+  // LEGENDARY BONUS - 4% discount on tanks
+  if ( getUserItems(LEGENDARY_ID, TANKUP_4PERC) == 1 ) {
+    price = safeMultiply(price, 24) / 25;
+  }
+  // LEGENDARY BONUS - 4% discount on employees
+  if ( getUserItems(LEGENDARY_ID, EMPLOYEE_4PERC) == 1 ) {
+    price = safeMultiply(price, 24) / 25;
+  }
+  return price;
 }
 
 uint64_t getCurrentSellPrice(const unsigned treasureID, const unsigned itemID) {
@@ -272,7 +299,14 @@ uint64_t currentTotalSellPrice() {
 }
 
 uint64_t getTimePerMin() {
-  return s_timePerMin;
+  uint16_t bonus = 100;
+  // LEGENDARY BONUS - 1% bonus time per 100 objects owned. An interesting one
+  if ( getUserItems(LEGENDARY_ID, TPSBONUS_100ITEM) == 1 ) {
+    bonus += (getUserGrandTotalItems() / 100);
+  }
+  // ACHIEVEMENT BONUS - 1% bonus time per achievement
+  bonus += getTotalChevos();
+  return (s_timePerMin * bonus) / 100;
 }
 
 /**
@@ -287,6 +321,10 @@ void updateTimePerMin() {
 }
 
 uint64_t getTankCapacity() {
+  // LEGENDARY BONUS. 5%+ tank capacity
+  if ( getUserItems(LEGENDARY_ID, TANKCAP_5PERC) == 1 ) {
+    return safeMultiply(s_timeCapacity, 21) / 20;
+  }
   return s_timeCapacity;
 }
 

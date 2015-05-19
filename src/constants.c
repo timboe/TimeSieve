@@ -231,22 +231,22 @@ const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "LEG 16"};
 
 const char* const DESC_LEGENDARY[MAX_UNIQUE] = {
-  "Extra 1% time per minute",
-  "Extra 2% time per minute",
+  "Missed items give a little time",
   "Tank holds 5% more",
-  "Tank holds 10% more",
+  "20% auto-collect bonus at midnight",
+  "3% increased item quality",
+  "LEG_5",
   "2% bonus to item find",
   "10% item find bonus on the hour",
-  "20% auto-collect bonus at midnight",
-  "3% auto-collect bonus",
-  "2% discount on refinery upgrades",
-  "3% discount on tank upgrades",
-  "4% discount on employees",
-  "3% increased item quality",
-  "Markets shift in your favour",
   "Items sell for 5% more",
+  "2% discount on refinery upgrades",
+  "3% auto-collect bonus",
+  "x3 time bonus on the hour",
+  "3% discount on tank upgrades",
+  "Markets shift in your favour",
   "5% chance to find two of an item",
-  "DESC 16"};
+  "4% discount on employees",
+  "1% time bonus per 100 owned items"};
 
 const char* const NAME_ACHIEVEMENT[MAX_CHEVOS] = {
   "Of the hour",

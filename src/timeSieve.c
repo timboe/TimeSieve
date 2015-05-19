@@ -6,6 +6,7 @@
 #include "items.h"
 #include "palette.h"
 #include "resources.h"
+#include "timeStore.h"
 
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
@@ -19,6 +20,7 @@ static GBitmap* s_gem = NULL;
 
 static GRect s_treasureRect;
 static bool s_treasureOnShow;
+static bool s_multipleTreasures;
 static int8_t s_treasureID;
 static int8_t s_itemID;
 static AppTimer* s_treasureTimeout = NULL;
@@ -133,7 +135,9 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   GBitmap* image = NULL;
   if (s_notifyTreasureID >= 0) {
     border = getTrasureColour(s_notifyTreasureID);
-    strcpy(notifyTxtTop, "Treasure!");
+    strcpy(notifyTxtTop, "Treasure");
+    if (s_multipleTreasures) strcpy(notifyTxtTop, " x2");
+    strcat(notifyTxtTop, "!");
     notifyTxtBot = getItemName(s_notifyTreasureID, s_notifyItemID);
     image = getSingleItemImage(s_notifyTreasureID, s_notifyItemID);
     offset = 35;
@@ -216,16 +220,21 @@ void create_timeSieve_layer(Window* parentWindow) {
 }
 
 void stopDisplayItem(void* data) {
+  if (data != NULL) {
+    addItemsMissed(1); // Was a timeout
+    APP_LOG(APP_LOG_LEVEL_DEBUG,"ItmMissed!");
+    // LEGENDARY BONUS. Give 5% of the current value of the missed item
+    if ( getUserItems(LEGENDARY_ID, ITEM_MISSBONUS) == 1 ) {
+      addTime( getCurrentSellPrice(s_treasureID, s_itemID) / 20  );
+      updateDisplayTime( getUserTime() );
+    }
+  }
+  else app_timer_cancel(s_treasureTimeout);
+  s_treasureTimeout = NULL;
   s_treasureRect = GRect(94, 18, 20, 20);
   s_treasureOnShow = false;
   s_treasureID = -1;
   s_haloRings = 0;
-  if (data != NULL) {
-    addItemsMissed(1); // Was a timeout
-    APP_LOG(APP_LOG_LEVEL_DEBUG,"ItmMissed!");
-  }
-  else app_timer_cancel(s_treasureTimeout);
-  s_treasureTimeout = NULL;
 }
 
 void itemCanBeCollected() {
@@ -255,7 +264,15 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
 
 bool collectItem(bool autoCollect) {
   if (s_treasureOnShow == false) return false;
-  addItem(s_treasureID, s_itemID, 1);
+  uint8_t nItem = 1;
+
+  // LEGENDARY BONUS - sometimes (10%) get two items. Obv not w legendaries
+  if ( getUserItems(LEGENDARY_ID, TWOITEM) == 1 ) {
+    if (s_treasureID != LEGENDARY_ID && rand()%10 == 0) ++nItem;
+  }
+
+  s_multipleTreasures = (nItem > 1);
+  addItem(s_treasureID, s_itemID, nItem);
   showNotifyTreasure(s_treasureID, s_itemID);
   stopDisplayItem(NULL);
   if (autoCollect == false) vibes_short_pulse();
