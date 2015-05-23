@@ -112,9 +112,9 @@ bool clockAnimCallback(TimeUnits units_changed) {
   }
 }
 
-void draw3DText(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset, bool BWMode) {
+void draw3DText(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset, bool BWMode, GColor BWFg, GColor BWBg) {
 
-  if (BWMode) graphics_context_set_text_color(ctx, GColorBlack);
+  if (BWMode) graphics_context_set_text_color(ctx, BWBg);
 
   // corners
   if (!BWMode) graphics_context_set_text_color(ctx, getTextColourL());
@@ -147,7 +147,7 @@ void draw3DText(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
   // main
-  if (BWMode) graphics_context_set_text_color(ctx, GColorWhite);
+  if (BWMode) graphics_context_set_text_color(ctx, BWFg);
   else if (s_flashMainFace) graphics_context_set_text_color(ctx, getTextColourU());
   else graphics_context_set_text_color(ctx, getTextColourC());
   loc.origin.x += offset; // O
@@ -227,7 +227,7 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
 
   // DATE
   GRect dateRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y, tank_bounds.size.w, 30);
-  draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false);
+  draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false, GColorBlack, GColorBlack);
 
   // WEATHER
   GRect wRect = GRect(-7, 0, 35, 25);
@@ -235,10 +235,10 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   wRect.origin.y += 5;
   wRect.origin.x += 17;
-  draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true);
+  draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorBlack, GColorWhite);
 
   GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
-  draw3DText(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset, false);
+  draw3DText(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset, false, GColorBlack, GColorBlack);
 
   if (s_clockTickCount == 0) return; // No animation in progress
 

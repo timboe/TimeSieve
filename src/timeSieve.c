@@ -138,7 +138,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
     strcpy(notifyTxtTop, "Treasure");
     if (s_multipleTreasures) strcpy(notifyTxtTop, " x2");
     strcat(notifyTxtTop, "!");
-    notifyTxtBot = getItemName(s_notifyTreasureID, s_notifyItemID);
+    notifyTxtBot = ITEM_NAME[s_notifyTreasureID][s_notifyItemID];
     image = getSingleItemImage(s_notifyTreasureID, s_notifyItemID);
     offset = 35;
   } else {

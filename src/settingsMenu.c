@@ -488,6 +488,9 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
     return;
   }
 
+  GTextAlignment algn = GTextAlignmentLeft;
+  if (row%2==0) algn = GTextAlignmentRight;
+
   if (selected) backColor = MENU_BACK_GREEN_SELECT;
   else if (row%2==0) backColor = MENU_BACK_GREEN_EVEN;
   else backColor = MENU_BACK_GREEN_ODD;
@@ -495,8 +498,8 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
-  graphics_draw_text(ctx, nameText, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  graphics_draw_text(ctx, descText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, nameText, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, algn, NULL);
+  graphics_draw_text(ctx, descText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, algn, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   if (image != NULL) graphics_draw_bitmap_in_rect(ctx, image, imageRect);

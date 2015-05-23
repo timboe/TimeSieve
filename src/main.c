@@ -4,6 +4,7 @@
 #include "resources.h"
 #include "persistence.h"
 #include "clock.h"
+#include "splash.h"
 
 // Prog initialisation
 void handleInit(void) {
@@ -11,7 +12,7 @@ void handleInit(void) {
   init_persistence(); // Load user save
   init_timeStore(); // Buffer upgrade prices, item prices, item probabilities
   doCatchup(); // Give user time and items missed while programme not running
-  init_mainWindow(); // Create and push to the stack the main window
+  showSplash();
   light_enable(1);
 }
 

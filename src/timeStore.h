@@ -4,7 +4,9 @@
 
 void init_timeStore();
 void destroy_timeStore();
-void doCatchup();
+
+uint64_t safeAdd(uint64_t a, uint64_t b);
+uint64_t safeMultiply(uint64_t a, uint64_t b);
 
 void timeToString(uint64_t time, char* buffer, size_t buffer_size, bool brief);
 void percentageToString(uint64_t amount, uint64_t total, char* buffer, const size_t buffer_size, unsigned* value, bool extraDigits);
@@ -12,7 +14,7 @@ void percentageToString(uint64_t amount, uint64_t total, char* buffer, const siz
 uint64_t getPriceOfUpgrade(const uint32_t typeID, const uint32_t resourceID);
 uint64_t getPriceOfNext(uint64_t priceOfCurrent, uint32_t typeID);
 
-bool doPurchase(const uint32_t typeID, const uint32_t resourceID);
+uint64_t doPurchase(const uint32_t typeID, const uint32_t resourceID);
 
 uint64_t getTimePerMin();
 void updateTimePerMin();

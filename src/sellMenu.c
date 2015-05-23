@@ -5,6 +5,7 @@
 #include "timeStore.h"
 #include "resources.h"
 #include "items.h"
+#include "notify.h"
 
 // Box is 32x27, ~14 px vert. available
 static const GPathInfo ARROW_DOWN_PATH = {
@@ -28,19 +29,16 @@ static GPath* s_box;
 
 static int8_t s_sellSections[SELLABLE_CATEGORIES] = {-1};
 
-static MenuLayer* s_sell_layer;
-
-static Layer* s_sellNotifyLayer;
-static AppTimer* s_sellTimer;
-static uint8_t s_soldTreasureID;
-static uint8_t s_soldItemID;
-static uint16_t s_soldNumber;
-static uint64_t s_soldPrice;
+static MenuLayer* s_sellLayer;
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
+// Hold text of top sell notify
+static char soldTextTop[TEXT_BUFFER_SIZE];
+static char soldTextBot[TEXT_BUFFER_SIZE];
+
 void updateSellLayer() {
-  if (s_sell_layer) layer_mark_dirty(menu_layer_get_layer(s_sell_layer));
+  if (s_sellLayer) layer_mark_dirty(menu_layer_get_layer(s_sellLayer));
 }
 
 int8_t getItemIDFromRow(const unsigned treasureID, const uint16_t row) {
@@ -155,7 +153,6 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   }
 
   GColor backColor;
-  const char* itemName = getItemName(treasureID, itemID);
   if (treasureID == COMMON_ID) {
     if (selected) backColor = GColorDarkGray;
     else backColor = GColorLightGray;
@@ -194,7 +191,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   timeToString(sellPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
   strcat(subText2, tempBuffer);
 
-  graphics_draw_text(ctx, itemName, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, ITEM_NAME[treasureID][itemID], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, subText1, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, subText2, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), medTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 
@@ -256,40 +253,6 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   graphics_draw_bitmap_in_rect(ctx, getSellItemImage(treasureID, itemID), imageRect);
 }
 
-// Notify popup
-static void sellNotifyUpdateProc(Layer *this_layer, GContext *ctx) {
-  if (s_sellTimer == NULL) return; // Not being shown
-  GRect b = layer_get_bounds(this_layer);
-  // Outer box
-  graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_fill_rect(ctx, b, 6, GCornersAll);
-  graphics_context_set_fill_color(ctx, GColorBlack);
-  if (s_soldNumber == 0) graphics_context_set_fill_color(ctx, GColorRed);
-  graphics_fill_rect(ctx, GRect(b.origin.x+2, b.origin.y+2, b.size.w-4, b.size.h-4), 6, GCornersAll);
-  graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_fill_rect(ctx, GRect(b.origin.x+4, b.origin.y+4, b.size.w-8, b.size.h-8), 6, GCornersAll);
-
-  static char soldTextTop[TEXT_BUFFER_SIZE];
-  static char soldTextBot[TEXT_BUFFER_SIZE];
-  graphics_context_set_text_color(ctx, GColorBlack);
-  snprintf(soldTextTop, TEXT_BUFFER_SIZE, "Sold %i", (int)s_soldNumber);
-  if (s_soldNumber == 0) {
-    strcpy(soldTextBot, "Time Tank Too Small!");
-  } else {
-    timeToString(s_soldPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
-    strcpy(soldTextBot, "For ");
-    strcat(soldTextBot, tempBuffer);
-  }
-
-  graphics_draw_text(ctx, soldTextTop, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,4,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_draw_text(ctx, getItemName(s_soldTreasureID, s_soldItemID), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), GRect(0,10,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_draw_text(ctx, soldTextBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(0,34,b.size.w,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-}
-
-void removeSellNotify(void* data) {
-  s_sellTimer = NULL;
-  layer_mark_dirty(s_sellNotifyLayer);
-}
 
 void doSell(const uint16_t section, const uint16_t row, bool sellAll) {
   // get type
@@ -300,15 +263,19 @@ void doSell(const uint16_t section, const uint16_t row, bool sellAll) {
   if (itemID == -1) return;
 
   uint16_t sold = sellItem(treasureID, itemID, sellAll);
-  s_soldTreasureID = treasureID;
-  s_soldItemID = itemID;
-  s_soldNumber = sold;
-  s_soldPrice = sold * getCurrentSellPrice(treasureID, itemID);
-  // Cancel any current timer and set to future
-  app_timer_cancel(s_sellTimer);
-  s_sellTimer = app_timer_register(SELL_DISPLAY_TIME, removeSellNotify, NULL);
+  GColor highlight = GColorBlack;
 
-  layer_mark_dirty(s_sellNotifyLayer);
+  snprintf(soldTextTop, TEXT_BUFFER_SIZE, "Sold %i", (int)sold);
+  if (sold == 0) {
+    strcpy(soldTextBot, "Time Tank Too Small!");
+    highlight = GColorRed;
+  } else {
+    timeToString(sold * getCurrentSellPrice(treasureID, itemID), tempBuffer, TEXT_BUFFER_SIZE, true);
+    strcpy(soldTextBot, "For ");
+    strcat(soldTextBot, tempBuffer);
+  }
+
+  showNotify(highlight, soldTextTop, ITEM_NAME[treasureID][itemID], soldTextBot);
 }
 
 static void sell_select_long_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -333,8 +300,8 @@ void sell_window_load(Window* parentWindow) {
   initSellWindowRes();
 
   // Now we prepare to initialize the menu layer
-  Layer* window_layer = window_get_root_layer(parentWindow);
-  GRect bounds = layer_get_frame(window_layer);
+  Layer* windowLayer = window_get_root_layer(parentWindow);
+  GRect bounds = layer_get_frame(windowLayer);
 
   s_arrowUp = gpath_create(&ARROW_UP_PATH);
   s_arrowDown = gpath_create(&ARROW_DOWN_PATH);
@@ -344,8 +311,8 @@ void sell_window_load(Window* parentWindow) {
   gpath_move_to(s_box, GPoint(126, 10));
 
   // Create the menu layer
-  s_sell_layer = menu_layer_create(bounds);
-  menu_layer_set_callbacks(s_sell_layer, NULL, (MenuLayerCallbacks){
+  s_sellLayer = menu_layer_create(bounds);
+  menu_layer_set_callbacks(s_sellLayer, NULL, (MenuLayerCallbacks){
     .get_num_sections = sell_get_num_sections_callback,
     .get_num_rows = sell_get_num_rows_callback,
     .get_cell_height = sell_get_cell_height_callback,
@@ -356,22 +323,18 @@ void sell_window_load(Window* parentWindow) {
     .select_long_click = sell_select_long_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_click_config_onto_window(s_sell_layer, parentWindow);
-  layer_add_child(window_layer, menu_layer_get_layer(s_sell_layer));
+  menu_layer_set_click_config_onto_window(s_sellLayer, parentWindow);
+  layer_add_child(windowLayer, menu_layer_get_layer(s_sellLayer));
 
   // Notify layer goes on top, shows sold items
-  s_sellNotifyLayer = layer_create( GRect(0, 0, bounds.size.w, 55) );
-  layer_set_update_proc(s_sellNotifyLayer, sellNotifyUpdateProc);
-  layer_add_child(window_layer, s_sellNotifyLayer);
-  s_sellTimer = NULL;
+  layer_add_child(windowLayer, getNotifyLayer());
 
 }
 
 void sell_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinULd");
-  menu_layer_destroy(s_sell_layer);
-  layer_destroy(s_sellNotifyLayer);
-  s_sell_layer = 0;
+  menu_layer_destroy(s_sellLayer);
+  destroyNotifyLayer();
   free(s_arrowUp);
   free(s_arrowDown);
   free(s_box);

@@ -5,12 +5,9 @@
 #include "timeStore.h"
 #include "mainWindow.h"
 
-static int32_t s_findChanceBase;
-static int32_t s_findChanceMin;
-static int32_t s_findChanceHour;
-static int32_t s_findChanceDay;
-static int32_t s_findChanceMonth;
-static int32_t s_findChanceYear;
+typedef enum {BASE, MIN, HOUR, DAY, MONTH, YEAR, N_TIME} CHANCE_TIME;
+
+static int32_t s_findChance[N_TIME];
 
 static int32_t s_qualityChanceBase;
 
@@ -25,7 +22,7 @@ int32_t getQualityBaseChance() {
 }
 
 int32_t getFindBaseChance() {
-  return s_findChanceBase;
+  return s_findChance[BASE];
 }
 
 
@@ -40,28 +37,19 @@ void updateProbabilities() {
 
   APP_LOG(APP_LOG_LEVEL_DEBUG, "SItmBufr");
 
-  s_findChanceBase  = 0;
-  s_findChanceMin   = BASE_CHANCE_MIN;
-  s_findChanceHour  = BASE_CHANCE_HOUR;
-  s_findChanceDay   = BASE_CHANCE_DAY;
-  s_findChanceMonth = BASE_CHANCE_MONTH;
-  s_findChanceYear  = BASE_CHANCE_YEAR;
-
-  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1); ++e) {
-    s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_1_CHANCE);
-    s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_1_CHANCE);
-    s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_1_CHANCE);
-    s_findChanceDay   = combineProbability(s_findChanceDay, FREQUENCY_1_CHANCE);
-    s_findChanceMonth = combineProbability(s_findChanceMonth, FREQUENCY_1_CHANCE);
-    s_findChanceYear  = combineProbability(s_findChanceYear, FREQUENCY_1_CHANCE);
-  }
-  for (uint e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2); ++e) {
-    s_findChanceBase  = combineProbability(s_findChanceBase, FREQUENCY_2_CHANCE);
-    s_findChanceMin   = combineProbability(s_findChanceMin, FREQUENCY_2_CHANCE);
-    s_findChanceHour  = combineProbability(s_findChanceHour, FREQUENCY_2_CHANCE);
-    s_findChanceDay   = combineProbability(s_findChanceDay, FREQUENCY_2_CHANCE);
-    s_findChanceMonth = combineProbability(s_findChanceMonth, FREQUENCY_2_CHANCE);
-    s_findChanceYear  = combineProbability(s_findChanceYear, FREQUENCY_2_CHANCE);
+  s_findChance[BASE]  = 0;
+  s_findChance[MIN]   = BASE_CHANCE_MIN;
+  s_findChance[HOUR]  = BASE_CHANCE_HOUR;
+  s_findChance[DAY]   = BASE_CHANCE_DAY;
+  s_findChance[MONTH] = BASE_CHANCE_MONTH;
+  s_findChance[YEAR]  = BASE_CHANCE_YEAR;
+  for (uint32_t t = 0; t < (uint32_t)N_TIME; ++t) {
+    for (uint32_t e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_1); ++e) {
+      s_findChance[t]  = combineProbability(s_findChance[t], FREQUENCY_1_CHANCE);
+    }
+    for (uint32_t e = 0; e < getUserUpgrades(WATCHER_ID, WATCHER_FREQUENCY_2); ++e) {
+      s_findChance[t]  = combineProbability(s_findChance[t], FREQUENCY_2_CHANCE);
+    }
   }
 
   s_qualityChanceBase = 0;
@@ -123,11 +111,11 @@ uint8_t getItemRarity(TimeUnits units_changed) {
 }
 
 int32_t getItemAppearChance(TimeUnits units_changed) {
-  if      ((units_changed & YEAR_UNIT)  != 0) return s_findChanceYear;
-  else if ((units_changed & MONTH_UNIT) != 0) return s_findChanceMonth;
-  else if ((units_changed & DAY_UNIT)   != 0) return s_findChanceDay;
-  else if ((units_changed & HOUR_UNIT)  != 0) return s_findChanceHour;
-  else                                        return s_findChanceMin;
+  if      ((units_changed & YEAR_UNIT)  != 0) return s_findChance[YEAR];
+  else if ((units_changed & MONTH_UNIT) != 0) return s_findChance[MONTH];
+  else if ((units_changed & DAY_UNIT)   != 0) return s_findChance[DAY];
+  else if ((units_changed & HOUR_UNIT)  != 0) return s_findChance[HOUR];
+  else                                        return s_findChance[MIN];
 }
 
 bool getItemAppears(TimeUnits units_changed) {
@@ -218,11 +206,3 @@ int8_t checkForItem(TimeUnits units_changed) {
   displyItem( treasureID, itemID );
   return treasureID;
 }
-
-const char* getItemName(uint8_t treasureID, uint8_t itemID) {
-  if (treasureID == COMMON_ID) return NAME_COMMON[itemID];
-  else if (treasureID == MAGIC_ID) return NAME_MAGIC[itemID];
-  else if (treasureID == RARE_ID) return NAME_RARE[itemID];
-  else if (treasureID == EPIC_ID) return NAME_EPIC[itemID];
-  else return NAME_LEGENDARY[itemID];
- }

@@ -1,6 +1,10 @@
 #include <pebble.h>
 #include "constants.h"
 
+const uint8_t ITEM_COLOURS[ITEM_CATEGORIES] = {0b11101010, 0b11011000, 0b11001011, 0b11010011, 0b11111000};
+
+const char* const ITEM_CATEGORIE_NAME[ITEM_CATEGORIES] = {"Common", "Magic", "Rare", "Epic", "Legendary"};
+
 const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   SEC_IN_MIN,      //REFINERY
   3*SEC_IN_MIN,
@@ -54,8 +58,8 @@ const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   0
   } };
 
-const uint64_t REWARD_REFINERY[MAX_UPGRADES] = {
-  1,
+const uint64_t UPGRADE_REWARD[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
+  1, // REFINERY
   30,
   3*SEC_IN_MIN,
   15*SEC_IN_MIN,
@@ -70,9 +74,44 @@ const uint64_t REWARD_REFINERY[MAX_UPGRADES] = {
   1*SEC_IN_MILLENIUM,
   0,
   0,
-  0};
+  0
+  }, {
+  10*SEC_IN_MIN, // TANK
+  1*SEC_IN_HOUR,
+  12*SEC_IN_HOUR,
+  1*SEC_IN_DAY,
+  31*SEC_IN_DAY,
+  1*SEC_IN_YEAR,
+  100*SEC_IN_YEAR,
+  1*SEC_IN_MILLENIUM,
+  200*SEC_IN_MILLENIUM,
+  1*SEC_IN_AGE,
+  1*SEC_IN_EPOCH,
+  1*SEC_IN_ERA,
+  2*SEC_IN_EON,
+  0,
+  0,
+  0
+  }, {
+  SEC_IN_MIN, // WATCHER - TODO remove this - it's not used!
+  SEC_IN_MIN*2,
+  SEC_IN_MIN*10,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  SEC_IN_MIN,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0,
+  (uint64_t)0
+  } };
 
-const char* const NAME_REFINERY[MAX_UPGRADES] = {
+const char* const UPGRADE_NAME[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   "Time Tongs",
   "30 SEC",
   "Funnel",
@@ -88,27 +127,8 @@ const char* const NAME_REFINERY[MAX_UPGRADES] = {
   "Prismatic Gem",
   "",
   "",
-  ""};
-
-const uint64_t REWARD_TANK[MAX_UPGRADES] = {
-  10*SEC_IN_MIN,
-  1*SEC_IN_HOUR,
-  12*SEC_IN_HOUR,
-  1*SEC_IN_DAY,
-  31*SEC_IN_DAY,
-  1*SEC_IN_YEAR,
-  100*SEC_IN_YEAR,
-  1*SEC_IN_MILLENIUM,
-  200*SEC_IN_MILLENIUM,
-  1*SEC_IN_AGE,
-  1*SEC_IN_EPOCH,
-  1*SEC_IN_ERA,
-  2*SEC_IN_EON,
-  0,
-  0,
-  0};
-
-const char* const NAME_TANK[MAX_UPGRADES] = {
+  ""
+  }, {
   "Minute Tank",
   "TUPGRADE 2",
   "TUPGRADE 3",
@@ -124,28 +144,8 @@ const char* const NAME_TANK[MAX_UPGRADES] = {
   "TUPGRADE 13",
   "",
   "",
-  ""};
-
-// remember these prices x10 each time and some are finite
-const uint64_t REWARD_WATCHER[MAX_UPGRADES] = {
-  SEC_IN_MIN,
-  SEC_IN_MIN*2,
-  SEC_IN_MIN*10,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  SEC_IN_MIN,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0,
-  (uint64_t)0};
-
-const char* const NAME_WATCHER[MAX_UPGRADES] = {
+  ""
+  }, {
   "", // Increase treasure chance
   "Techie", // Techie - unlock extra clock bits
   "Intern Runner",// XXX - WATCHER_CHANCE_1
@@ -161,7 +161,8 @@ const char* const NAME_WATCHER[MAX_UPGRADES] = {
   "",
   "",
   "",
-  ""};
+  ""
+  } };
 
 const uint64_t SELL_PRICE[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   SEC_IN_MIN*10, // COMMON
@@ -185,29 +186,27 @@ const uint64_t SELL_PRICE[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   SEC_IN_MILLENIUM*5
   } };
 
-const char* const NAME_COMMON[MAX_TREASURES] = {
+const char* const ITEM_NAME[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   "Old Tooth",
   "Coathangr",
   "Googly i",
-  "Milk"};
-
-const char* const NAME_MAGIC[MAX_TREASURES] = {
+  "Milk"
+  }, {
   "Briefs",
   "Rick Roll",
   "MAGIC 3",
-  "MAGIC 4"};
-
-const char* const NAME_RARE[MAX_TREASURES] = {
+  "MAGIC 4"
+  }, {
   "RARE 1",
   "RARE 2",
   "Bitcoin",
-  "Man's Soul"};
-
-const char* const NAME_EPIC[MAX_TREASURES] = {
+  "Man's Soul"
+  }, {
   "EPIC 1",
   "Gemerald",
   "EPIC 3",
-  "EPIC 4"};
+  "EPIC 4"
+  } };
 
 const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "LEG 1",

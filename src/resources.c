@@ -9,14 +9,12 @@ static GFont s_clock;
 static GFont s_clockSmall;
 static GFont s_weatherFont;
 static GFont s_temperatureFont;
+static GFont s_g14b;
 static GBitmap* s_singleItemImage = NULL;
 static GBitmap* s_gem[ITEM_CATEGORIES];
 
-static GBitmap* s_commonItem[MAX_TREASURES];
-static GBitmap* s_magicItem[MAX_TREASURES];
-static GBitmap* s_rareItem[MAX_TREASURES];
-static GBitmap* s_epicItem[MAX_TREASURES];
-static GBitmap* s_legendaryItem[MAX_UNIQUE];
+static GBitmap* s_item[SELLABLE_CATEGORIES][MAX_TREASURES];
+static GBitmap* s_legendaryItem[MAX_TREASURES];
 
 static GBitmap* s_refineryImage[MAX_UPGRADES];
 static GBitmap* s_tankImage[MAX_UPGRADES];
@@ -24,10 +22,22 @@ static GBitmap* s_employeeImage[MAX_UPGRADES];
 
 //////////////////////////
 
+static char tempBuffer[TEXT_BUFFER_SIZE];
+
+/**
+ * For any time we need some extra room for string manipulation
+ **/
+char* getTempBuffer() {
+  return tempBuffer;
+}
+
+//////////////////////////
+
 void initMainWindowRes() {
   s_perfectDOSFont  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
   s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_21));
   s_temperatureFont = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+  s_g14b            = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   loadClockFont();
   s_gem[COMMON_ID]    = gbitmap_create_with_resource(RESOURCE_ID_GEM_COMMON);
   s_gem[MAGIC_ID]     = gbitmap_create_with_resource(RESOURCE_ID_GEM_MAGIC);
@@ -84,6 +94,8 @@ GFont* getWeatherFont() { return &s_weatherFont; }
 
 GFont* getTemperatureFont() { return &s_temperatureFont; }
 
+GFont* getGothic14BoldFont() { return &s_g14b; }
+
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID) {
   gbitmap_destroy( s_singleItemImage );
   s_singleItemImage = loadItemImage(treasureID, itemID);
@@ -95,31 +107,23 @@ GBitmap* getGemImage(uint8_t treasureID) { return s_gem[treasureID]; }
 //////////////////////////
 
 void initSellWindowRes() {
-  for (uint8_t i=0; i < MAX_TREASURES; ++i) {
-    s_commonItem[i] = loadItemImage(COMMON_ID, i);
-    s_magicItem[i]  = loadItemImage(MAGIC_ID, i);
-    s_rareItem[i]   = loadItemImage(RARE_ID, i);
-    s_epicItem[i]   = loadItemImage(EPIC_ID, i);
+  for (uint8_t i=0; i < SELLABLE_CATEGORIES; ++i) {
+    for (uint8_t j=0; j < MAX_TREASURES; ++j) {
+      s_item[i][j] = loadItemImage(i, j);
+    }
   }
 }
 
 void deinitSellWindowRes() {
-  for (uint8_t i=0; i < MAX_TREASURES; ++i) {
-    gbitmap_destroy( s_commonItem[i] );
-    gbitmap_destroy( s_magicItem[i] );
-    gbitmap_destroy( s_rareItem[i] );
-    gbitmap_destroy( s_epicItem[i] );
+  for (uint8_t i=0; i < SELLABLE_CATEGORIES; ++i) {
+    for (uint8_t j=0; j < MAX_TREASURES; ++j) {
+      gbitmap_destroy( s_item[i][j] );
+    }
   }
 }
 
 GBitmap* getSellItemImage(uint8_t treasureID, uint8_t itemID) {
-  switch (treasureID) {
-    case COMMON_ID: return s_commonItem[itemID];
-    case MAGIC_ID: return s_magicItem[itemID];
-    case RARE_ID: return s_rareItem[itemID];
-    case EPIC_ID: return s_epicItem[itemID];
-  }
-  return NULL;
+  return s_item[treasureID][itemID];
 }
 
 // This internal fn is used elsewhere too in resources

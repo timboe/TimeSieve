@@ -78,7 +78,7 @@ void main_window_load(Window *window) {
 }
 
 // Main window destructiom
-void main_window_unload(Window *window) {
+void main_window_unload(Window *window) { 
   destroy_timeSieve_layer();
   destroy_clock_layer();
   destroy_timeTank_layer();
@@ -101,7 +101,7 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
   } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
   } else if (IS_DEBUG && BUTTON_ID_BACK == button) {
-    tick_handler(NULL, SECOND_UNIT|MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT|YEAR_UNIT);
+    tick_handler(NULL, SECOND_UNIT|MINUTE_UNIT|HOUR_UNIT|DAY_UNIT);
   }
 }
 

@@ -59,29 +59,26 @@
 #define TREASURE_DISPLAY_TIME 50000
 #define NOTIFY_TREASURE_DISPLAY_TIME 3000
 #define NOTIFY_ACHIEVEMENT_DISPLAY_TIME 50000
-#define SELL_DISPLAY_TIME 3000
+#define NOTIFY_DISPLAY_TIME 3000
+#define SPLASH_DISPLAY_TIME 20000
 
 #define N_REFINERY_UPGRADES 13
 #define N_TANK_UPGRADES 13
 #define N_WATCHER_UPGRADES 11
 
-extern const char* const NAME_REFINERY[MAX_UPGRADES];
-extern const char* const NAME_TANK[MAX_UPGRADES];
-extern const char* const NAME_WATCHER[MAX_UPGRADES];
-extern const char* const NAME_COMMON[MAX_TREASURES];
-extern const char* const NAME_MAGIC[MAX_TREASURES];
-extern const char* const NAME_RARE[MAX_TREASURES];
-extern const char* const NAME_EPIC[MAX_TREASURES];
+extern const char* const UPGRADE_NAME[UPGRADE_CATEGORIES][MAX_UPGRADES];
+extern const char* const ITEM_NAME[SELLABLE_CATEGORIES][MAX_TREASURES];
 extern const char* const NAME_LEGENDARY[MAX_UNIQUE];
 extern const char* const DESC_LEGENDARY[MAX_UNIQUE];
 extern const char* const NAME_ACHIEVEMENT[MAX_CHEVOS];
 extern const char* const DESC_ACHIEVEMENT[MAX_CHEVOS];
 
 extern const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES];
-extern const uint64_t REWARD_REFINERY[MAX_UPGRADES];
-extern const uint64_t REWARD_TANK[MAX_UPGRADES];
-extern const uint64_t REWARD_WATCHER[MAX_UPGRADES];
+extern const uint64_t UPGRADE_REWARD[UPGRADE_CATEGORIES][MAX_UPGRADES];
 extern const uint64_t SELL_PRICE[SELLABLE_CATEGORIES][MAX_TREASURES];
+
+extern const uint8_t ITEM_COLOURS[ITEM_CATEGORIES];
+extern const char* const ITEM_CATEGORIE_NAME[ITEM_CATEGORIES];
 
 
 typedef enum {WATCHER_FREQUENCY_1,
@@ -166,12 +163,6 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define MENU_BACK_PURPLE_ODD GColorPurpureus
 #define MENU_BACK_PURPLE_EVEN GColorLavenderIndigo
 #define MENU_BACK_PURPLE_SELECT GColorJazzberryJam
-
-#define COLOUR_COMMON GColorLightGray
-#define COLOUR_MAGIC GColorKellyGreen
-#define COLOUR_RARE GColorVividCerulean
-#define COLOUR_EPIC GColorElectricUltramarine
-#define COLOUR_LEGENDARY GColorChromeYellow
 
 #define PALETTE_BLUE 0
 #define PALETTE_GREEN 1

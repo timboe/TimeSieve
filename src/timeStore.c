@@ -131,71 +131,7 @@ void destroy_timeStore() {
   free( s_bufferUpgradePrice );
 }
 
-void giveCatchupItems(TimeUnits units, uint32_t n) {
-  for (uint32_t i = 0; i < n; ++i) {
-    uint8_t treasureID = getItemRarity(units);
-    uint8_t itemID = 0;
-    genRandomItem(&treasureID, &itemID); // Both are modified (rarity may need to be downgraded)
-    addItem(treasureID, itemID, 1);
-  }
-}
 
-void doCatchup() {
-  if (getUserTimeOfSave() == 0) return;
-  int32_t timeDiff = time(NULL) - getUserTimeOfSave();
-  APP_LOG(APP_LOG_LEVEL_INFO, "Catchup BGN %i seconds", (int)timeDiff);
-  if (timeDiff < 0) return;
-
-  // Give liquid time. Won't give more than can fit
-  uint32_t nMin = timeDiff / SEC_IN_MIN;
-  addTime( safeMultiply( getTimePerMin(), nMin) );
-  updateDisplayTime( getUserTime() );
-
-  // If no chance of autocollect then end here!
-  if (getAutoCollectChance() == 0) return;
-
-  // Items
-  uint32_t nYear = timeDiff / SEC_IN_YEAR;
-  uint32_t nMonth = (timeDiff / (SEC_IN_DAY*31)) - nYear;
-  uint32_t nDay = (timeDiff / SEC_IN_DAY) - nMonth - nYear;
-  uint32_t nHour = (timeDiff / SEC_IN_HOUR) - nDay - nMonth - nYear;
-  nMin = nMin - nHour - nDay - nMonth - nYear;
-  uint32_t itemsFound = 0;
-  // For year, month and day we do it proper, i.e. we check each boundary in turn
-  for (uint8_t N = 0; N < 3; ++N) {
-    uint32_t tries = nYear;
-    TimeUnits unit = YEAR_UNIT;
-    if (N == 1) {
-      tries = nMonth;
-      unit = MONTH_UNIT;
-    } else if (N == 2) {
-      tries = nDay;
-      unit = DAY_UNIT;
-    }
-    for (uint32_t t = 0; t < tries; ++t) {
-      if (getItemAutoCollect() == false) continue;
-      if (checkForItem(unit) == false) continue;
-      giveCatchupItems(unit, 1);
-      ++itemsFound;
-    }
-  }
-  // For hour and min, we cheat, and do it probabailisticaly.
-  // This rounds down to the nearest items boo-hoo to the user
-  // Expected N items
-  uint32_t dayItems = (nDay * getItemAppearChance(DAY_UNIT)) / SCALE_FACTOR;
-  // Now take into account the auto-collect chance
-  dayItems = (dayItems * getAutoCollectChance()) / SCALE_FACTOR;
-  // Finally give the items
-  giveCatchupItems(DAY_UNIT, dayItems);
-  // And do the same for mins
-  uint32_t minItems = (nMin * getItemAppearChance(MINUTE_UNIT)) / SCALE_FACTOR;
-  minItems = (minItems * getAutoCollectChance()) / SCALE_FACTOR;
-  giveCatchupItems(MINUTE_UNIT, minItems);
-  // Done
-  itemsFound += dayItems + minItems;
-  APP_LOG(APP_LOG_LEVEL_INFO, "Catchup END %i items", (int)itemsFound);
-
-}
 
 
 uint64_t getPriceOfUpgrade(const uint32_t typeID, const uint32_t resourceID) {
@@ -266,7 +202,7 @@ uint64_t getTimePerMin() {
 void updateTimePerMin() {
   s_timePerMin = 60; // This is the base level
   for (uint32_t upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    s_timePerMin += getUserUpgrades(REFINERY_ID, upgrade) * REWARD_REFINERY[upgrade];
+    s_timePerMin += getUserUpgrades(REFINERY_ID, upgrade) * UPGRADE_REWARD[REFINERY_ID][upgrade];
   }
 }
 
@@ -284,7 +220,7 @@ uint64_t getTankCapacity() {
 void updateTankCapacity() {
   s_timeCapacity = SEC_IN_HOUR; // Base level
   for (uint32_t upgrade = 0; upgrade < MAX_UPGRADES; ++upgrade ) {
-    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( REWARD_TANK[upgrade], getUserUpgrades(TANK_ID, upgrade)) );
+    s_timeCapacity = safeAdd( s_timeCapacity, safeMultiply( UPGRADE_REWARD[TANK_ID][upgrade], getUserUpgrades(TANK_ID, upgrade)) );
   }
 }
 
@@ -316,11 +252,11 @@ void removeTime(uint64_t toSubtract) {
 }
 
 /**
- * Check that the desired item can be afforded, and buy it if so
+ * Check that the desired item can be afforded, and buy it if so. Return price paid or zero if fail
  */
-bool doPurchase(const uint32_t typeID, const uint32_t resourceID) {
+uint64_t doPurchase(const uint32_t typeID, const uint32_t resourceID) {
   uint64_t cost = getPriceOfUpgrade(typeID, resourceID);
-  if (cost > getUserTime()) return false;
+  if (cost > getUserTime()) return 0;
   removeTime( cost ); // Debit the user
   addUpgrade(typeID, resourceID, 1); // Give them their upgrade
   // Update the price in the buffer so the next one becomes more expensive
@@ -329,7 +265,7 @@ bool doPurchase(const uint32_t typeID, const uint32_t resourceID) {
   if (typeID == REFINERY_ID) updateTimePerMin();
   else if (typeID == TANK_ID) updateTankCapacity();
   else if (typeID == WATCHER_ID) updateProbabilities();
-  return true;
+  return cost;
 }
 
 
