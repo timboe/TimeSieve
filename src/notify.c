@@ -33,7 +33,7 @@ void removeNotify(void* data) {
 }
 
 void showNotify(GColor highlight, const char* a, const char* b, const char* c) {
-  app_timer_cancel(s_notifyTimer);
+  if (s_notifyTimer) app_timer_cancel(s_notifyTimer);
   s_notifyTimer = app_timer_register(NOTIFY_DISPLAY_TIME, removeNotify, NULL);
   layer_mark_dirty(s_notifyLayer);
   s_notifyColor = highlight;

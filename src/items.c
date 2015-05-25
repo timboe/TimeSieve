@@ -101,7 +101,7 @@ uint8_t getItemRarity(TimeUnits units_changed) {
     chance = combineProbability(chance, 30);
   }
 
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "QItm r:%i", (int)chance);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "QItm r:%i", (int)chance);
   // Check to see what we win
   if      (getUserTotalTime() > SEC_IN_YEAR             && chance >= BASE_CHANCE_LEGENDARY) return LEGENDARY_ID;
   else if (getUserTotalTime() > SELL_PRICE[EPIC_ID][2]  && chance >= BASE_CHANCE_EPIC)      return EPIC_ID;

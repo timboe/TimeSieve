@@ -132,13 +132,30 @@ void destroy_timeStore() {
 }
 
 
-
+bool getIfAtMaxLevel(uint32_t typeID, uint32_t resourceID) {
+  if (typeID != WATCHER_ID) return false;
+  const int owned = getUserUpgrades(typeID, resourceID);
+  switch (resourceID) {
+    case WATCHER_TECH:
+      if (owned == TECH_WEATHER) return true;
+      break;
+    case WATCHER_LIGHT: case WATCHER_VIBE:
+      if (owned == NOTIFY_LEGENDARY) return true;
+      break;
+    case WATCHER_FONT:
+      if (owned == FONT_5) return true;
+      break;
+    case WATCHER_COLOUR:
+      if (owned == PALETTE_RED) return true;
+      break;
+  }
+  return false;
+}
 
 uint64_t getPriceOfUpgrade(const uint32_t typeID, const uint32_t resourceID) {
   uint64_t price = getPriceOfNext(s_bufferUpgradePrice[(typeID*MAX_UPGRADES)+resourceID], typeID);
 
   //APP_LOG(APP_LOG_LEVEL_INFO,"%i,%i PRICE OF NEXT %u -> %u", (int)typeID, (int) resourceID, (unsigned int)s_bufferUpgradePrice[(typeID*MAX_UPGRADES)+resourceID], (unsigned int) price);
-
 
   // LEGENDARY BONUS - 2% discount on refineries
   if ( getUserItems(LEGENDARY_ID, REFINERY_2PERC) == 1 ) {
@@ -255,6 +272,8 @@ void removeTime(uint64_t toSubtract) {
  * Check that the desired item can be afforded, and buy it if so. Return price paid or zero if fail
  */
 uint64_t doPurchase(const uint32_t typeID, const uint32_t resourceID) {
+  // Can we buy any more?
+  if (getIfAtMaxLevel(typeID, resourceID) == true) return 0;
   uint64_t cost = getPriceOfUpgrade(typeID, resourceID);
   if (cost > getUserTime()) return 0;
   removeTime( cost ); // Debit the user

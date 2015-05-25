@@ -15,6 +15,7 @@ uint64_t getPriceOfUpgrade(const uint32_t typeID, const uint32_t resourceID);
 uint64_t getPriceOfNext(uint64_t priceOfCurrent, uint32_t typeID);
 
 uint64_t doPurchase(const uint32_t typeID, const uint32_t resourceID);
+bool getIfAtMaxLevel(uint32_t typeID, uint32_t resourceID);
 
 uint64_t getTimePerMin();
 void updateTimePerMin();

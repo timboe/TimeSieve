@@ -8,17 +8,24 @@ static bool s_clockLoaded = false;
 static GFont s_clock;
 static GFont s_clockSmall;
 static GFont s_weatherFont;
-static GFont s_temperatureFont;
-static GFont s_g14b;
+static GFont s_g14;
+static GFont s_g24b;
+static GBitmap* s_QImage = NULL;
 static GBitmap* s_singleItemImage = NULL;
-static GBitmap* s_gem[ITEM_CATEGORIES];
+static GBitmap* s_gem[ITEM_CATEGORIES] = {NULL};
+static GBitmap* s_bluetoothImage = NULL;
 
-static GBitmap* s_item[SELLABLE_CATEGORIES][MAX_TREASURES];
-static GBitmap* s_legendaryItem[MAX_TREASURES];
+static GBitmap* s_item[SELLABLE_CATEGORIES][MAX_TREASURES] = {{NULL},{NULL}};
+static GBitmap* s_legendaryItem[MAX_TREASURES] = {NULL};
 
-static GBitmap* s_refineryImage[MAX_UPGRADES];
-static GBitmap* s_tankImage[MAX_UPGRADES];
-static GBitmap* s_employeeImage[MAX_UPGRADES];
+static GBitmap* s_resourceImage[UPGRADE_CATEGORIES][MAX_UPGRADES] = {{NULL},{NULL}};
+
+//////////////////////////
+
+void memRep(void* data) {
+  APP_LOG(APP_LOG_LEVEL_INFO,"used:%i free:%i",heap_bytes_used(), heap_bytes_free());
+  if (data) app_timer_register(1000, memRep, data);
+}
 
 //////////////////////////
 
@@ -31,22 +38,39 @@ char* getTempBuffer() {
   return tempBuffer;
 }
 
+void initGlobalRes() {
+  s_g14  = fonts_get_system_font(FONT_KEY_GOTHIC_14);
+  s_g24b = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+  s_QImage  = gbitmap_create_with_resource(RESOURCE_ID_QMARK);
+}
+
+void destroyGlobalRes() {
+  gbitmap_destroy( s_QImage );
+}
+
+GFont* getGothic14Font() { return &s_g14; }
+
+GFont* getGothic24BoldFont() { return &s_g24b; }
+
+GBitmap* getQImage() { return s_QImage; }
+
 //////////////////////////
 
 void initMainWindowRes() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "initMainWindowRes"); memRep(NULL);
   s_perfectDOSFont  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
   s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_21));
-  s_temperatureFont = fonts_get_system_font(FONT_KEY_GOTHIC_14);
-  s_g14b            = fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD);
   loadClockFont();
   s_gem[COMMON_ID]    = gbitmap_create_with_resource(RESOURCE_ID_GEM_COMMON);
   s_gem[MAGIC_ID]     = gbitmap_create_with_resource(RESOURCE_ID_GEM_MAGIC);
   s_gem[RARE_ID]      = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE);
   s_gem[EPIC_ID]      = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC);
   s_gem[LEGENDARY_ID] = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY);
+  s_bluetoothImage    = gbitmap_create_with_resource(RESOURCE_ID_BLUETOOTH);
 }
 
 void deinitMainWindowRes() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "DEinitMainWindowRes"); memRep(NULL);
   fonts_unload_custom_font(s_perfectDOSFont);
   fonts_unload_custom_font(s_clock);
   fonts_unload_custom_font(s_clockSmall);
@@ -54,6 +78,8 @@ void deinitMainWindowRes() {
   s_clockLoaded = false;
   gbitmap_destroy( s_singleItemImage );
   s_singleItemImage = NULL;
+  gbitmap_destroy( s_bluetoothImage );
+  s_bluetoothImage = NULL;
   for (uint8_t i = 0; i < ITEM_CATEGORIES; ++i) {
     gbitmap_destroy(s_gem[i]);
   }
@@ -92,9 +118,9 @@ GFont* getClockSmallFont() { return &s_clockSmall; }
 
 GFont* getWeatherFont() { return &s_weatherFont; }
 
-GFont* getTemperatureFont() { return &s_temperatureFont; }
+GFont* getTemperatureFont() { return &s_g14; }
 
-GFont* getGothic14BoldFont() { return &s_g14b; }
+GBitmap* getBluetoothImage() { return s_bluetoothImage; }
 
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID) {
   gbitmap_destroy( s_singleItemImage );
@@ -118,6 +144,7 @@ void deinitSellWindowRes() {
   for (uint8_t i=0; i < SELLABLE_CATEGORIES; ++i) {
     for (uint8_t j=0; j < MAX_TREASURES; ++j) {
       gbitmap_destroy( s_item[i][j] );
+      s_item[i][j] = NULL;
     }
   }
 }
@@ -182,14 +209,17 @@ GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID) {
 //////////////////////////
 
 void initPrestigeWindowRes() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "initPresWindowRes"); memRep(NULL);
   for (uint8_t i=0; i < MAX_UNIQUE; ++i) {
-    s_legendaryItem[i] = loadItemImage(LEGENDARY_ID, i);
+   s_legendaryItem[i] = loadItemImage(LEGENDARY_ID, i); //TODO crash is related to these
   }
 }
 
 void deinitPrestigeWindowRes() {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "DEinitPresWindowRes"); memRep(NULL);
   for (uint8_t i=0; i < MAX_UNIQUE; ++i) {
-    gbitmap_destroy( s_legendaryItem[i] );
+    gbitmap_destroy( s_legendaryItem[i] ); //TODO crash is related to these
+    s_legendaryItem[i] = NULL;
   }
 }
 
@@ -197,89 +227,68 @@ GBitmap* getPrestigeItemImage(uint8_t itemID) { return s_legendaryItem[itemID]; 
 
 //////////////////////////
 
-void initRefineryWindowRes() {
-  s_refineryImage[0] = NULL;// TODO
-  s_refineryImage[1] = NULL;// TODO
-  s_refineryImage[2] = NULL;// TODO
-  s_refineryImage[3] = NULL;// TODO
-  s_refineryImage[4] = NULL;// TODO
-  s_refineryImage[5] = NULL;// TODO
-  s_refineryImage[6] = NULL;// TODO
-  s_refineryImage[7] = NULL;// TODO
-  s_refineryImage[8] = NULL;// TODO
-  s_refineryImage[9] = NULL;// TODO
-  s_refineryImage[10] = NULL;// TODO
-  s_refineryImage[11] = NULL;// TODO
-  s_refineryImage[12] = NULL;// TODO
-  s_refineryImage[13] = NULL;
-  s_refineryImage[14] = NULL;
-  s_refineryImage[15] = NULL;
-}
-
-void deinitRefineryWindowRes() {
-  for (uint8_t i=0; i < N_REFINERY_UPGRADES; ++i) {
-    gbitmap_destroy( s_refineryImage[i] );
+void initBuyWindowRes(const uint32_t typeID) {
+  if (typeID == REFINERY_ID) {
+    s_resourceImage[REFINERY_ID][0] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][1] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][2] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][3] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][4] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][5] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][6] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][7] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][8] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][9] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][10] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][11] = NULL;// TODO
+    s_resourceImage[REFINERY_ID][12] = NULL;// TODO
+    // s_resourceImage[REFINERY_ID][13] = NULL;
+    // s_resourceImage[REFINERY_ID][14] = NULL;
+    // s_resourceImage[REFINERY_ID][15] = NULL;
+  } else if (typeID == TANK_ID) {
+    s_resourceImage[TANK_ID][0] = NULL;// TODO
+    s_resourceImage[TANK_ID][1] = NULL;// TODO
+    s_resourceImage[TANK_ID][2] = NULL;// TODO
+    s_resourceImage[TANK_ID][3] = NULL;// TODO
+    s_resourceImage[TANK_ID][4] = NULL;// TODO
+    s_resourceImage[TANK_ID][5] = NULL;// TODO
+    s_resourceImage[TANK_ID][6] = NULL;// TODO
+    s_resourceImage[TANK_ID][7] = NULL;// TODO
+    s_resourceImage[TANK_ID][8] = NULL;// TODO
+    s_resourceImage[TANK_ID][9] = NULL;// TODO
+    s_resourceImage[TANK_ID][10] = NULL;// TODO
+    s_resourceImage[TANK_ID][11] = NULL;// TODO
+    s_resourceImage[TANK_ID][12] = NULL;// TODO
+    // s_resourceImage[TANK_ID][13] = NULL;
+    // s_resourceImage[TANK_ID][14] = NULL;
+    // s_resourceImage[TANK_ID][15] = NULL;
+  } else { // WATCHER_ID
+    s_resourceImage[WATCHER_ID][0] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_0);
+    s_resourceImage[WATCHER_ID][1] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_1);
+    s_resourceImage[WATCHER_ID][2] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_2);
+    s_resourceImage[WATCHER_ID][3] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_3);
+    s_resourceImage[WATCHER_ID][4] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_4);
+    s_resourceImage[WATCHER_ID][5] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_5);
+    s_resourceImage[WATCHER_ID][6] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_6);
+    s_resourceImage[WATCHER_ID][7] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_7);
+    s_resourceImage[WATCHER_ID][8] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_8);
+    s_resourceImage[WATCHER_ID][9] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_9);
+    s_resourceImage[WATCHER_ID][10] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_10);
+    // s_resourceImage[WATCHER_ID][11] = NULL;
+    // s_resourceImage[WATCHER_ID][12] = NULL;
+    // s_resourceImage[WATCHER_ID][13] = NULL;
+    // s_resourceImage[WATCHER_ID][14] = NULL;
+    // s_resourceImage[WATCHER_ID][15] = NULL;
   }
 }
 
-GBitmap* getRefineryImage(uint8_t refineryID) { return s_refineryImage[refineryID]; }
-
-//////////////////////////
-
-void initTankWindowRes() {
-  s_tankImage[0] = NULL;// TODO
-  s_tankImage[1] = NULL;// TODO
-  s_tankImage[2] = NULL;// TODO
-  s_tankImage[3] = NULL;// TODO
-  s_tankImage[4] = NULL;// TODO
-  s_tankImage[5] = NULL;// TODO
-  s_tankImage[6] = NULL;// TODO
-  s_tankImage[7] = NULL;// TODO
-  s_tankImage[8] = NULL;// TODO
-  s_tankImage[9] = NULL;// TODO
-  s_tankImage[10] = NULL;// TODO
-  s_tankImage[11] = NULL;// TODO
-  s_tankImage[12] = NULL;// TODO
-  s_tankImage[13] = NULL;
-  s_tankImage[14] = NULL;
-  s_tankImage[15] = NULL;
-}
-
-void deinitTankWindowRes() {
-  for (uint8_t i=0; i < N_TANK_UPGRADES; ++i) {
-    gbitmap_destroy( s_tankImage[i] );
+void deinitBuyWindowRes(const uint32_t typeID) {
+  for (uint8_t i=0; i < MAX_UPGRADES; ++i) {
+    gbitmap_destroy( s_resourceImage[typeID][i] );
+    s_resourceImage[typeID][i] = NULL;
   }
 }
 
-GBitmap* getTankImage(uint8_t tankID) { return s_tankImage[tankID]; }
-
-//////////////////////////
-
-void initEmployeeWindowRes() {
-  s_employeeImage[0] = NULL;// TODO
-  s_employeeImage[1] = NULL;// TODO
-  s_employeeImage[2] = NULL;// TODO
-  s_employeeImage[3] = NULL;// TODO
-  s_employeeImage[4] = NULL;// TODO
-  s_employeeImage[5] = NULL;// TODO
-  s_employeeImage[6] = NULL;// TODO
-  s_employeeImage[7] = NULL;// TODO
-  s_employeeImage[8] = NULL;// TODO
-  s_employeeImage[9] = NULL;// TODO
-  s_employeeImage[10] = NULL;// TODO
-  s_employeeImage[11] = NULL;
-  s_employeeImage[12] = NULL;
-  s_employeeImage[13] = NULL;
-  s_employeeImage[14] = NULL;
-  s_employeeImage[15] = NULL;
+GBitmap* getBuyImage(const uint32_t typeID, const uint32_t resourceID) {
+  return s_resourceImage[typeID][resourceID];
 }
-
-void deinitEmployeeWindowRes() {
-  for (uint8_t i=0; i < N_WATCHER_UPGRADES; ++i) {
-    gbitmap_destroy( s_employeeImage[i] );
-  }
-}
-
-GBitmap* getEmployeeImage(uint8_t employeeID) { return s_employeeImage[employeeID]; }
-
-//////////////////////////

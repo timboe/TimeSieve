@@ -12,6 +12,7 @@ static char s_dateBuffer[CLOCK_TEXT_SIZE];
 static BatteryChargeState s_battery;
 static char s_weatherIcon[1];
 static char s_temperature[5];
+static bool s_bluetoothStatus;
 
 static GPoint s_spoogelet[N_SPOOGELET];
 static int16_t s_spoogeletVx[N_SPOOGELET];
@@ -186,6 +187,11 @@ void updateBattery(BatteryChargeState charge) {
   updateClockLayer();
 }
 
+void updateBluetooth(bool bluetooth) {
+  s_bluetoothStatus = bluetooth;
+  updateClockLayer();
+}
+
 void updateWeatherBuffer() {
 
   int16_t temp = -30 + rand()%80; // TODO load from internet
@@ -216,17 +222,23 @@ void updateWeatherBuffer() {
 }
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
-  GRect tank_bounds = layer_get_bounds(this_layer);
+  GRect b = layer_get_bounds(this_layer);
 
-  // BATTERY
+  // BATTERY + BT
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
-  graphics_draw_rect(ctx, GRect(115,7,18,7));
-  graphics_draw_rect(ctx, GRect(133,9,2,3));
-  graphics_fill_rect(ctx, GRect(117,9,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
+  graphics_draw_rect(ctx, GRect(112,9,18,7));
+  graphics_draw_rect(ctx, GRect(130,11,2,3));
+  graphics_fill_rect(ctx, GRect(114,11,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
+  if (s_bluetoothStatus) {
+    graphics_context_set_compositing_mode(ctx, GCompOpSet);
+    graphics_context_set_fill_color(ctx, getLiquidTimeColour());
+    graphics_fill_rect(ctx, GRect(b.size.w - 7, 6, 5, 12), 0, GCornersAll);
+    graphics_draw_bitmap_in_rect(ctx, getBluetoothImage(), GRect(b.size.w - 8, 5, 7, 14));
+  }
 
   // DATE
-  GRect dateRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y, tank_bounds.size.w, 30);
+  GRect dateRect = GRect(b.origin.x, b.origin.y, b.size.w, 30);
   draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false, GColorBlack, GColorBlack);
 
   // WEATHER
@@ -235,9 +247,9 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   wRect.origin.y += 5;
   wRect.origin.x += 17;
-  draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorBlack, GColorWhite);
+  draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorWhite, GColorBlack);
 
-  GRect timeRect = GRect(tank_bounds.origin.x, tank_bounds.origin.y + CLOCK_OFFSET, tank_bounds.size.w, tank_bounds.size.h - CLOCK_OFFSET);
+  GRect timeRect = GRect(b.origin.x, b.origin.y + CLOCK_OFFSET, b.size.w, b.size.h - CLOCK_OFFSET);
   draw3DText(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset, false, GColorBlack, GColorBlack);
 
   if (s_clockTickCount == 0) return; // No animation in progress
@@ -268,6 +280,8 @@ void create_clock_layer(Window* parentWindow) {
   layer_set_clips(s_clockLayer, false);
   battery_state_service_subscribe(updateBattery);
   s_battery = battery_state_service_peek();
+  bluetooth_connection_service_subscribe(updateBluetooth);
+  s_bluetoothStatus = bluetooth_connection_service_peek();
   updateTimeBuffer();
   updateDateBuffer();
   updateWeatherBuffer();

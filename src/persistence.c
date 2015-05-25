@@ -118,15 +118,7 @@ time_t getUserTimeOfSave() {
   return s_userData->timeOfSave;
 }
 
-uint16_t getUserTotalUpgrades(const uint32_t typeID) {
-  uint16_t count = 0;
-  for (uint32_t i = 0; i < MAX_UPGRADES; ++i) {
-    for (uint32_t j = 0; j < UPGRADE_CATEGORIES; ++j) {
-      count += s_userData->upgradesOwned[j][i];
-    }
-  }
-  return count;
-}
+
 
 uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID) {
   if (treasureID == LEGENDARY_ID) {
@@ -136,8 +128,8 @@ uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID) {
   }
 }
 
-uint16_t getUserTotalItems(const uint32_t treasureID) {
-  uint16_t count = 0;
+uint32_t getUserTotalItems(const uint32_t treasureID) {
+  uint32_t count = 0;
   if (treasureID == LEGENDARY_ID) {
     for (uint32_t i = 0; i < MAX_UNIQUE; ++i) {
       if ( BITTEST(s_userData->legendaryOwned, i) ) ++count;
@@ -150,8 +142,8 @@ uint16_t getUserTotalItems(const uint32_t treasureID) {
   return count;
 }
 
-uint16_t getUserGrandTotalItems() {
-  uint16_t tot = 0;
+uint32_t getUserGrandTotalItems() {
+  uint32_t tot = 0;
   for (uint8_t cat = 0; cat < ITEM_CATEGORIES; ++cat) {
     tot += getUserTotalItems(cat);
   }
@@ -175,6 +167,22 @@ uint16_t getUserItemTypes(const uint32_t treasureID) {
 
 uint16_t getUserUpgrades(const uint32_t typeID, const uint32_t resourceID) {
   return s_userData->upgradesOwned[typeID][resourceID];
+}
+
+uint32_t getUserTotalUpgrades(const uint32_t typeID) {
+  uint32_t count = 0;
+  for (uint32_t i = 0; i < MAX_UPGRADES; ++i) {
+    count =+ getUserUpgrades(typeID, i);
+  }
+  return count;
+}
+
+uint32_t getUserGrandTotalUpgrades() {
+  uint32_t count = 0;
+  for (uint32_t i = 0; i < UPGRADE_CATEGORIES; ++i) {
+    count =+ getUserTotalUpgrades(i);
+  }
+  return count;
 }
 
 void setUserTime(uint64_t newTime) {

@@ -8,9 +8,7 @@
 
 // Menu layers for my windows
 static MenuLayer* s_menu_layer = NULL;
-static MenuLayer* s_refinery_layer = NULL;
-static MenuLayer* s_tank_layer = NULL;
-static MenuLayer* s_watcher_layer = NULL;
+static MenuLayer* s_subMenuLayer = NULL;
 
 // My sub-windows
 static Window* s_refinery_window;
@@ -21,19 +19,12 @@ static int s_refinery_context = REFINERY_ID;
 static int s_tank_context = TANK_ID;
 static int s_watcher_context = WATCHER_ID;
 
-static bool s_selectedMaxLevel;
-
-// Temp buffer
-static char tempBuffer[TEXT_BUFFER_SIZE];
-
 static char notifyTop[TEXT_BUFFER_SIZE];
 static char notifyBottom[TEXT_BUFFER_SIZE];
 
 void updateBuyLayer() {
   if (s_menu_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
-  if (s_refinery_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_refinery_layer));
-  if (s_tank_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_tank_layer));
-  if (s_watcher_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_watcher_layer));
+  if (s_subMenuLayer != NULL) layer_mark_dirty(menu_layer_get_layer(s_subMenuLayer));
 }
 
 ///
@@ -46,7 +37,7 @@ static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t secti
 
 static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return MENU_CELL_BASIC_HEADER_HEIGHT; }
 
-static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {menu_cell_basic_header_draw(ctx, cell_layer, "BUY Upgrades");}
+static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) { menu_cell_basic_header_draw(ctx, cell_layer, "BUY Upgrades"); }
 
 static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
   // Determine which section we're going to draw in
@@ -64,6 +55,7 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   } else if (row == WATCHER_ID) {
     menu_cell_basic_draw(ctx, cell_layer, "EMPLOYEES", "They work for YOU", NULL);
   }
+  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
 
 static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -108,11 +100,11 @@ static void sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer
 
   const int context = *((int*)data);
   const GSize size = layer_get_frame(cell_layer).size;
-  timeToString(getUserTime(), tempBuffer, TEXT_BUFFER_SIZE, true);
+  timeToString(getUserTime(), getTempBuffer(), TEXT_BUFFER_SIZE, true);
   static char s_title[TEXT_BUFFER_SIZE];
   static char s_header[TEXT_BUFFER_SIZE];
   strcpy(s_header, "AVAILABLE: ");
-  strcat(s_header, tempBuffer);
+  strcat(s_header, getTempBuffer());
   if (context == REFINERY_ID) strcpy(s_title, "REFINARY Upgrades");
   else if (context == TANK_ID) strcpy(s_title, "TANK Upgrades");
   else if (context == WATCHER_ID) strcpy(s_title, "WATCHER Upgrades");
@@ -135,7 +127,8 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   const unsigned location = cell_index->row;
   const int owned = getUserUpgrades(context, location);
   const uint64_t priceNext = getPriceOfUpgrade(context, location);
-  bool maxLevel = false;
+  bool maxLevel = getIfAtMaxLevel(context, location);
+  GBitmap* buyImage = getBuyImage(context, location);
 
   char upgradeText[TEXT_BUFFER_SIZE];
   if (context == REFINERY_ID) {
@@ -157,7 +150,6 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         if (owned == TECH_NONE) strcat(upgradeText, "Battery");
         else if (owned == TECH_BATTERY) strcat(upgradeText, "Month");
         else if (owned == TECH_MONTH) strcat(upgradeText, "Weather");
-        else maxLevel = true;
         break;
       case WATCHER_LIGHT:
         strcpy(upgradeText, "LIGHT: ");
@@ -172,24 +164,19 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         else if (owned == NOTIFY_MAGIC) strcat(upgradeText, "Epic+");
         else if (owned == NOTIFY_RARE) strcat(upgradeText, "Rare+");
         else if (owned == NOTIFY_EPIC) strcat(upgradeText, "Legendary");
-        else maxLevel = true;
         break;
       case WATCHER_FONT:
         if (owned < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "FONT: %i", (int)(owned+1));
-        else maxLevel = true;
         break;
       case WATCHER_COLOUR:
         strcpy(upgradeText, "THEME: ");
         if (owned == PALETTE_BLUE) strcat(upgradeText, "Green");
         else if (owned == PALETTE_GREEN) strcat(upgradeText, "Yellow");
         else if (owned == PALETTE_YELLOW) strcat(upgradeText, "Red");
-        else maxLevel = true;
         break;
     }
     if (maxLevel) strcpy(upgradeText, "MAX");
-
   }
-  if (selected) s_selectedMaxLevel = maxLevel;
 
   bool display = false, canAfford = false;
   // Can I afford this? Only display if total time gained playing is greater than the cost
@@ -218,12 +205,13 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     //draw_dithered_rect(ctx, GRect(0, 0, size.w, size.h), GColorLightGray, GColorWhite, DITHER_10_PERCENT);
     GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
     // Change the name to ?s
-    strcpy(tempBuffer, "");
+    strcpy(getTempBuffer(), "");
     for (uint8_t i = 0; (UPGRADE_NAME[context][location])[i] != 0; i++) {
-      if ((UPGRADE_NAME[context][location])[i] == ' ') strcat(tempBuffer, " ");
-      else strcat(tempBuffer, "?");
+      if ((UPGRADE_NAME[context][location])[i] == ' ') strcat(getTempBuffer(), " ");
+      else strcat(getTempBuffer(), "?");
     }
-    graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    graphics_draw_text(ctx, getTempBuffer(), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    buyImage = getQImage();
   } else {
     // Now text
     GRect ttlTextRect = GRect(MENU_X_OFFSET, -6,  size.w-MENU_X_OFFSET, size.h);
@@ -231,10 +219,10 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     GRect medTextRect = GRect(MENU_X_OFFSET, 27, size.w-MENU_X_OFFSET, size.h-33);
     GRect botTextRect = GRect(MENU_X_OFFSET, 38, size.w-MENU_X_OFFSET, size.h-44);
 
-    timeToString(priceNext, tempBuffer, TEXT_BUFFER_SIZE, true);
+    timeToString(priceNext, getTempBuffer(), TEXT_BUFFER_SIZE, true);
     static char s_header[TEXT_BUFFER_SIZE];
     strcpy(s_header, "COST: ");
-    strcat(s_header, tempBuffer);
+    strcat(s_header, getTempBuffer());
     if (maxLevel) strcpy(s_header, "COST: -");
 
     static char s_owned[TEXT_BUFFER_SIZE];
@@ -243,8 +231,8 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
     static char s_reward[TEXT_BUFFER_SIZE];
     strcpy(s_reward, upgradeText);
     if (context != WATCHER_ID) {
-      timeToString(UPGRADE_REWARD[context][location], tempBuffer, TEXT_BUFFER_SIZE, true);
-      strcat(s_reward, tempBuffer);
+      timeToString(UPGRADE_REWARD[context][location], getTempBuffer(), TEXT_BUFFER_SIZE, true);
+      strcat(s_reward, getTempBuffer());
     }
 
     graphics_draw_text(ctx, UPGRADE_NAME[context][location], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
@@ -255,16 +243,12 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
   graphics_context_set_stroke_color(ctx, GColorBlack);
 
-  // Image placeholder
-  GRect imageRect = GRect(3, 10,  22, 36);
-  graphics_draw_rect(ctx, imageRect);
-
-  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
+  graphics_context_set_compositing_mode(ctx, GCompOpSet);
+  graphics_draw_bitmap_in_rect(ctx, buyImage, GRect(3, 10,  22, 36));
 
 }
 
 void buyClick(const uint32_t typeID, const uint32_t resourceID, const bool buyTen) {
-  if ( s_selectedMaxLevel == true ) return; // Cannot buy as have maximum //TODO make a function for this
   uint8_t bought = 0;
   uint64_t paid = 0;
   for (uint8_t i = 0; i < (buyTen ? 10 : 1); ++i) {
@@ -277,12 +261,13 @@ void buyClick(const uint32_t typeID, const uint32_t resourceID, const bool buyTe
   if (bought) updateDisplayTime( getUserTime() );
   snprintf(notifyTop, TEXT_BUFFER_SIZE, "Bought %i", (int)bought);
   if (bought == 0) {
-    strcpy(notifyBottom, "Insufficient Time!");
+    if (getIfAtMaxLevel(typeID, resourceID)) strcpy(notifyBottom, "Own Maximum!");
+    else strcpy(notifyBottom, "Insufficient Time!");
     highlight = GColorRed;
   } else {
-    timeToString(paid, tempBuffer, TEXT_BUFFER_SIZE, true);
+    timeToString(paid, getTempBuffer(), TEXT_BUFFER_SIZE, true);
     strcpy(notifyBottom, "For ");
-    strcat(notifyBottom, tempBuffer);
+    strcat(notifyBottom, getTempBuffer());
   }
 
   showNotify(highlight, notifyTop, UPGRADE_NAME[typeID][resourceID], notifyBottom);
@@ -313,23 +298,14 @@ static void sub_menu_long_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
 void sub_window_load(Window* parentWindow) {
   // Now we prepare to initialize the menu layer
   Layer* windowLayer = window_get_root_layer(parentWindow);
-  const GRect bounds = layer_get_frame(windowLayer);
 
-  MenuLayer* newLayer = menu_layer_create(bounds);
+  MenuLayer* s_subMenuLayer = menu_layer_create(layer_get_frame(windowLayer));
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i CREATE", context);
 
-  if (context == REFINERY_ID) {
-    s_refinery_layer = newLayer;
-    initRefineryWindowRes();
-  } else if (context == TANK_ID) {
-    s_tank_layer = newLayer;
-    initTankWindowRes();
-  } else if (context == WATCHER_ID) {
-    s_watcher_layer = newLayer;
-    initEmployeeWindowRes();
-  }
-  menu_layer_set_callbacks(newLayer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
+  initBuyWindowRes(context);
+
+  menu_layer_set_callbacks(s_subMenuLayer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
     .get_num_sections = sub_menu_get_num_sections_callback,
     .get_num_rows = sub_menu_get_num_rows_callback,
     .get_cell_height = sub_menu_get_cell_height_callback,
@@ -340,8 +316,9 @@ void sub_window_load(Window* parentWindow) {
     .select_long_click = sub_menu_long_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_click_config_onto_window(newLayer, parentWindow);
-  layer_add_child(windowLayer, menu_layer_get_layer(newLayer));
+  menu_layer_set_normal_colors(s_subMenuLayer, MENU_BACK_GREEN_ODD, GColorBlack);
+  menu_layer_set_click_config_onto_window(s_subMenuLayer, parentWindow);
+  layer_add_child(windowLayer, menu_layer_get_layer(s_subMenuLayer));
 
   // Notify layer goes on top, shows sold items
   layer_add_child(windowLayer, getNotifyLayer());
@@ -351,19 +328,9 @@ void sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i DESTROY", context);
   destroyNotifyLayer();
-  if (context == REFINERY_ID) {
-    menu_layer_destroy(s_refinery_layer);
-    s_refinery_layer = NULL;
-    deinitRefineryWindowRes();
-  } else if (context == TANK_ID) {
-    menu_layer_destroy(s_tank_layer);
-    s_tank_layer = NULL;
-    deinitTankWindowRes();
-  } else if (context == WATCHER_ID) {
-    menu_layer_destroy(s_watcher_layer);
-    s_watcher_layer = NULL;
-    deinitEmployeeWindowRes();
-  }
+  menu_layer_destroy(s_subMenuLayer);
+  s_subMenuLayer = NULL;
+  deinitBuyWindowRes(context);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -371,7 +338,6 @@ void sub_window_unload(Window* parentWindow) {
 void createSubWin(Window** w, int* context) {
   *w = window_create();
   window_set_user_data(*w, context);
-  window_set_background_color(*w, MENU_BACK_GREEN_ODD);
   window_set_window_handlers(*w, (WindowHandlers) {
     .load = sub_window_load,
     .unload = sub_window_unload
@@ -381,8 +347,8 @@ void createSubWin(Window** w, int* context) {
 void buy_window_load(Window* parentWindow) {
 
   // Now we prepare to initialize the menu layer
-  Layer* window_layer = window_get_root_layer(parentWindow);
-  GRect bounds = layer_get_frame(window_layer);
+  Layer* windowLayer = window_get_root_layer(parentWindow);
+  GRect bounds = layer_get_frame(windowLayer);
 
   // Create the menu layer
   s_menu_layer = menu_layer_create(bounds);
@@ -396,7 +362,8 @@ void buy_window_load(Window* parentWindow) {
   });
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_click_config_onto_window(s_menu_layer, parentWindow);
-  layer_add_child(window_layer, menu_layer_get_layer(s_menu_layer));
+  menu_layer_set_normal_colors(s_menu_layer, MENU_BACK_GREEN_ODD, GColorBlack);
+  layer_add_child(windowLayer, menu_layer_get_layer(s_menu_layer));
 
   // Setup sub-windows that we might want to jump to
   createSubWin(&s_refinery_window, &s_refinery_context);

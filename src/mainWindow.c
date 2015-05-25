@@ -78,7 +78,7 @@ void main_window_load(Window *window) {
 }
 
 // Main window destructiom
-void main_window_unload(Window *window) { 
+void main_window_unload(Window *window) {
   destroy_timeSieve_layer();
   destroy_clock_layer();
   destroy_timeTank_layer();
@@ -145,6 +145,8 @@ void doSecond() {
  * sustaining until all animations have played out
  **/
 void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "TICK"); memRep(NULL);
+
   if (getUserOpt(OPT_SHOW_SECONDS) == true) doSecond();
   updateTimeBuffer();
 
@@ -217,9 +219,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   } else {
     animEnd(); // Just redraw
   }
-
-  APP_LOG(APP_LOG_LEVEL_INFO,"used:%i free:%i",heap_bytes_used(), heap_bytes_free());
-
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "TICK_E"); memRep(NULL);
 }
 
 void update_tick_handler() {
@@ -246,21 +246,18 @@ void init_mainWindow() {
 
   // Create the menu windows
   s_buy_window = window_create();
-  window_set_background_color(s_buy_window, MENU_BACK_GREEN_ODD);
   window_set_window_handlers(s_buy_window, (WindowHandlers) {
     .load = buy_window_load,
     .unload = buy_window_unload
   });
 
   s_settings_window = window_create();
-  window_set_background_color(s_buy_window, MENU_BACK_YELLOW_ODD);
   window_set_window_handlers(s_settings_window, (WindowHandlers) {
     .load = settings_window_load,
     .unload = settings_window_unload
   });
 
   s_sell_window = window_create();
-  window_set_background_color(s_buy_window, MENU_BACK_RED_ODD);
   window_set_window_handlers(s_sell_window, (WindowHandlers) {
     .load = sell_window_load,
     .unload = sell_window_unload

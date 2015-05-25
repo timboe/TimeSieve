@@ -14,6 +14,20 @@
             { "file": "fonts/Bowman.ttf", "name": "FONT_A_18", "type": "font", "characterRegex": "[0-9:A-Za-z ]" },
 
             { "file": "images/sieveBasic.png", "name": "SIEVE_BASIC", "type": "png" },
+            { "file": "images/bluetooth.png", "name": "BLUETOOTH", "type": "png" },
+            { "file": "images/qmark.png", "name": "QMARK", "type": "png" },
+
+            { "file": "images/employee0.png", "name": "EMPLOYEE_0", "type": "png" },
+            { "file": "images/employee1.png", "name": "EMPLOYEE_1", "type": "png" },
+            { "file": "images/employee2.png", "name": "EMPLOYEE_2", "type": "png" },
+            { "file": "images/employee3.png", "name": "EMPLOYEE_3", "type": "png" },
+            { "file": "images/employee4.png", "name": "EMPLOYEE_4", "type": "png" },
+            { "file": "images/employee5.png", "name": "EMPLOYEE_5", "type": "png" },
+            { "file": "images/employee6.png", "name": "EMPLOYEE_6", "type": "png" },
+            { "file": "images/employee7.png", "name": "EMPLOYEE_7", "type": "png" },
+            { "file": "images/employee8.png", "name": "EMPLOYEE_8", "type": "png" },
+            { "file": "images/employee9.png", "name": "EMPLOYEE_9", "type": "png" },
+            { "file": "images/employee10.png", "name": "EMPLOYEE_10", "type": "png" },
 
             { "file": "images/gemCommon.png", "name": "GEM_COMMON", "type": "png" },
             { "file": "images/gemMagic.png", "name": "GEM_MAGIC", "type": "png" },

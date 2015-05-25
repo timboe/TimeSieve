@@ -25,8 +25,7 @@
 #define RESTART_COUNTDOWN 8
 
 static MenuLayer* s_settings_layer = NULL;
-static MenuLayer* s_chevo_layer = NULL;
-static MenuLayer* s_unique_layer = NULL;
+static MenuLayer* s_settingsSubLayer = NULL;
 
 static Window* s_chevo_window = NULL;
 static Window* s_unique_window = NULL;
@@ -60,8 +59,7 @@ static uint8_t s_unlockedTo[NUM_UNLOCK_ROWS]; // How far has the user actually u
 
 void updateSettingsLayer() {
   if (s_settings_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_settings_layer));
-  if (s_chevo_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_chevo_layer));
-  if (s_unique_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_unique_layer));
+  if (s_settingsSubLayer != NULL) layer_mark_dirty(menu_layer_get_layer(s_settingsSubLayer));
 }
 
 void loadUserSettings() {
@@ -279,15 +277,13 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
     }
 
-
   } else if (section == SETTINGS_SECTION_ID) {
-
 
     if (row == SETTINGS_UPDATEF_ID) { // Seconds
 
       strcpy(titleText, "UPDATE Freq.");
-      if (getUserOpt(OPT_SHOW_SECONDS)) strcpy(subText1, "1/2] SECONDS");
-      else strcpy(subText1, "2/2] MINUTES");
+      if (getUserOpt(OPT_SHOW_SECONDS)) strcpy(subText1, "SECONDS");
+      else strcpy(subText1, "MINUTES");
 
     } else if (row == SETTINGS_ANIMATE_ID) { // Animate
 
@@ -407,6 +403,7 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
         resetUserData();
         destroy_timeStore();
         init_timeStore();
+        vibes_long_pulse();
       }
     }
 
@@ -503,9 +500,8 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   if (image != NULL) graphics_draw_bitmap_in_rect(ctx, image, imageRect);
-}
 
-static void settings_sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
 
 ///
@@ -515,46 +511,36 @@ static void settings_sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *
 void settings_sub_window_load(Window* parentWindow) {
 
   // Now we prepare to initialize the menu layer
-  Layer* window_layer = window_get_root_layer(parentWindow);
-  const GRect bounds = layer_get_frame(window_layer);
+  Layer* windowLayer = window_get_root_layer(parentWindow);
+  const GRect bounds = layer_get_frame(windowLayer);
 
-  MenuLayer* new_layer;
+  MenuLayer* newLayer;
   const int context = *((int*) window_get_user_data(parentWindow));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETNGS SUB-W %i LOAD", context);
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"StngSubW%iLOAD", context);
 
-  new_layer = menu_layer_create(bounds);
-  if (context == CHEVO_CONTEXT_ID) {
-    s_chevo_layer = new_layer;
-  } else if (context == UNIQUE_CONTEXT_ID) {
-    s_unique_layer = new_layer;
-    initPrestigeWindowRes();
-  }
+  s_settingsSubLayer = menu_layer_create(bounds);
+  if (context == UNIQUE_CONTEXT_ID) initPrestigeWindowRes();
   // Create the menu layer
-  menu_layer_set_callbacks(new_layer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
+  menu_layer_set_callbacks(s_settingsSubLayer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
     .get_num_sections = settings_sub_menu_get_num_sections_callback,
     .get_num_rows = settings_sub_menu_get_num_rows_callback,
     .get_cell_height = settings_sub_menu_get_cell_height_callback,
     .get_header_height = settings_sub_menu_get_header_height_callback,
     .draw_header = settings_sub_menu_draw_header_callback,
     .draw_row = settings_sub_menu_draw_row_callback,
-    .select_click = settings_sub_menu_select_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_click_config_onto_window(new_layer, parentWindow);
-  layer_add_child(window_layer, menu_layer_get_layer(new_layer));
+  menu_layer_set_normal_colors(s_settingsSubLayer, MENU_BACK_GREEN_ODD, GColorBlack);
+  menu_layer_set_click_config_onto_window(s_settingsSubLayer, parentWindow);
+  layer_add_child(windowLayer, menu_layer_get_layer(s_settingsSubLayer));
 }
 
 void settings_sub_window_unload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"SETNGS SUB-W %i DESTROY", context);
-  if (context == CHEVO_CONTEXT_ID) {
-    menu_layer_destroy(s_chevo_layer);
-    s_chevo_layer = NULL;
-  } else if (context == UNIQUE_CONTEXT_ID) {
-    menu_layer_destroy(s_unique_layer);
-    s_unique_layer = NULL;
-    deinitPrestigeWindowRes();
-  }
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"StngSubW%iDEST", context);
+  menu_layer_destroy(s_settingsSubLayer);
+  s_settingsSubLayer = NULL;
+  if (context == UNIQUE_CONTEXT_ID) deinitPrestigeWindowRes();
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -591,7 +577,9 @@ void settings_window_load(Window* parentWindow) {
     .select_click = settings_select_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
+  menu_layer_set_normal_colors(s_settings_layer, MENU_BACK_RED_ODD, GColorBlack);
   menu_layer_set_click_config_onto_window(s_settings_layer, parentWindow);
+  menu_layer_pad_bottom_enable(s_settings_layer, false);
   layer_add_child(window_layer, menu_layer_get_layer(s_settings_layer));
 
   // Setup sub-windows that we might want to jump to
@@ -609,4 +597,5 @@ void settings_window_unload() {
   window_destroy(s_unique_window);
   s_chevo_window = NULL;
   s_unique_window = NULL;
+  APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWinDstryDone");
 }

@@ -31,8 +31,6 @@ static int8_t s_sellSections[SELLABLE_CATEGORIES] = {-1};
 
 static MenuLayer* s_sellLayer;
 
-static char tempBuffer[TEXT_BUFFER_SIZE];
-
 // Hold text of top sell notify
 static char soldTextTop[TEXT_BUFFER_SIZE];
 static char soldTextBot[TEXT_BUFFER_SIZE];
@@ -107,23 +105,18 @@ static void sell_draw_header_callback(GContext* ctx, const Layer *cell_layer, ui
 
   const int8_t category = s_sellSections[section_index];
 
+  strcpy(getTempBuffer(), ITEM_CATEGORIE_NAME[category]);
+  strcat(getTempBuffer(), " Treasures");
+
   GColor backColor;
-  if (category == COMMON_ID) {
-    strcpy(tempBuffer,"COMMON Treasures");
-    backColor = GColorLightGray;
-  } else if (category == MAGIC_ID) {
-    strcpy(tempBuffer,"MAGIC Treasures");
-    backColor = MENU_BACK_GREEN_ODD;
-  } else if (category == RARE_ID) {
-    strcpy(tempBuffer,"RARE Treasures");
-    backColor = MENU_BACK_BLUE_ODD;
-  } else if (category == EPIC_ID) {
-    strcpy(tempBuffer,"EPIC Treasures");
-    backColor = MENU_BACK_PURPLE_ODD;
-  }
+  if      (category == COMMON_ID) backColor = GColorLightGray;
+  else if (category == MAGIC_ID)  backColor = MENU_BACK_GREEN_ODD;
+  else if (category == RARE_ID)   backColor = MENU_BACK_BLUE_ODD;
+  else if (category == EPIC_ID)   backColor = MENU_BACK_PURPLE_ODD;
+
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, top, 0, GCornersAll);
-  graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+  graphics_draw_text(ctx, getTempBuffer(), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), top, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 }
 
 static int16_t sell_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -188,8 +181,8 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   uint64_t sellPrice = owned * getCurrentSellPrice(treasureID, itemID);
   snprintf(subText1, TEXT_BUFFER_SIZE, "OWNED: %i", (int)owned);
   strcpy(subText2, "VALUE:");
-  timeToString(sellPrice, tempBuffer, TEXT_BUFFER_SIZE, true);
-  strcat(subText2, tempBuffer);
+  timeToString(sellPrice, getTempBuffer(), TEXT_BUFFER_SIZE, true);
+  strcat(subText2, getTempBuffer());
 
   graphics_draw_text(ctx, ITEM_NAME[treasureID][itemID], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
   graphics_draw_text(ctx, subText1, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
@@ -197,7 +190,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
 
   // market box
   unsigned percentage;
-  currentSellPricePercentage(tempBuffer, TEXT_BUFFER_SIZE, &percentage, treasureID, itemID);
+  currentSellPricePercentage(getTempBuffer(), TEXT_BUFFER_SIZE, &percentage, treasureID, itemID);
   GColor percBoxBack;
   GColor percBoxFront;
   GColor percBoxHighlight;
@@ -241,16 +234,17 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   graphics_fill_rect(ctx, valueBorder, 2, GCornersAll);
   graphics_context_set_fill_color(ctx, percBoxBack);
   graphics_fill_rect(ctx, valueBox, 2, GCornersAll);
-  graphics_draw_text(ctx, tempBuffer, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), percBox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, getTempBuffer(), fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), percBox, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   graphics_context_set_fill_color(ctx, percBoxFront);
   gpath_draw_filled(ctx, arrow);
   gpath_draw_outline(ctx, arrow);
-
 
   // Image
   GRect imageRect = GRect(3, 4,  22, 36);
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   graphics_draw_bitmap_in_rect(ctx, getSellItemImage(treasureID, itemID), imageRect);
+
+  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
 
 
@@ -270,9 +264,9 @@ void doSell(const uint16_t section, const uint16_t row, bool sellAll) {
     strcpy(soldTextBot, "Time Tank Too Small!");
     highlight = GColorRed;
   } else {
-    timeToString(sold * getCurrentSellPrice(treasureID, itemID), tempBuffer, TEXT_BUFFER_SIZE, true);
+    timeToString(sold * getCurrentSellPrice(treasureID, itemID), getTempBuffer(), TEXT_BUFFER_SIZE, true);
     strcpy(soldTextBot, "For ");
-    strcat(soldTextBot, tempBuffer);
+    strcat(soldTextBot, getTempBuffer());
   }
 
   showNotify(highlight, soldTextTop, ITEM_NAME[treasureID][itemID], soldTextBot);
@@ -323,6 +317,7 @@ void sell_window_load(Window* parentWindow) {
     .select_long_click = sell_select_long_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
+  menu_layer_set_normal_colors(s_sellLayer, MENU_BACK_RED_ODD, GColorBlack);
   menu_layer_set_click_config_onto_window(s_sellLayer, parentWindow);
   layer_add_child(windowLayer, menu_layer_get_layer(s_sellLayer));
 

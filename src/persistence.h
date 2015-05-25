@@ -27,12 +27,13 @@ void DEVMODE();
 
 
 uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID);
-uint16_t getUserTotalItems(const uint32_t treasureID);
-uint16_t getUserGrandTotalItems();
+uint32_t getUserTotalItems(const uint32_t treasureID);
+uint32_t getUserGrandTotalItems();
 uint16_t getUserItemTypes(const uint32_t treasureID);
 
 uint16_t getUserUpgrades(const uint32_t typeID, const uint32_t resourceID);
-uint16_t getUserTotalUpgrades(const uint32_t typeID);
+uint32_t getUserTotalUpgrades(const uint32_t typeID);
+uint32_t getUserGrandTotalUpgrades();
 
 void addUpgrade(const uint32_t typeID, const uint32_t resourceID, const int32_t n);
 void addItem(const uint32_t treasureID, const uint32_t itemID, const int32_t n);

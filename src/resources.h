@@ -3,6 +3,16 @@
 
 char* getTempBuffer();
 
+void memRep(void* data);
+
+//////////////////////////
+
+void initGlobalRes();
+void destroyGlobalRes();
+
+GFont* getGothic14BoldFont();
+GBitmap* getQImage();
+
 //////////////////////////
 
 void initMainWindowRes();
@@ -14,15 +24,19 @@ GFont* getClockFont();
 GFont* getClockSmallFont();
 GFont* getWeatherFont();
 GFont* getTemperatureFont();
-GFont* getGothic14BoldFont();
-
 
 GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID); // Internal
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID);
 GBitmap* getGemImage(uint8_t treasureID);
+GBitmap* getBluetoothImage();
 
-void init_resources();
-void destroy_resources();
+//////////////////////////
+
+void initSplashWindowRes();
+void deinitSplashWindowRes();
+
+GFont* getGothic14Font();
+GFont* getGothic24BoldFont();
 
 //////////////////////////
 
@@ -40,23 +54,9 @@ GBitmap* getPrestigeItemImage(uint8_t itemID);
 
 //////////////////////////
 
-void initRefineryWindowRes();
-void deinitRefineryWindowRes();
+void initBuyWindowRes(const uint32_t typeID);
+void deinitBuyWindowRes(const uint32_t typeID);
 
-GBitmap* getRefineryImage(uint8_t refineryID);
-
-//////////////////////////
-
-void initTankWindowRes();
-void deinitTankWindowRes();
-
-GBitmap* getTankImage(uint8_t tankID);
-
-//////////////////////////
-
-void initEmployeeWindowRes();
-void deinitEmployeeWindowRes();
-
-GBitmap* getEmployeeImage(uint8_t employeeID);
+GBitmap* getBuyImage(const uint32_t typeID, uint32_t resourceID);
 
 //////////////////////////

@@ -1,9 +1,9 @@
 #include <pebble.h>
 #include "constants.h"
 
-const uint8_t ITEM_COLOURS[ITEM_CATEGORIES] = {0b11101010, 0b11011000, 0b11001011, 0b11010011, 0b11111000};
+const uint8_t ITEM_COLOURS[ITEM_CATEGORIES] = {0b11101010, 0b11011000, 0b11001011, 0b11100111, 0b11111000};
 
-const char* const ITEM_CATEGORIE_NAME[ITEM_CATEGORIES] = {"Common", "Magic", "Rare", "Epic", "Legendary"};
+const char* const ITEM_CATEGORIE_NAME[ITEM_CATEGORIES] = {"COMMON", "MAGIC", "RARE", "EPIC", "LEGENDARY"};
 
 const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   SEC_IN_MIN,      //REFINERY
@@ -146,7 +146,7 @@ const char* const UPGRADE_NAME[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   "",
   ""
   }, {
-  "", // Increase treasure chance
+  "name here", // Increase treasure chance
   "Techie", // Techie - unlock extra clock bits
   "Intern Runner",// XXX - WATCHER_CHANCE_1
   "Electrician",  // Electrician - light notify

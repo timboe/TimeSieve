@@ -24,7 +24,6 @@ static GPoint waterfall_bits_bgn[N_WATERFALL_BITS];
 static GPoint waterfall_bits_end[N_WATERFALL_BITS];
 
 
-
 void randomiseWaterfallBits() {
   for (unsigned i = 0; i < N_WATERFALL_BITS; ++i) {
     int16_t x = 102 + rand()%8;
@@ -154,22 +153,9 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
 
 
   graphics_context_set_text_color(ctx, GColorWhite);
-  graphics_draw_text(ctx,
-                     s_tankContentText,
-                     *getDOSFont(),
-                     text_content_rect,
-                     GTextOverflowModeWordWrap,
-                     GTextAlignmentLeft,
-                     NULL);
-    graphics_draw_text(ctx,
-                     s_tankFullPercetText,
-                     *getDOSFont(),
-                     text_percentage_rect,
-                     GTextOverflowModeWordWrap,
-                     GTextAlignmentCenter,
-                     NULL);
-
-  	//APP_LOG(APP_LOG_LEVEL_DEBUG, "Drew text");
+  graphics_draw_text(ctx, s_tankContentText, *getGothic24BoldFont(), text_content_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  graphics_draw_text(ctx, s_tankFullPercetText, *getGothic24BoldFont(), text_percentage_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  //APP_LOG(APP_LOG_LEVEL_DEBUG, "Drew text");
 }
 
 void create_timeTank_layer(Window* parentWindow) {
