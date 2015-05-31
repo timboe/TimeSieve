@@ -195,7 +195,7 @@ const char* const ITEM_NAME[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   "Briefs",
   "Rick Roll",
   "MAGIC 3",
-  "MAGIC 4"
+  "Mm Pizza"
   }, {
   "RARE 1",
   "RARE 2",
@@ -203,23 +203,23 @@ const char* const ITEM_NAME[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   "Man's Soul"
   }, {
   "EPIC 1",
-  "Gemerald",
-  "EPIC 3",
+  "Fine Art",
+  "It's a Tiara",
   "EPIC 4"
   } };
 
 const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
-  "LEG 1",
+  "Antioch",
   "LEG 2",
-  "LEG 3",
-  "LEG 4",
+  "Bat Cookie",
+  "Snuke",
   "LEG 5",
-  "LEG 6",
+  "Puzzle Box",
   "LEG 7",
-  "LEG 8",
+  "Gemerald",
   "LEG 9",
   "LEG 10",
-  "LEG 11",
+  "Crystal Skull",
   "LEG 12",
   "LEG 13",
   "LEG 14",

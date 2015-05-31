@@ -1,45 +1,38 @@
 #include <pebble.h>
 #include "buyMenu.h"
+#include "buyMenuSub.h"
 #include "constants.h"
-#include "persistence.h"
-#include "resources.h"
-#include "timeStore.h"
-#include "notify.h"
 
-// Menu layers for my windows
-static MenuLayer* s_menu_layer = NULL;
-static MenuLayer* s_subMenuLayer = NULL;
+// Menu layers for my window
+static MenuLayer* s_menuLayer = NULL;
 
 // My sub-windows
-static Window* s_refinery_window;
-static Window* s_tank_window;
-static Window* s_watcher_window;
+static Window* s_refineryWindow;
+static Window* s_tankWindow;
+static Window* s_watcherWindow;
 
-static int s_refinery_context = REFINERY_ID;
-static int s_tank_context = TANK_ID;
-static int s_watcher_context = WATCHER_ID;
-
-static char notifyTop[TEXT_BUFFER_SIZE];
-static char notifyBottom[TEXT_BUFFER_SIZE];
+static int s_refineryContext = REFINERY_ID;
+static int s_tankContext = TANK_ID;
+static int s_watcherContext = WATCHER_ID;
 
 void updateBuyLayer() {
-  if (s_menu_layer != NULL) layer_mark_dirty(menu_layer_get_layer(s_menu_layer));
-  if (s_subMenuLayer != NULL) layer_mark_dirty(menu_layer_get_layer(s_subMenuLayer));
+  if (s_menuLayer != NULL) layer_mark_dirty(menu_layer_get_layer(s_menuLayer));
+  updateBuyMenuSubLayer();
 }
 
 ///
 /// MAIN BUY WINDOW CALLBACKS
 ///
 
-static uint16_t menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) { return NUM_BUY_MENU_SECTIONS; }
+static uint16_t buyMenuGetNumSectionsCallback(MenuLayer* menu_layer, void* data) { return NUM_BUY_MENU_SECTIONS; }
 
-static uint16_t menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return NUM_BUY_MENU_ITEMS; }
+static uint16_t buyMenuGetNumRowsCallback(MenuLayer* menu_layer, uint16_t section_index, void* data) { return NUM_BUY_MENU_ITEMS; }
 
-static int16_t menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return MENU_CELL_BASIC_HEADER_HEIGHT; }
+static int16_t buyMenuGetHeaderHeightCallback(MenuLayer* menu_layer, uint16_t section_index, void* data) { return MENU_CELL_BASIC_HEADER_HEIGHT; }
 
-static void menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) { menu_cell_basic_header_draw(ctx, cell_layer, "BUY Upgrades"); }
+static void buyMenuDrawHeaderCallback(GContext* ctx, const Layer* cell_layer, uint16_t section_index, void* data) { menu_cell_basic_header_draw(ctx, cell_layer, "BUY Upgrades"); }
 
-static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
+static void buyMenuDrawRowCallback(GContext* ctx, const Layer* cell_layer, MenuIndex* cell_index, void* data) {
   // Determine which section we're going to draw in
   const GSize size = layer_get_frame(cell_layer).size;
   const bool selected = menu_cell_layer_is_highlighted(cell_layer);
@@ -58,331 +51,59 @@ static void menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
 
-static void menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
+static void buyMenuSelectCallback(MenuLayer* menu_layer, MenuIndex* cell_index, void* data) {
   // Use the row to specify which item will receive the select action
   const int row = cell_index->row;
   if (row == REFINERY_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH REFINERY");
-    window_stack_push(s_refinery_window, true);
+    window_stack_push(s_refineryWindow, true);
   } else if (row == TANK_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH TANK");
-    window_stack_push(s_tank_window, true);
-//  } else if (row == SIEVE_ID) {
-//    APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH SIEVE");
-//    window_stack_push(s_sieve_window, true);
+    window_stack_push(s_tankWindow, true);
   } else if (row == WATCHER_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH WATCHER");
-    window_stack_push(s_watcher_window, true);
+    window_stack_push(s_watcherWindow, true);
   }
 
-}
-
-///
-/// REFINARY BUY WINDOW CALLBACKS
-///
-
-static uint16_t sub_menu_get_num_sections_callback(MenuLayer *menu_layer, void *data) { return 1; }
-
-static uint16_t sub_menu_get_num_rows_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) {
-  const int context = *((int*)data);
-  if (context == REFINERY_ID) return N_REFINERY_UPGRADES;
-  else if (context == TANK_ID) return N_TANK_UPGRADES;
-  else if (context == WATCHER_ID) return N_WATCHER_UPGRADES;
-  return 0;
-}
-
-static int16_t sub_menu_get_header_height_callback(MenuLayer *menu_layer, uint16_t section_index, void *data) { return MENU_CELL_LARGE_HEADER_HEIGHT; }
-
-static int16_t sub_menu_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) { return MENU_THREE_CELL_HEIGHT; }
-
-static void sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer, uint16_t section_index, void *data) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "HEADER DRAW %i", section_index);
-
-  const int context = *((int*)data);
-  const GSize size = layer_get_frame(cell_layer).size;
-  timeToString(getUserTime(), getTempBuffer(), TEXT_BUFFER_SIZE, true);
-  static char s_title[TEXT_BUFFER_SIZE];
-  static char s_header[TEXT_BUFFER_SIZE];
-  strcpy(s_header, "AVAILABLE: ");
-  strcat(s_header, getTempBuffer());
-  if (context == REFINERY_ID) strcpy(s_title, "REFINARY Upgrades");
-  else if (context == TANK_ID) strcpy(s_title, "TANK Upgrades");
-  else if (context == WATCHER_ID) strcpy(s_title, "WATCHER Upgrades");
-  GRect topTextRect = GRect(2, 0, size.w-2, size.h);
-  GRect botTextRect = GRect(2, 14, size.w-2, size.h-14);
-  graphics_context_set_text_color(ctx, GColorBlack);
-  graphics_draw_text(ctx, s_title, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  graphics_draw_text(ctx, s_header, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-}
-
-static void sub_menu_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuIndex *cell_index, void *data) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "ROW DRAW %i", cell_index->row);
-
-  const int context = *((int*)data);
-  const GSize size = layer_get_frame(cell_layer).size;
-  const int row = cell_index->row;
-  const bool selected = menu_cell_layer_is_highlighted(cell_layer);
-
-  //Get details
-  const unsigned location = cell_index->row;
-  const int owned = getUserUpgrades(context, location);
-  const uint64_t priceNext = getPriceOfUpgrade(context, location);
-  bool maxLevel = getIfAtMaxLevel(context, location);
-  GBitmap* buyImage = getBuyImage(context, location);
-
-  char upgradeText[TEXT_BUFFER_SIZE];
-  if (context == REFINERY_ID) {
-    strcpy(upgradeText, "GAIN: ");
-  } else if (context == TANK_ID) {
-    strcpy(upgradeText, "SIZE: ");
-  } else if (context == WATCHER_ID) {
-    bool doneNotifyTxt = false;
-    uint8_t owned = getUserUpgrades(WATCHER_ID, row);
-    switch (row) {
-      case WATCHER_CHANCE_1: strcpy(upgradeText, "AUTO-Collect +1%"); break;
-      case WATCHER_CHANCE_2: strcpy(upgradeText, "AUTO-Collect +5%"); break;
-      case WATCHER_FREQUENCY_1: strcpy(upgradeText, "ITEM Chance +0.5%"); break;
-      case WATCHER_FREQUENCY_2: strcpy(upgradeText, "ITEM Chance +3%"); break;
-      case WATCHER_QUALITY_1: strcpy(upgradeText,   "ITEM Quality +1%"); break;
-      case WATCHER_QUALITY_2: strcpy(upgradeText,   "ITEM Qaulity +4%"); break;
-      case WATCHER_TECH:
-        strcpy(upgradeText, "ADDON: ");
-        if (owned == TECH_NONE) strcat(upgradeText, "Battery");
-        else if (owned == TECH_BATTERY) strcat(upgradeText, "Month");
-        else if (owned == TECH_MONTH) strcat(upgradeText, "Weather");
-        break;
-      case WATCHER_LIGHT:
-        strcpy(upgradeText, "LIGHT: ");
-        doneNotifyTxt = true;
-        // DELIBERATE FALL-TRHOUGH
-      case WATCHER_VIBE:
-        if (doneNotifyTxt == false) {
-          strcpy(upgradeText, "VIBE: ");
-        }
-        if (owned == NOTIFY_NONE) strcat(upgradeText, "Common+");
-        else if (owned == NOTIFY_COMMON) strcat(upgradeText, "Magic+");
-        else if (owned == NOTIFY_MAGIC) strcat(upgradeText, "Epic+");
-        else if (owned == NOTIFY_RARE) strcat(upgradeText, "Rare+");
-        else if (owned == NOTIFY_EPIC) strcat(upgradeText, "Legendary");
-        break;
-      case WATCHER_FONT:
-        if (owned < FONT_MAX-1) snprintf(upgradeText, TEXT_BUFFER_SIZE, "FONT: %i", (int)(owned+1));
-        break;
-      case WATCHER_COLOUR:
-        strcpy(upgradeText, "THEME: ");
-        if (owned == PALETTE_BLUE) strcat(upgradeText, "Green");
-        else if (owned == PALETTE_GREEN) strcat(upgradeText, "Yellow");
-        else if (owned == PALETTE_YELLOW) strcat(upgradeText, "Red");
-        break;
-    }
-    if (maxLevel) strcpy(upgradeText, "MAX");
-  }
-
-  bool display = false, canAfford = false;
-  // Can I afford this? Only display if total time gained playing is greater than the cost
-  if (owned > 0 || getUserTotalTime() > priceNext) display = true;
-  if (getUserTime() >= priceNext) canAfford = true;
-
-  // Text colours
-  if (selected) graphics_context_set_text_color(ctx, GColorWhite);
-  else graphics_context_set_text_color(ctx, GColorBlack);
-
-  // Back color
-  GColor backColor;
-  if (selected && !display)         backColor = GColorDarkGray;
-  else if (!display)                backColor = GColorLightGray;
-  else if (selected && canAfford)   backColor = MENU_BACK_GREEN_SELECT;
-  else if (selected)                backColor = MENU_BACK_RED_SELECT;
-  else if (row%2 == 1 && canAfford) backColor = MENU_BACK_GREEN_ODD;
-  else if (canAfford)               backColor = MENU_BACK_GREEN_EVEN;
-  else if (row%2 == 1)              backColor = MENU_BACK_RED_ODD;
-  else                              backColor = MENU_BACK_RED_EVEN;
-  graphics_context_set_fill_color(ctx, backColor);
-  graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
-
-  // Do not have and cannot afford, draw ???s
-  if (display == false) {
-    //draw_dithered_rect(ctx, GRect(0, 0, size.w, size.h), GColorLightGray, GColorWhite, DITHER_10_PERCENT);
-    GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
-    // Change the name to ?s
-    strcpy(getTempBuffer(), "");
-    for (uint8_t i = 0; (UPGRADE_NAME[context][location])[i] != 0; i++) {
-      if ((UPGRADE_NAME[context][location])[i] == ' ') strcat(getTempBuffer(), " ");
-      else strcat(getTempBuffer(), "?");
-    }
-    graphics_draw_text(ctx, getTempBuffer(), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-    buyImage = getQImage();
-  } else {
-    // Now text
-    GRect ttlTextRect = GRect(MENU_X_OFFSET, -6,  size.w-MENU_X_OFFSET, size.h);
-    GRect topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
-    GRect medTextRect = GRect(MENU_X_OFFSET, 27, size.w-MENU_X_OFFSET, size.h-33);
-    GRect botTextRect = GRect(MENU_X_OFFSET, 38, size.w-MENU_X_OFFSET, size.h-44);
-
-    timeToString(priceNext, getTempBuffer(), TEXT_BUFFER_SIZE, true);
-    static char s_header[TEXT_BUFFER_SIZE];
-    strcpy(s_header, "COST: ");
-    strcat(s_header, getTempBuffer());
-    if (maxLevel) strcpy(s_header, "COST: -");
-
-    static char s_owned[TEXT_BUFFER_SIZE];
-    snprintf(s_owned, TEXT_BUFFER_SIZE, "OWNED: %i", owned);
-
-    static char s_reward[TEXT_BUFFER_SIZE];
-    strcpy(s_reward, upgradeText);
-    if (context != WATCHER_ID) {
-      timeToString(UPGRADE_REWARD[context][location], getTempBuffer(), TEXT_BUFFER_SIZE, true);
-      strcat(s_reward, getTempBuffer());
-    }
-
-    graphics_draw_text(ctx, UPGRADE_NAME[context][location], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-    graphics_draw_text(ctx, s_header, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-    graphics_draw_text(ctx, s_owned, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), medTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-    graphics_draw_text(ctx, s_reward, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
-  }
-
-  graphics_context_set_stroke_color(ctx, GColorBlack);
-
-  graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, buyImage, GRect(3, 10,  22, 36));
-
-}
-
-void buyClick(const uint32_t typeID, const uint32_t resourceID, const bool buyTen) {
-  uint8_t bought = 0;
-  uint64_t paid = 0;
-  for (uint8_t i = 0; i < (buyTen ? 10 : 1); ++i) {
-    const uint64_t price = doPurchase(typeID, resourceID);
-    paid += price;
-    if (price > 0) ++bought;
-    else break;
-  }
-  GColor highlight = GColorBlack;
-  if (bought) updateDisplayTime( getUserTime() );
-  snprintf(notifyTop, TEXT_BUFFER_SIZE, "Bought %i", (int)bought);
-  if (bought == 0) {
-    if (getIfAtMaxLevel(typeID, resourceID)) strcpy(notifyBottom, "Own Maximum!");
-    else strcpy(notifyBottom, "Insufficient Time!");
-    highlight = GColorRed;
-  } else {
-    timeToString(paid, getTempBuffer(), TEXT_BUFFER_SIZE, true);
-    strcpy(notifyBottom, "For ");
-    strcat(notifyBottom, getTempBuffer());
-  }
-
-  showNotify(highlight, notifyTop, UPGRADE_NAME[typeID][resourceID], notifyBottom);
-}
-
-/**
- * User is trying to buy something, trigger the purchase, will only go through if it is affordable
- */
-static void sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  const int context = *((int*)data);
-  buyClick(context, cell_index->row, false);
-  layer_mark_dirty(menu_layer_get_layer(menu_layer));
-}
-
-/**
- * User is trying to buy 10. TODO imp this by making a getIsMaxLevel fn
- */
-static void sub_menu_long_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
-  const int context = *((int*)data);
-  buyClick(context, cell_index->row, true);
-  layer_mark_dirty(menu_layer_get_layer(menu_layer));
-}
-
-///
-/// SETUP
-///
-
-void sub_window_load(Window* parentWindow) {
-  // Now we prepare to initialize the menu layer
-  Layer* windowLayer = window_get_root_layer(parentWindow);
-
-  MenuLayer* s_subMenuLayer = menu_layer_create(layer_get_frame(windowLayer));
-  const int context = *((int*) window_get_user_data(parentWindow));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i CREATE", context);
-
-  initBuyWindowRes(context);
-
-  menu_layer_set_callbacks(s_subMenuLayer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
-    .get_num_sections = sub_menu_get_num_sections_callback,
-    .get_num_rows = sub_menu_get_num_rows_callback,
-    .get_cell_height = sub_menu_get_cell_height_callback,
-    .get_header_height = sub_menu_get_header_height_callback,
-    .draw_header = sub_menu_draw_header_callback,
-    .draw_row = sub_menu_draw_row_callback,
-    .select_click = sub_menu_select_callback,
-    .select_long_click = sub_menu_long_callback,
-  });
-  // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_normal_colors(s_subMenuLayer, MENU_BACK_GREEN_ODD, GColorBlack);
-  menu_layer_set_click_config_onto_window(s_subMenuLayer, parentWindow);
-  layer_add_child(windowLayer, menu_layer_get_layer(s_subMenuLayer));
-
-  // Notify layer goes on top, shows sold items
-  layer_add_child(windowLayer, getNotifyLayer());
-}
-
-void sub_window_unload(Window* parentWindow) {
-  const int context = *((int*) window_get_user_data(parentWindow));
-  APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY SUB-WIN %i DESTROY", context);
-  destroyNotifyLayer();
-  menu_layer_destroy(s_subMenuLayer);
-  s_subMenuLayer = NULL;
-  deinitBuyWindowRes(context);
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void createSubWin(Window** w, int* context) {
-  *w = window_create();
-  window_set_user_data(*w, context);
-  window_set_window_handlers(*w, (WindowHandlers) {
-    .load = sub_window_load,
-    .unload = sub_window_unload
-  });
-}
-
 void buy_window_load(Window* parentWindow) {
 
-  // Now we prepare to initialize the menu layer
-  Layer* windowLayer = window_get_root_layer(parentWindow);
-  GRect bounds = layer_get_frame(windowLayer);
-
   // Create the menu layer
-  s_menu_layer = menu_layer_create(bounds);
-  menu_layer_set_callbacks(s_menu_layer, NULL, (MenuLayerCallbacks){
-    .get_num_sections = menu_get_num_sections_callback,
-    .get_num_rows = menu_get_num_rows_callback,
-    .get_header_height = menu_get_header_height_callback,
-    .draw_header = menu_draw_header_callback,
-    .draw_row = menu_draw_row_callback,
-    .select_click = menu_select_callback,
+  s_menuLayer = menu_layer_create(layer_get_frame(window_get_root_layer(parentWindow)));
+  menu_layer_set_callbacks(s_menuLayer, NULL, (MenuLayerCallbacks){
+    .get_num_sections = buyMenuGetNumSectionsCallback,
+    .get_num_rows = buyMenuGetNumRowsCallback,
+    .get_header_height = buyMenuGetHeaderHeightCallback,
+    .draw_header = buyMenuDrawHeaderCallback,
+    .draw_row = buyMenuDrawRowCallback,
+    .select_click = buyMenuSelectCallback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_click_config_onto_window(s_menu_layer, parentWindow);
-  menu_layer_set_normal_colors(s_menu_layer, MENU_BACK_GREEN_ODD, GColorBlack);
-  layer_add_child(windowLayer, menu_layer_get_layer(s_menu_layer));
+  menu_layer_set_click_config_onto_window(s_menuLayer, parentWindow);
+  menu_layer_set_normal_colors(s_menuLayer, MENU_BACK_GREEN_ODD, GColorBlack);
+  layer_add_child(window_get_root_layer(parentWindow), menu_layer_get_layer(s_menuLayer));
 
   // Setup sub-windows that we might want to jump to
-  createSubWin(&s_refinery_window, &s_refinery_context);
-  createSubWin(&s_tank_window, &s_tank_context);
-  createSubWin(&s_watcher_window, &s_watcher_context);
+  createSubWin(&s_refineryWindow, &s_refineryContext);
+  createSubWin(&s_tankWindow, &s_tankContext);
+  createSubWin(&s_watcherWindow, &s_watcherContext);
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN LOAD");
 
 }
 
 void buy_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN DESTROY");
-  menu_layer_destroy(s_menu_layer);
-  s_menu_layer = NULL;
+  menu_layer_destroy(s_menuLayer);
+  s_menuLayer = NULL;
 
   // Destroy sub-windows
-  window_destroy(s_refinery_window);
-  window_destroy(s_tank_window);
-  window_destroy(s_watcher_window);
-  s_refinery_window = NULL;
-  s_tank_window = NULL;
-  s_watcher_window = NULL;
+  window_destroy(s_refineryWindow);
+  window_destroy(s_tankWindow);
+  window_destroy(s_watcherWindow);
+  s_refineryWindow = NULL;
+  s_tankWindow = NULL;
+  s_watcherWindow = NULL;
 }
