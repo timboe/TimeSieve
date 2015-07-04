@@ -12,8 +12,9 @@ static struct userData_v1* s_userData;
  * Customisable list of things to give for testing.
  */
 void DEVMODE() {
-  addItem(LEGENDARY_ID, 2, 3);
-  addItem(LEGENDARY_ID, 3, 3);
+  for (int i=0; i<16; ++i)  addItem(LEGENDARY_ID, i, 1);
+
+
   addItem(EPIC_ID, 3, 3);
   addItem(EPIC_ID, 2, 3);
   addItem(EPIC_ID, 1, 3);
