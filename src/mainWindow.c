@@ -70,20 +70,24 @@ TimeUnits getLastTimeUnit() {
 
 // Main window initialisation
 void main_window_load(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW load");
   create_timeSieve_layer(window);
   create_clock_layer(window);
   create_timeTank_layer(window);
   initMainWindowRes();
   update_tick_handler(); // Get 1s or 1m callbacks
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW load done");
 }
 
 // Main window destructiom
 void main_window_unload(Window *window) {
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW Uload");
   destroy_timeSieve_layer();
   destroy_clock_layer();
   destroy_timeTank_layer();
   deinitMainWindowRes();
   tick_timer_service_unsubscribe();
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW Uload done");
 }
 
 // For the main window

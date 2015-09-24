@@ -16,7 +16,7 @@ static GBitmap* s_gem[ITEM_CATEGORIES] = {NULL};
 static GBitmap* s_bluetoothImage = NULL;
 
 static GBitmap* s_item[SELLABLE_CATEGORIES][MAX_TREASURES] = {{NULL},{NULL}};
-static GBitmap* s_legendaryItem[MAX_TREASURES] = {NULL};
+static GBitmap* s_legendaryItem[MAX_UNIQUE] = {NULL};
 
 static GBitmap* s_resourceImage[UPGRADE_CATEGORIES][MAX_UPGRADES] = {{NULL},{NULL}};
 
@@ -229,39 +229,39 @@ GBitmap* getPrestigeItemImage(uint8_t itemID) { return s_legendaryItem[itemID]; 
 
 void initBuyWindowRes(const uint32_t typeID) {
   if (typeID == REFINERY_ID) {
-    s_resourceImage[REFINERY_ID][0] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][1] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][2] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][3] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][4] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][5] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][6] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][7] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][8] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][9] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][10] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][11] = NULL;// TODO
-    s_resourceImage[REFINERY_ID][12] = NULL;// TODO
-    // s_resourceImage[REFINERY_ID][13] = NULL;
-    // s_resourceImage[REFINERY_ID][14] = NULL;
-    // s_resourceImage[REFINERY_ID][15] = NULL;
+    s_resourceImage[REFINERY_ID][0] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_0);
+    s_resourceImage[REFINERY_ID][1] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_1);
+    s_resourceImage[REFINERY_ID][2] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_2);
+    s_resourceImage[REFINERY_ID][3] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_3);
+    s_resourceImage[REFINERY_ID][4] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_4);
+    s_resourceImage[REFINERY_ID][5] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_5);
+    s_resourceImage[REFINERY_ID][6] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_6);
+    s_resourceImage[REFINERY_ID][7] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_7);
+    s_resourceImage[REFINERY_ID][8] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_8);
+    s_resourceImage[REFINERY_ID][9] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_9);
+    s_resourceImage[REFINERY_ID][10] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_10);
+    s_resourceImage[REFINERY_ID][11] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_11);
+    //s_resourceImage[REFINERY_ID][12] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_12);
+    // s_resourceImage[REFINERY_ID][13] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_13;
+    // s_resourceImage[REFINERY_ID][14] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_14);
+    // s_resourceImage[REFINERY_ID][15] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_15);
   } else if (typeID == TANK_ID) {
-    s_resourceImage[TANK_ID][0] = NULL;// TODO
-    s_resourceImage[TANK_ID][1] = NULL;// TODO
-    s_resourceImage[TANK_ID][2] = NULL;// TODO
-    s_resourceImage[TANK_ID][3] = NULL;// TODO
-    s_resourceImage[TANK_ID][4] = NULL;// TODO
-    s_resourceImage[TANK_ID][5] = NULL;// TODO
-    s_resourceImage[TANK_ID][6] = NULL;// TODO
-    s_resourceImage[TANK_ID][7] = NULL;// TODO
-    s_resourceImage[TANK_ID][8] = NULL;// TODO
-    s_resourceImage[TANK_ID][9] = NULL;// TODO
-    s_resourceImage[TANK_ID][10] = NULL;// TODO
-    s_resourceImage[TANK_ID][11] = NULL;// TODO
-    s_resourceImage[TANK_ID][12] = NULL;// TODO
-    // s_resourceImage[TANK_ID][13] = NULL;
-    // s_resourceImage[TANK_ID][14] = NULL;
-    // s_resourceImage[TANK_ID][15] = NULL;
+    s_resourceImage[TANK_ID][0] = gbitmap_create_with_resource(RESOURCE_ID_TANK_0);
+    s_resourceImage[TANK_ID][1] = gbitmap_create_with_resource(RESOURCE_ID_TANK_1);
+    s_resourceImage[TANK_ID][2] = gbitmap_create_with_resource(RESOURCE_ID_TANK_2);
+    s_resourceImage[TANK_ID][3] = gbitmap_create_with_resource(RESOURCE_ID_TANK_3);
+    s_resourceImage[TANK_ID][4] = gbitmap_create_with_resource(RESOURCE_ID_TANK_4);
+    s_resourceImage[TANK_ID][5] = gbitmap_create_with_resource(RESOURCE_ID_TANK_5);
+    s_resourceImage[TANK_ID][6] = gbitmap_create_with_resource(RESOURCE_ID_TANK_6);
+    s_resourceImage[TANK_ID][7] = gbitmap_create_with_resource(RESOURCE_ID_TANK_7);
+    s_resourceImage[TANK_ID][8] = gbitmap_create_with_resource(RESOURCE_ID_TANK_8);
+    s_resourceImage[TANK_ID][9] = gbitmap_create_with_resource(RESOURCE_ID_TANK_9);
+    s_resourceImage[TANK_ID][10] = gbitmap_create_with_resource(RESOURCE_ID_TANK_10);
+    s_resourceImage[TANK_ID][11] = gbitmap_create_with_resource(RESOURCE_ID_TANK_11);
+    //s_resourceImage[TANK_ID][12] = gbitmap_create_with_resource(RESOURCE_ID_TANK_12);
+    // s_resourceImage[TANK_ID][13] = gbitmap_create_with_resource(RESOURCE_ID_TANK_13);
+    // s_resourceImage[TANK_ID][14] = gbitmap_create_with_resource(RESOURCE_ID_TANK_14);
+    // s_resourceImage[TANK_ID][15] = gbitmap_create_with_resource(RESOURCE_ID_TANK_15);
   } else { // WATCHER_ID
     s_resourceImage[WATCHER_ID][0] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_0);
     s_resourceImage[WATCHER_ID][1] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_1);
@@ -274,11 +274,11 @@ void initBuyWindowRes(const uint32_t typeID) {
     s_resourceImage[WATCHER_ID][8] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_8);
     s_resourceImage[WATCHER_ID][9] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_9);
     s_resourceImage[WATCHER_ID][10] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_10);
-    // s_resourceImage[WATCHER_ID][11] = NULL;
-    // s_resourceImage[WATCHER_ID][12] = NULL;
-    // s_resourceImage[WATCHER_ID][13] = NULL;
-    // s_resourceImage[WATCHER_ID][14] = NULL;
-    // s_resourceImage[WATCHER_ID][15] = NULL;
+    // s_resourceImage[WATCHER_ID][11] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_11);
+    // s_resourceImage[WATCHER_ID][12] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_12);
+    // s_resourceImage[WATCHER_ID][13] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_13);
+    // s_resourceImage[WATCHER_ID][14] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_14);
+    // s_resourceImage[WATCHER_ID][15] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_15);
   }
 }
 

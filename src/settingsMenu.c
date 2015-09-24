@@ -511,14 +511,10 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
 void settings_sub_window_load(Window* parentWindow) {
 
   // Now we prepare to initialize the menu layer
-  Layer* windowLayer = window_get_root_layer(parentWindow);
-  const GRect bounds = layer_get_frame(windowLayer);
-
-  MenuLayer* newLayer;
+  s_settingsSubLayer = menu_layer_create(layer_get_frame(window_get_root_layer(parentWindow)));
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"StngSubW%iLOAD", context);
 
-  s_settingsSubLayer = menu_layer_create(bounds);
   if (context == UNIQUE_CONTEXT_ID) initPrestigeWindowRes();
   // Create the menu layer
   menu_layer_set_callbacks(s_settingsSubLayer, window_get_user_data(parentWindow), (MenuLayerCallbacks){
@@ -532,7 +528,7 @@ void settings_sub_window_load(Window* parentWindow) {
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_normal_colors(s_settingsSubLayer, MENU_BACK_GREEN_ODD, GColorBlack);
   menu_layer_set_click_config_onto_window(s_settingsSubLayer, parentWindow);
-  layer_add_child(windowLayer, menu_layer_get_layer(s_settingsSubLayer));
+  layer_add_child(window_get_root_layer(parentWindow), menu_layer_get_layer(s_settingsSubLayer));
 }
 
 void settings_sub_window_unload(Window* parentWindow) {

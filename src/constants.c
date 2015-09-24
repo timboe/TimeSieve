@@ -194,7 +194,7 @@ const char* const ITEM_NAME[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   }, {
   "Briefs",
   "Rick Roll",
-  "MAGIC 3",
+  "Xray Spex",
   "Mm Pizza"
   }, {
   "RARE 1",
@@ -205,7 +205,7 @@ const char* const ITEM_NAME[SELLABLE_CATEGORIES][MAX_TREASURES] = { {
   "EPIC 1",
   "Fine Art",
   "It's a Tiara",
-  "EPIC 4"
+  "Z' Boson"
   } };
 
 const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
@@ -213,7 +213,7 @@ const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "LEG 2",
   "Bat Cookie",
   "Snuke",
-  "LEG 5",
+  "Flower Power",
   "Puzzle Box",
   "Jolly Roger",
   "Gemerald",
@@ -221,9 +221,9 @@ const char* const NAME_LEGENDARY[MAX_UNIQUE] = {
   "Loaded Die",
   "Crystal Skull",
   "Diamond Hoe",
-  "LEG 13",
-  "LEG 14",
-  "LEG 15",
+  "Gold Horseshoe",
+  "Dawkinian",
+  "Triforce",
   "LEG 16"};
 
 const char* const DESC_LEGENDARY[MAX_UNIQUE] = {
