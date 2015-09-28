@@ -3,8 +3,8 @@
 #include "persistence.h"
 #include "constants.h"
 
-static GFont s_perfectDOSFont;
 static bool s_clockLoaded = false;
+static GFont s_perfectDOSFont;
 static GFont s_clock;
 static GFont s_clockSmall;
 static GFont s_weatherFont;
@@ -19,6 +19,27 @@ static GBitmap* s_item[SELLABLE_CATEGORIES][MAX_TREASURES] = {{NULL},{NULL}};
 static GBitmap* s_legendaryItem[MAX_UNIQUE] = {NULL};
 
 static GBitmap* s_resourceImage[UPGRADE_CATEGORIES][MAX_UPGRADES] = {{NULL},{NULL}};
+
+//#define GRAPHICS_ON
+#define GRAPHICS_OFF
+
+//////////////////////////
+
+/**
+ * All graphics goes through here so we can debug memory issues
+ */
+
+void drawBitmap(GContext* ctx, const GBitmap* bitmap, GRect rect) {
+  #ifdef GRAPHICS_ON
+  if (bitmap == NULL) return;
+  graphics_draw_bitmap_in_rect(ctx, bitmap, rect);
+  #else
+  graphics_context_set_fill_color(ctx, GColorMagenta);
+  graphics_context_set_stroke_color(ctx, GColorCyan);
+  graphics_draw_rect(ctx, rect);
+  graphics_fill_rect(ctx, rect, 0, GCornersAll);
+  #endif
+}
 
 //////////////////////////
 
@@ -41,11 +62,15 @@ char* getTempBuffer() {
 void initGlobalRes() {
   s_g14  = fonts_get_system_font(FONT_KEY_GOTHIC_14);
   s_g24b = fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD);
+  #ifdef GRAPHICS_ON
   s_QImage  = gbitmap_create_with_resource(RESOURCE_ID_QMARK);
+  #endif
 }
 
 void destroyGlobalRes() {
+  #ifdef GRAPHICS_ON
   gbitmap_destroy( s_QImage );
+  #endif
 }
 
 GFont* getGothic14Font() { return &s_g14; }
@@ -61,12 +86,14 @@ void initMainWindowRes() {
   s_perfectDOSFont  = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_PERFECT_DOS_21));
   s_weatherFont     = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_WEATHER_21));
   loadClockFont();
+  #ifdef GRAPHICS_ON
   s_gem[COMMON_ID]    = gbitmap_create_with_resource(RESOURCE_ID_GEM_COMMON);
   s_gem[MAGIC_ID]     = gbitmap_create_with_resource(RESOURCE_ID_GEM_MAGIC);
   s_gem[RARE_ID]      = gbitmap_create_with_resource(RESOURCE_ID_GEM_RARE);
   s_gem[EPIC_ID]      = gbitmap_create_with_resource(RESOURCE_ID_GEM_EPIC);
   s_gem[LEGENDARY_ID] = gbitmap_create_with_resource(RESOURCE_ID_GEM_LEGENDARY);
   s_bluetoothImage    = gbitmap_create_with_resource(RESOURCE_ID_BLUETOOTH);
+  #endif
 }
 
 void deinitMainWindowRes() {
@@ -76,6 +103,8 @@ void deinitMainWindowRes() {
   fonts_unload_custom_font(s_clockSmall);
   fonts_unload_custom_font(s_weatherFont);
   s_clockLoaded = false;
+  //TODO check if loading an image into two places is bad
+  #ifdef GRAPHICS_ON
   gbitmap_destroy( s_singleItemImage );
   s_singleItemImage = NULL;
   gbitmap_destroy( s_bluetoothImage );
@@ -83,6 +112,7 @@ void deinitMainWindowRes() {
   for (uint8_t i = 0; i < ITEM_CATEGORIES; ++i) {
     gbitmap_destroy(s_gem[i]);
   }
+  #endif
 }
 
 void loadClockFont() {
@@ -123,8 +153,10 @@ GFont* getTemperatureFont() { return &s_g14; }
 GBitmap* getBluetoothImage() { return s_bluetoothImage; }
 
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID) {
+  #ifdef GRAPHICS_ON
   gbitmap_destroy( s_singleItemImage );
   s_singleItemImage = loadItemImage(treasureID, itemID);
+  #endif
   return s_singleItemImage;
 }
 
@@ -133,20 +165,24 @@ GBitmap* getGemImage(uint8_t treasureID) { return s_gem[treasureID]; }
 //////////////////////////
 
 void initSellWindowRes() {
+  #ifdef GRAPHICS_ON
   for (uint8_t i=0; i < SELLABLE_CATEGORIES; ++i) {
     for (uint8_t j=0; j < MAX_TREASURES; ++j) {
       s_item[i][j] = loadItemImage(i, j);
     }
   }
+  #endif
 }
 
 void deinitSellWindowRes() {
+  #ifdef GRAPHICS_ON
   for (uint8_t i=0; i < SELLABLE_CATEGORIES; ++i) {
     for (uint8_t j=0; j < MAX_TREASURES; ++j) {
       gbitmap_destroy( s_item[i][j] );
       s_item[i][j] = NULL;
     }
   }
+  #endif
 }
 
 GBitmap* getSellItemImage(uint8_t treasureID, uint8_t itemID) {
@@ -155,6 +191,7 @@ GBitmap* getSellItemImage(uint8_t treasureID, uint8_t itemID) {
 
 // This internal fn is used elsewhere too in resources
 GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID) {
+  #ifdef GRAPHICS_ON
   if (treasureID == COMMON_ID) {
     switch (itemID) {
       case 0: return gbitmap_create_with_resource(RESOURCE_ID_COMMON_0);
@@ -203,6 +240,7 @@ GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID) {
       case 15: return gbitmap_create_with_resource(RESOURCE_ID_LEGENDARY_15);
     }
   }
+  #endif
   return NULL;
 }
 
@@ -210,17 +248,21 @@ GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID) {
 
 void initPrestigeWindowRes() {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "initPresWindowRes"); memRep(NULL);
+  #ifdef GRAPHICS_ON
   for (uint8_t i=0; i < MAX_UNIQUE; ++i) {
    s_legendaryItem[i] = loadItemImage(LEGENDARY_ID, i); //TODO crash is related to these
   }
+  #endif
 }
 
 void deinitPrestigeWindowRes() {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "DEinitPresWindowRes"); memRep(NULL);
+  #ifdef GRAPHICS_ON
   for (uint8_t i=0; i < MAX_UNIQUE; ++i) {
     gbitmap_destroy( s_legendaryItem[i] ); //TODO crash is related to these
     s_legendaryItem[i] = NULL;
   }
+  #endif
 }
 
 GBitmap* getPrestigeItemImage(uint8_t itemID) { return s_legendaryItem[itemID]; }
@@ -228,6 +270,7 @@ GBitmap* getPrestigeItemImage(uint8_t itemID) { return s_legendaryItem[itemID]; 
 //////////////////////////
 
 void initBuyWindowRes(const uint32_t typeID) {
+  #ifdef GRAPHICS_ON
   if (typeID == REFINERY_ID) {
     s_resourceImage[REFINERY_ID][0] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_0);
     s_resourceImage[REFINERY_ID][1] = gbitmap_create_with_resource(RESOURCE_ID_REFINERY_1);
@@ -280,13 +323,16 @@ void initBuyWindowRes(const uint32_t typeID) {
     // s_resourceImage[WATCHER_ID][14] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_14);
     // s_resourceImage[WATCHER_ID][15] = gbitmap_create_with_resource(RESOURCE_ID_EMPLOYEE_15);
   }
+  #endif
 }
 
 void deinitBuyWindowRes(const uint32_t typeID) {
+  #ifdef GRAPHICS_ON
   for (uint8_t i=0; i < MAX_UPGRADES; ++i) {
     gbitmap_destroy( s_resourceImage[typeID][i] );
     s_resourceImage[typeID][i] = NULL;
   }
+  #endif
 }
 
 GBitmap* getBuyImage(const uint32_t typeID, const uint32_t resourceID) {

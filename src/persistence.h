@@ -24,7 +24,7 @@ void init_persistence(); // Load
 void destroy_persistence(); // Save
 void resetUserData(); // Reset
 void DEVMODE();
-
+void inboxReceivedHandler(DictionaryIterator *iter, void *context);
 
 uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID);
 uint32_t getUserTotalItems(const uint32_t treasureID);

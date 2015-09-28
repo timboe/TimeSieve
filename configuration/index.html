@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0" name="viewport">
+  <title></title>
+  <link rel="stylesheet" href="css/slate.css">
+</head>
+<body>
+  <form id="main-form">
+    <div class="item-container">
+      <div class="item-container-header">Time Sink Configuration</div>
+      <!---->
+      <div class="item-container">
+        Update Frequency
+        <div class="item-subtitle">Updating every second will increase battery useage.</div>
+        <div class="item-container-content">
+          <label class="item">
+            Minute
+            <input type="radio" class="item-radio" name="radio-time" id="id-time-min" value="minute"checked >
+          </label>
+          <label class="item">
+            Second
+            <input type="radio" class="item-radio" name="radio-time" id="id-time-sec" value="second" >
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        Temperature Unit
+        <div class="item-subtitle">Weather needs to be unlocked.</div>
+        <div class="item-container-content">
+          <label class="item">
+            Celsius
+            <input type="radio" class="item-radio" name="radio-weather" id="id-weather-cel" value="celsius" checked>
+          </label>
+          <label class="item">
+            Farenheit
+            <input type="radio" class="item-radio" name="radio-weather" id="id-weather-far" value="farenheit" >
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        Quiet Time Starts (hour)
+        <div class="item-subtitle">No item notifications during quiet time. Notifications need to be unlocked.</div>
+        <div class="item-container-content">
+          <label class="item">
+            <input type="range" class="item-slider" name="quiet-start" id="id-start" value="22" min="0" max="23">
+            <div class="item-input-wrapper item-slider-text">
+              <input type="text" class="item-input" name="quiet-start" id="id-start-box" value="22">
+            </div>
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        Quiet Time Ends (hour)
+        <div class="item-container-content">
+          <label class="item">
+            <input type="range" class="item-slider" name="quiet-end" id="id-end" value="8" min="0" max="23">
+            <div class="item-input-wrapper item-slider-text">
+              <input type="text" class="item-input" name="quiet-end" id="id-end-box" value="8">
+            </div>
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        <div class="item-container-content">
+          <label class="item">
+            Animations
+            <input type="checkbox" class="item-toggle" name="animation-checkbox" id="id-anim" checked>
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        Reset Game
+        <div class="item-subtitle">To start again, type 'restart' into this box and sumbit. This <em>cannot be undone</em>.</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input type="text" class="item-input" name="reset-textbox" id="id-reset" placeholder="">
+            </div>
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        <div class="button-container">
+          <input type="button" class="item-button" id="submit_button" value="SUBMIT">
+        </div>
+      </div>
+      <!---->
+    </div>
+  </form>
+  <script type="text/javascript" src="js/slate.js"></script>
+</body>
+<script>
+function getConfigData() {
+
+  var resetVar = false;
+  if (document.getElementById('id-reset').value == "restart") resetVar = true;
+
+  var options = {
+    'op_reset':      resetVar,
+    'op_animation':  document.getElementById('id-anim').checked,
+    'op_quietStart': document.getElementById('id-start').value,
+    'op_quietEnd':   document.getElementById('id-end').value,
+    'op_celcius':    document.getElementById('id-weather-cel').checked,
+    'op_fareheit':   document.getElementById('id-weather-far').checked,
+    'op_minutes':    document.getElementById('id-time-min').checked,
+    'op_seconds':    document.getElementById('id-time-sec').checked
+  };
+
+  // Save for next launch
+  localStorage['op_animation']  = options['op_animation'];
+  localStorage['op_quietStart'] = options['op_quietStart'];
+  localStorage['op_quietEnd']   = options['op_quietEnd'];
+  localStorage['op_celcius']    = options['op_celcius'];
+  localStorage['op_fareheit']   = options['op_fareheit'];
+  localStorage['op_minutes']    = options['op_minutes'];
+  localStorage['op_seconds']    = options['op_seconds'];
+
+  console.log('JS: Read options: ' + JSON.stringify(options));
+  return options;
+}
+
+function getQueryParam(variable, defaultValue) {
+  var query = location.search.substring(1);
+  var vars = query.split('&');
+  for (var i = 0; i < vars.length; i++) {
+    var pair = vars[i].split('=');
+    if (pair[0] === variable) {
+      return decodeURIComponent(pair[1]);
+    }
+  }
+  return defaultValue || false;
+}
+
+var submitButton = document.getElementById('submit_button');
+submitButton.addEventListener('click', function() {
+  console.log('JS: Submit');
+  // Set the return URL depending on the runtime environment
+  var return_to = getQueryParam('return_to', 'pebblejs://close#');
+  document.location = return_to + encodeURIComponent(JSON.stringify(getConfigData()));
+});
+
+(function() {
+  // Load any previously saved configuration, if available
+  if(typeof localStorage['op_animation'] !== 'undefined') {
+    console.log('JS: Load prev saved');
+    document.getElementById('id-anim').checked        = JSON.parse(localStorage['op_animation']);
+    document.getElementById('id-start').value         = localStorage['op_quietStart'];
+    document.getElementById('id-start-box').value     = localStorage['op_quietStart'];
+    document.getElementById('id-end').value           = localStorage['op_quietEnd'];
+    document.getElementById('id-end-box').value       = localStorage['op_quietEnd'];
+    document.getElementById('id-weather-cel').checked = JSON.parse(localStorage['op_celcius']);
+    document.getElementById('id-weather-far').checked = JSON.parse(localStorage['op_fareheit']);
+    document.getElementById('id-time-min').checked    = JSON.parse(localStorage['op_minutes']);
+    document.getElementById('id-time-sec').checked    = JSON.parse(localStorage['op_seconds']);
+  } else {
+    console.log('JS: No prev to save');
+  }
+})();
+</script>
+</html>

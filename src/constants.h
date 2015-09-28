@@ -10,7 +10,7 @@
 #define BITTEST(a, b) ((a)[BITSLOT(b)] & BITMASK(b))
 #define BITNSLOTS(nb) ((nb + CHAR_BIT - 1) / CHAR_BIT)
 
-#define IS_DEBUG 1
+#define IS_DEBUG 0
 
 // Used in animations
 #define MS_IN_SEC 1000
@@ -60,7 +60,7 @@
 #define NOTIFY_TREASURE_DISPLAY_TIME 3000
 #define NOTIFY_ACHIEVEMENT_DISPLAY_TIME 50000
 #define NOTIFY_DISPLAY_TIME 3000
-#define SPLASH_DISPLAY_TIME 20000
+#define SPLASH_DISPLAY_TIME 5000
 
 #define N_REFINERY_UPGRADES 13
 #define N_TANK_UPGRADES 13
@@ -97,6 +97,15 @@ typedef enum {WATCHER_FREQUENCY_1,
               W_14,
               W_15,
               W_16} WATCHER_TYPE;
+
+// APP DICT MAPPING
+
+#define KEY_ANIMATION 0
+#define KEY_TEMP_CELSIUS 1
+#define KEY_SHOW_SEC 2
+#define KEY_QUIET_START 3
+#define KEY_QUIET_END 4
+#define KEY_RESET 5
 
 // TREASURE SETTINGS
 
@@ -206,7 +215,7 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define TEXT_BUFFER_SIZE 32
 #define TEXT_LARGE_BUFFER_SIZE 64
 
-#define TANK_TEXT_V_OFFSET 5
+#define TANK_TEXT_V_OFFSET 0
 #define TANK_TEXT_HEIGHT 20
 
 #define CLOCK_TEXT_SIZE 9

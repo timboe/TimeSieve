@@ -11,12 +11,13 @@
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
 
-static GBitmap *s_convTopBitmap;
-static GBitmap *s_convBotBitmap;
-static GBitmap* s_convCap;
-static uint8_t s_convOffset = 0;
-
+static GBitmap *s_convTopBitmap = NULL;
+static GBitmap *s_convBotBitmap = NULL;
+static GBitmap* s_convCap = NULL;
+static GBitmap* s_sieveBasic = NULL;
 static GBitmap* s_gem = NULL;
+
+static uint8_t s_convOffset = 0;
 
 static GRect s_treasureRect;
 static bool s_treasureOnShow;
@@ -26,11 +27,9 @@ static int8_t s_itemID;
 static AppTimer* s_treasureTimeout = NULL;
 
 static GPoint s_halo;
-static uint8_t s_haloRings;
+static uint8_t s_haloRings = 0;
 
-static GBitmap* s_sieveBasic;
-
-static Layer* s_notifyLayer;
+static Layer* s_notifyLayer = NULL;
 static int8_t s_notifyTreasureID = -1;
 static int8_t s_notifyAchievementID = -1;
 static int8_t s_notifyItemID;
@@ -47,7 +46,7 @@ static const GPathInfo FLAIR_PATH = {
                          {0, 0}, {-95,  100},  {-100, 95}
                         }
 };
-static GPath* s_flairPath;
+static GPath* s_flairPath = NULL;
 static int32_t s_flairAngle = 0;
 
 void sieveAnimReset(TimeUnits units_changed) {
@@ -63,7 +62,7 @@ bool sieveAnimCallback(TimeUnits units_changed) {
   if (s_treasureID == -1 && (units_changed & DAY_UNIT) == 0) return false;
 
   if (s_treasureID != -1) {
-    if (++s_convOffset == 8) s_convOffset = 0; // Degenerency
+    if (++s_convOffset == 7) s_convOffset = 0; // Degenerency, 7 not 8 to avoid single-frame with no movement
     --s_treasureRect.origin.x;
     --s_halo.x;
     if (s_sieveTickCount % 14 == 0) ++s_haloRings;
@@ -106,21 +105,20 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
     graphics_draw_circle(ctx, s_halo, r);
     r +=5;
   }
-  //graphics_fill_rect(ctx, GRect(20, 30, 80, 40), 0, GCornersAll); // Masking box
 
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
 
-  GRect convBotBound = GRect(0+4 + s_convOffset, 42, 94, 6);
-  graphics_draw_bitmap_in_rect(ctx, s_convBotBitmap, convBotBound);
+  GRect convBotBound = GRect(4+3 + s_convOffset, 42, 94, 6);
+  drawBitmap(ctx, s_convBotBitmap, convBotBound);
 
-  GRect convTopBound = GRect(8+4 - s_convOffset, 30, 94, 12);
-  graphics_draw_bitmap_in_rect(ctx, s_convTopBitmap, convTopBound);
+  GRect convTopBound = GRect(8+3 - s_convOffset, 30, 94, 12);
+  drawBitmap(ctx, s_convTopBitmap, convTopBound);
 
   GRect convCapBound = GRect(0, 30, 14, 18);
-  graphics_draw_bitmap_in_rect(ctx, s_convCap, convCapBound);
+  drawBitmap(ctx, s_convCap, convCapBound);
 
-  graphics_draw_bitmap_in_rect(ctx, s_gem, s_treasureRect);
-  graphics_draw_bitmap_in_rect(ctx, s_sieveBasic, GRect(88, 10, 50, 40));
+  drawBitmap(ctx, s_gem, s_treasureRect);
+  drawBitmap(ctx, s_sieveBasic, GRect(89, 7, 45, 45));
 }
 
 /**
@@ -159,7 +157,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   graphics_draw_text(ctx, notifyTxtBot, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), GRect(b.origin.x+offset, b.origin.y+25,b.size.w-offset,30), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  if (image != NULL) graphics_draw_bitmap_in_rect(ctx, image, GRect(b.origin.x+10, b.origin.y+6, 22, 36));
+  drawBitmap(ctx, image, GRect(b.origin.x+10, b.origin.y+6, 22, 36));
 }
 
 bool stopNotify() {
@@ -198,11 +196,16 @@ void create_timeSieve_layer(Window* parentWindow) {
   layer_set_update_proc(s_timeSieveLayer, timeSieve_update_proc);
   layer_set_clips(s_timeSieveLayer, false);
 
+  //TODO move this into resources
+  #ifdef GRAPHICS_ON
   s_convTopBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_TOP);
   s_convBotBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_BOT);
   s_convCap = gbitmap_create_with_resource(RESOURCE_ID_CONV_CAP);
+  s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
+  #endif
 
-  s_gem = getGemImage(COMMON_ID);
+  s_gem = NULL;
+  s_treasureRect = GRect(94, 18, 20, 20);
 
   // Hide halo
   s_haloRings = 0;
@@ -212,8 +215,6 @@ void create_timeSieve_layer(Window* parentWindow) {
   gpath_move_to(s_flairPath, GPoint(72, -18));
 
   // Create layer for the tank
-  s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
-
   s_notifyLayer = layer_create( GRect(4, 4, layerBounds.size.w-8, 48) ); // border 4 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc);
   layer_add_child(s_timeSieveLayer, s_notifyLayer);
@@ -265,6 +266,7 @@ void displyItem(uint8_t treasureID, uint8_t itemID) {
 bool collectItem(bool autoCollect) {
   if (s_treasureOnShow == false) return false;
   uint8_t nItem = 1;
+  s_gem = NULL;
 
   // LEGENDARY BONUS - sometimes (10%) get two items. Obv not w legendaries
   if ( getUserItems(LEGENDARY_ID, TWOITEM) == 1 ) {
@@ -282,12 +284,12 @@ bool collectItem(bool autoCollect) {
 void destroy_timeSieve_layer() {
   layer_destroy(s_timeSieveLayer);
 
+  #ifdef GRAPHICS_ON
   gbitmap_destroy(s_convTopBitmap);
   gbitmap_destroy(s_convBotBitmap);
   gbitmap_destroy(s_convCap);
+  gbitmap_destroy(s_sieveBasic);
+  #endif
 
   free(s_flairPath);
-
-  gbitmap_destroy(s_sieveBasic);
-
 }

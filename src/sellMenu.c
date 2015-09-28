@@ -242,7 +242,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   // Image
   GRect imageRect = GRect(3, 4,  22, 36);
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, getSellItemImage(treasureID, itemID), imageRect);
+  drawBitmap(ctx, getSellItemImage(treasureID, itemID), imageRect);
 
   graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
@@ -318,6 +318,7 @@ void sell_window_load(Window* parentWindow) {
   });
   // Bind the menu layer's click config provider to the window for interactivity
   menu_layer_set_normal_colors(s_sellLayer, MENU_BACK_RED_ODD, GColorBlack);
+  menu_layer_set_highlight_colors(s_sellLayer, MENU_BACK_RED_ODD, MENU_BACK_RED_ODD);
   menu_layer_set_click_config_onto_window(s_sellLayer, parentWindow);
   layer_add_child(windowLayer, menu_layer_get_layer(s_sellLayer));
 

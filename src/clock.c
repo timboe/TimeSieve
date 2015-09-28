@@ -58,8 +58,8 @@ void clockAnimReset(TimeUnits units_changed) {
     s_spoogeletVx[i] =  sin_lookup(angle) * v / TRIG_MAX_RATIO;
     s_spoogeletVy[i] = -cos_lookup(angle) * v / TRIG_MAX_RATIO;
   }
-  s_attractor.x = 110;//130
-  s_attractor.y = 75;//60
+  s_attractor.x = 112;//130
+  s_attractor.y = 85;//60
 }
 
 bool clockAnimCallback(TimeUnits units_changed) {
@@ -143,7 +143,7 @@ void draw3DText(GContext *ctx, GRect loc, GFont* f, char* buffer, uint8_t offset
   loc.origin.x -= offset; // DR
   if (!BWMode) graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
-  graphics_context_set_text_color(ctx, getTextColourL());
+  if (!BWMode) graphics_context_set_text_color(ctx, getTextColourL());
   loc.origin.y += offset; // CR
   graphics_draw_text(ctx, buffer, *f, loc, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
 
@@ -179,7 +179,7 @@ void updateDateBuffer() {
   time_t temp = time(NULL);
   struct tm *tickTime = localtime(&temp);
   strftime(s_dateBuffer, CLOCK_TEXT_SIZE*sizeof(char), "%e %b", tickTime); // 22 May
-
+  updateClockLayer();
 }
 
 void updateBattery(BatteryChargeState charge) {
@@ -219,37 +219,48 @@ void updateWeatherBuffer() {
     case 10: strcpy(s_weatherIcon, WEATHER_SNOW); break;
     case 11: strcpy(s_weatherIcon, WEATHER_THUNDER); break;
   }
+  updateClockLayer();
+
 }
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect b = layer_get_bounds(this_layer);
+  const int clockUpgrade = getUserSetting(SETTING_TECH);
 
   // BATTERY + BT
-  graphics_context_set_stroke_color(ctx, GColorWhite);
-  graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
-  graphics_draw_rect(ctx, GRect(112,9,18,7));
-  graphics_draw_rect(ctx, GRect(130,11,2,3));
-  graphics_fill_rect(ctx, GRect(114,11,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
-  if (s_bluetoothStatus) {
-    graphics_context_set_compositing_mode(ctx, GCompOpSet);
-    graphics_context_set_fill_color(ctx, getLiquidTimeColour());
-    graphics_fill_rect(ctx, GRect(b.size.w - 7, 6, 5, 12), 0, GCornersAll);
-    graphics_draw_bitmap_in_rect(ctx, getBluetoothImage(), GRect(b.size.w - 8, 5, 7, 14));
+  if (1 || clockUpgrade >= TECH_BATTERY) {
+    graphics_context_set_stroke_color(ctx, GColorWhite);
+    graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
+    graphics_draw_rect(ctx, GRect(119,9,18,7));
+    graphics_draw_rect(ctx, GRect(137,11,2,3));
+    graphics_fill_rect(ctx, GRect(121,11,s_battery.charge_percent/7,3), 0, GCornersAll); // 100%=14 pixels
+    if (s_bluetoothStatus) {
+      graphics_context_set_compositing_mode(ctx, GCompOpSet);
+      graphics_context_set_fill_color(ctx, getLiquidTimeColour());
+      graphics_fill_rect(ctx, GRect(8, 6, 5, 12), 0, GCornersAll);
+      drawBitmap(ctx, getBluetoothImage(), GRect(7, 5, 7, 14));
+    }
   }
 
   // DATE
-  GRect dateRect = GRect(b.origin.x, b.origin.y, b.size.w, 30);
-  draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false, GColorBlack, GColorBlack);
+  if (1 || clockUpgrade >= TECH_MONTH) {
+    GRect dateRect = GRect(b.origin.x, b.origin.y, b.size.w, 30);
+    draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false, GColorBlack, GColorBlack);
+  }
 
   // WEATHER
-  GRect wRect = GRect(-7, 0, 35, 25);
-  graphics_context_set_text_color(ctx, getLiquidTimeHighlightColour());
-  graphics_draw_text(ctx, s_weatherIcon, *getWeatherFont(), wRect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  wRect.origin.y += 5;
-  wRect.origin.x += 17;
-  draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorWhite, GColorBlack);
+  if (1 || clockUpgrade >= TECH_WEATHER) {
+    GRect wRect = GRect(-7, 60, 35, 25);
+    draw3DText(ctx, wRect, getWeatherFont(), s_weatherIcon, 1, true, getLiquidTimeHighlightColour(), getLiquidTimeColour());
+    wRect.origin.y += 5;
+    wRect.origin.x += 17;
+    draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorWhite, GColorBlack);
+  }
 
-  GRect timeRect = GRect(b.origin.x, b.origin.y + CLOCK_OFFSET, b.size.w, b.size.h - CLOCK_OFFSET);
+  int makeRoomForTheDateOffset = 0;
+  //if (clockUpgrade == 0) makeRoomForTheDateOffset = -10;
+  GRect timeRect = GRect(b.origin.x, b.origin.y + CLOCK_OFFSET + makeRoomForTheDateOffset, b.size.w, b.size.h - CLOCK_OFFSET - makeRoomForTheDateOffset);
+
   draw3DText(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset, false, GColorBlack, GColorBlack);
 
   if (s_clockTickCount == 0) return; // No animation in progress
@@ -264,8 +275,8 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
     graphics_fill_circle(ctx, p, r);
     graphics_draw_circle(ctx, p, r);
   }
-  graphics_context_set_fill_color(ctx, GColorGreen);
-  graphics_fill_circle(ctx, s_attractor, 3);
+  //graphics_context_set_fill_color(ctx, GColorGreen);
+  //graphics_fill_circle(ctx, s_attractor, 3);
 
 }
 
@@ -285,7 +296,6 @@ void create_clock_layer(Window* parentWindow) {
   updateTimeBuffer();
   updateDateBuffer();
   updateWeatherBuffer();
-
 }
 
 

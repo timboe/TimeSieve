@@ -15,14 +15,11 @@
 #define UNLOCK_SECTION_ID 2
 #define SETTINGS_SECTION_ID 3
 
-#define NUM_SETTINGS_MENU_SECTIONS 4
+#define NUM_SETTINGS_MENU_SECTIONS 3
 //
 #define NUM_STAT_ROWS 3
 #define NUM_CHEVO_ROWS 2
 #define NUM_UNLOCK_ROWS 5
-#define NUM_SETTINGS_ROWS 6
-
-#define RESTART_COUNTDOWN 8
 
 static MenuLayer* s_settings_layer = NULL;
 static MenuLayer* s_settingsSubLayer = NULL;
@@ -38,14 +35,6 @@ static char tempBuffer[TEXT_BUFFER_SIZE];
 static uint8_t s_timeDisplay = 0;
 static uint8_t s_buildingDisplay = 0;
 static int8_t s_itemDisplay = -1;
-static uint8_t s_restartCheck = RESTART_COUNTDOWN;
-
-#define SETTINGS_UPDATEF_ID 0
-#define SETTINGS_ANIMATE_ID 1
-#define SETTINGS_CELSIUS_ID 2
-#define SETTINGS_QUIETS_ID 3
-#define SETTINGS_QUIETE_ID 4
-#define SETTINGS_RESET_ID 5
 
 // Hold unlockable settings and which are currently locked
 #define UNLOCK_TECH_ID 0
@@ -87,7 +76,6 @@ static uint16_t settings_get_num_rows_callback(MenuLayer *menu_layer, uint16_t s
   	case STAT_SECTION_ID: return NUM_STAT_ROWS;
   	case CHEVO_SECTION_ID: return NUM_CHEVO_ROWS;
   	case UNLOCK_SECTION_ID: return NUM_UNLOCK_ROWS;
-  	case SETTINGS_SECTION_ID: return NUM_SETTINGS_ROWS;
   	default: return 0;
   }
 }
@@ -105,9 +93,6 @@ static void settings_draw_header_callback(GContext* ctx, const Layer *cell_layer
   } else if (section_index == UNLOCK_SECTION_ID) {
     strcpy(tempBuffer, "UNLOCKS");
     graphics_context_set_fill_color(ctx, MENU_BACK_BLUE_ODD);
-  } else if (section_index == SETTINGS_SECTION_ID) {
-    strcpy(tempBuffer, "SETTINGS");
-    graphics_context_set_fill_color(ctx, MENU_BACK_RED_ODD);
   }
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   menu_cell_basic_header_draw(ctx, cell_layer, tempBuffer);
@@ -119,7 +104,7 @@ static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuInde
   switch(cell_index->section) {
     case STAT_SECTION_ID: return MENU_TWO_CELL_HEIGHT;
     case CHEVO_SECTION_ID: return MENU_ZERO_CELL_HEIGHT;
-    case SETTINGS_SECTION_ID: case UNLOCK_SECTION_ID: return MENU_ONE_CELL_HEIGHT;
+    case UNLOCK_SECTION_ID: return MENU_ONE_CELL_HEIGHT;
     default: return 0;
   }
 }
@@ -146,9 +131,7 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   else if (section == UNLOCK_SECTION_ID && selected   ) backColor = MENU_BACK_BLUE_SELECT;
   else if (section == UNLOCK_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_BLUE_EVEN;
   else if (section == UNLOCK_SECTION_ID               ) backColor = MENU_BACK_BLUE_ODD;
-  else if (section == SETTINGS_SECTION_ID && selected   ) backColor = MENU_BACK_RED_SELECT;
-  else if (section == SETTINGS_SECTION_ID && row%2 == 0 ) backColor = MENU_BACK_RED_EVEN;
-  else if (section == SETTINGS_SECTION_ID               ) backColor = MENU_BACK_RED_ODD;
+
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
 
@@ -196,7 +179,6 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
         v = getAutoCollectChance();
       }
       snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "BONUS: %i.%i%%", v/(SCALE_FACTOR/100), v%(SCALE_FACTOR/100) );
-
 
     } else if (row == 2) { // DISPLAY ITEMS
 
@@ -277,47 +259,6 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
 
     }
 
-  } else if (section == SETTINGS_SECTION_ID) {
-
-    if (row == SETTINGS_UPDATEF_ID) { // Seconds
-
-      strcpy(titleText, "UPDATE Freq.");
-      if (getUserOpt(OPT_SHOW_SECONDS)) strcpy(subText1, "SECONDS");
-      else strcpy(subText1, "MINUTES");
-
-    } else if (row == SETTINGS_ANIMATE_ID) { // Animate
-
-      strcpy(titleText, "ANIMATIONS");
-      if (getUserOpt(OPT_ANIMATE)) strcpy(subText1, "ON");
-      else strcpy(subText1, "OFF");
-
-    } else if (row == SETTINGS_CELSIUS_ID) { // Temp
-
-      strcpy(titleText, "TEMPERATURE");
-      if (getUserOpt(OPT_CELSIUS)) strcpy(subText1, "CELSIUS");
-      else strcpy(subText1, "FARENHEIT");
-
-    } else if (row == SETTINGS_QUIETS_ID) { // Quite start
-
-      strcpy(titleText, "QUIET Start");
-      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "Don't notify from %ih", (int)getUserSetting(SETTING_ZZZ_START) );
-
-    } else if (row == SETTINGS_QUIETE_ID) { // Quiet end
-
-      strcpy(titleText, "QUIET End");
-      snprintf(subText1, TEXT_LARGE_BUFFER_SIZE, "... until %ih", (int)getUserSetting(SETTING_ZZZ_END) );
-
-    } else if (row == SETTINGS_RESET_ID) { // new game
-
-      strcpy(titleText, "RESET Game!");
-      if (s_restartCheck == 8) strcpy(subText1, "Start again?");
-      else if (s_restartCheck == 7) strcpy(subText1, "Are you sure?");
-      else if (s_restartCheck == 6) strcpy(subText1, "Really really sure??");
-      else if (s_restartCheck > 0) snprintf(subText1, TEXT_BUFFER_SIZE, "Click %i more times!", (int)s_restartCheck);
-      else if (s_restartCheck == 0) strcpy(subText1, "GAME RESET!");
-
-    }
-
   } else {
     return;
   }
@@ -385,28 +326,6 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
 
     }
 
-  } else if (section == SETTINGS_SECTION_ID) {
-
-    if (row == SETTINGS_ANIMATE_ID) { // Animate
-      flipUserOpt(OPT_ANIMATE);
-    } else if (row == SETTINGS_UPDATEF_ID) { // Seconds
-      flipUserOpt(OPT_SHOW_SECONDS);
-    } else if (row == SETTINGS_CELSIUS_ID) { // Temp
-      flipUserOpt(OPT_CELSIUS);
-    } else if (row == SETTINGS_QUIETS_ID) { // Quite start
-      incrementUserSetting(SETTING_ZZZ_START);
-    } else if (row == SETTINGS_QUIETE_ID) { // Quiet end
-      incrementUserSetting(SETTING_ZZZ_END);
-    } else if (row == SETTINGS_RESET_ID) { // new game
-      if (--s_restartCheck == 0) {
-        // Start afresh!!!
-        resetUserData();
-        destroy_timeStore();
-        init_timeStore();
-        vibes_long_pulse();
-      }
-    }
-
   }
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
@@ -457,7 +376,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   int8_t itemID;
   const char* nameText;
   const char* descText;
-  GBitmap* image;
+  GBitmap* image = NULL;
   GColor backColor;
   GRect ttlTextRect = GRect(MENU_X_OFFSET, -6, size.w-MENU_X_OFFSET, size.h);
   GRect topTextRect = GRect(MENU_X_OFFSET, 16, size.w-MENU_X_OFFSET, size.h-22);
@@ -499,7 +418,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
   graphics_draw_text(ctx, descText, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, algn, NULL);
   // Image
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  if (image != NULL) graphics_draw_bitmap_in_rect(ctx, image, imageRect);
+  drawBitmap(ctx, image, imageRect);
 
   graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
@@ -573,7 +492,7 @@ void settings_window_load(Window* parentWindow) {
     .select_click = settings_select_callback,
   });
   // Bind the menu layer's click config provider to the window for interactivity
-  menu_layer_set_normal_colors(s_settings_layer, MENU_BACK_RED_ODD, GColorBlack);
+  menu_layer_set_normal_colors(s_settings_layer, MENU_BACK_BLUE_EVEN, GColorBlack);
   menu_layer_set_click_config_onto_window(s_settings_layer, parentWindow);
   menu_layer_pad_bottom_enable(s_settings_layer, false);
   layer_add_child(window_layer, menu_layer_get_layer(s_settings_layer));
@@ -581,8 +500,6 @@ void settings_window_load(Window* parentWindow) {
   // Setup sub-windows that we might want to jump to
   createSettingsSubWin(&s_chevo_window, &s_chevo_context);
   createSettingsSubWin(&s_unique_window, &s_unique_context);
-  s_restartCheck = RESTART_COUNTDOWN;
-
 }
 
 void settings_window_unload() {

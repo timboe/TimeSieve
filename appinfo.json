@@ -1,11 +1,18 @@
 {
-    "appKeys": {},
     "capabilities": [
-        ""
+      "configurable"
     ],
     "companyName": "timboe@gmail.com",
-    "longName": "TimeSieve",
+    "longName": "TimeSink",
     "projectType": "native",
+    "appKeys": {
+      "KEY_ANIMATION": 0,
+      "KEY_TEMP_CELSIUS": 1,
+      "KEY_SHOW_SEC": 2,
+      "KEY_QUIET_START": 3,
+      "KEY_QUIET_END": 4,
+      "KEY_RESET": 5
+    },
     "resources": {
         "media": [
             { "file": "fonts/perfect-dos-vga.ttf", "name": "PERFECT_DOS_21", "type": "font", "characterRegex": "[0-9:%.A-Za-z ]" },

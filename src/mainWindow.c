@@ -114,7 +114,7 @@ void click_config_provider(Window *window) {
   window_single_click_subscribe(BUTTON_ID_DOWN, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_UP, main_window_single_click_handler);
-  window_single_click_subscribe(BUTTON_ID_BACK, main_window_single_click_handler);
+  if (IS_DEBUG) window_single_click_subscribe(BUTTON_ID_BACK, main_window_single_click_handler);
 }
 
 /**
@@ -148,7 +148,7 @@ void doSecond() {
  * Finally, if animate is true we insitigate the animation routine which is self-
  * sustaining until all animations have played out
  **/
-void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
+void tick_handler(struct tm* tick_time, TimeUnits units_changed) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "TICK"); memRep(NULL);
 
   if (getUserOpt(OPT_SHOW_SECONDS) == true) doSecond();
@@ -156,7 +156,7 @@ void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
 
   if ((units_changed & MINUTE_UNIT) == 0) return; // If no min change then stop here
 
-  // Chance of day?
+  // Change of day?
   if ((units_changed & DAY_UNIT) > 0) updateDateBuffer();
 
   // For everthing else, we take midday as a new 'day' as well
@@ -232,6 +232,7 @@ void update_tick_handler() {
   } else {
     tick_timer_service_subscribe(MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT|YEAR_UNIT, tick_handler);
   }
+  updateClockLayer();
 }
 
 

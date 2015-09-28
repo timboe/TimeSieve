@@ -3,7 +3,7 @@
 #include "timeStore.h"
 #include "constants.h"
 #include "resources.h"
-
+#include "clock.h"
 #include "palette.h"
 #include "persistence.h"
 
@@ -141,6 +141,7 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_draw_round_rect(ctx, inner_wall, 10);
 
   // Fill the text
+
   GRect text_percentage_rect = GRect(tank_bounds.origin.x + 5,
                                      tank_bounds.origin.y + TANK_TEXT_V_OFFSET,
                                      tank_bounds.size.w-10,
@@ -152,9 +153,12 @@ static void timeTank_update_proc(Layer *this_layer, GContext *ctx) {
                                   TANK_TEXT_HEIGHT);
 
 
-  graphics_context_set_text_color(ctx, GColorWhite);
-  graphics_draw_text(ctx, s_tankContentText, *getGothic24BoldFont(), text_content_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
-  graphics_draw_text(ctx, s_tankFullPercetText, *getGothic24BoldFont(), text_percentage_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  // graphics_context_set_text_color(ctx, GColorWhite);
+
+  draw3DText(ctx, text_percentage_rect, getGothic24BoldFont(), s_tankFullPercetText, 1, true, GColorWhite, GColorBlack);
+  draw3DText(ctx, text_content_rect,    getGothic24BoldFont(), s_tankContentText,    1, true, GColorWhite, GColorBlack);
+  //graphics_draw_text(ctx, s_tankContentText, *getGothic24BoldFont(), text_content_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  //graphics_draw_text(ctx, s_tankFullPercetText, *getGothic24BoldFont(), text_percentage_rect, GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
   //APP_LOG(APP_LOG_LEVEL_DEBUG, "Drew text");
 }
 

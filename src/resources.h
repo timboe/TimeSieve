@@ -5,6 +5,8 @@ char* getTempBuffer();
 
 void memRep(void* data);
 
+void drawBitmap(GContext* ctx, const GBitmap* bitmap, GRect rect);
+
 //////////////////////////
 
 void initGlobalRes();

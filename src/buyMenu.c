@@ -42,9 +42,9 @@ static void buyMenuDrawRowCallback(GContext* ctx, const Layer* cell_layer, MenuI
   else                 graphics_context_set_fill_color(ctx, MENU_BACK_GREEN_EVEN);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   if (row == REFINERY_ID) {
-    menu_cell_basic_draw(ctx, cell_layer, "REFINERY", "Get more liquid time", NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "ADDONS", "Get more liquid time", NULL);
   } else if (row == TANK_ID) {
-    menu_cell_basic_draw(ctx, cell_layer, "TANK", "Store more liquid time", NULL);
+    menu_cell_basic_draw(ctx, cell_layer, "TANKS", "Store more liquid time", NULL);
   } else if (row == WATCHER_ID) {
     menu_cell_basic_draw(ctx, cell_layer, "EMPLOYEES", "They work for YOU", NULL);
   }
@@ -96,8 +96,6 @@ void buy_window_load(Window* parentWindow) {
 
 void buy_window_unload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN DESTROY");
-  menu_layer_destroy(s_menuLayer);
-  s_menuLayer = NULL;
 
   // Destroy sub-windows
   window_destroy(s_refineryWindow);
@@ -106,4 +104,7 @@ void buy_window_unload() {
   s_refineryWindow = NULL;
   s_tankWindow = NULL;
   s_watcherWindow = NULL;
+
+  menu_layer_destroy(s_menuLayer);
+  s_menuLayer = NULL;
 }

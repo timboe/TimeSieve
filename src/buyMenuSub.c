@@ -9,6 +9,7 @@
 static MenuLayer* s_subMenuLayer = NULL;
 
 static char s_notifyTop[TEXT_BUFFER_SIZE];
+static char s_notifyMiddle[TEXT_BUFFER_SIZE];
 static char s_notifyBottom[TEXT_BUFFER_SIZE];
 
 static char s_title[TEXT_BUFFER_SIZE];
@@ -42,12 +43,12 @@ static void sub_menu_draw_header_callback(GContext* ctx, const Layer *cell_layer
   timeToString(getUserTime(), getTempBuffer(), TEXT_BUFFER_SIZE, true);
 
 
-  if (context == REFINERY_ID) strcpy(s_title, "REFINARY Upgrades");
+  if (context == REFINERY_ID) strcpy(s_title, "SINK Upgrades");
   else if (context == TANK_ID) strcpy(s_title, "TANK Upgrades");
-  else if (context == WATCHER_ID) strcpy(s_title, "WATCHER Upgrades");
+  else if (context == WATCHER_ID) strcpy(s_title, "EMPLOYEES");
   GRect topTextRect = GRect(2, 0, size.w-2, size.h);
   GRect botTextRect = GRect(2, 14, size.w-2, size.h-14);
-  strcpy(s_subTitle, "AVAILABLE: ");
+  strcpy(s_subTitle, "TO SPEND: ");
   strcat(s_subTitle, getTempBuffer());
 
   graphics_context_set_text_color(ctx, GColorBlack);
@@ -59,15 +60,14 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, M
 
   const int context = *((int*)data);
   const GSize size = layer_get_frame(cell_layer).size;
-  const int row = cell_index->row;
   const bool selected = menu_cell_layer_is_highlighted(cell_layer);
 
   //Get details
-  const unsigned location = cell_index->row;
-  const int owned = getUserUpgrades(context, location);
-  const uint64_t priceNext = getPriceOfUpgrade(context, location);
-  bool maxLevel = getIfAtMaxLevel(context, location);
-  GBitmap* buyImage = getBuyImage(context, location);
+  const int row = cell_index->row;
+  const int owned = getUserUpgrades(context, row);
+  const uint64_t priceNext = getPriceOfUpgrade(context, row);
+  bool maxLevel = getIfAtMaxLevel(context, row);
+  GBitmap* buyImage = getBuyImage(context, row);
 
   char upgradeText[TEXT_BUFFER_SIZE];
   if (context == REFINERY_ID) {
@@ -75,7 +75,7 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, M
   } else if (context == TANK_ID) {
     strcpy(upgradeText, "SIZE: ");
   } else if (context == WATCHER_ID) {
-    bool doneNotifyTxt = false;
+    bool doneFallThrough = false;
     uint8_t owned = getUserUpgrades(WATCHER_ID, row);
     switch (row) {
       case WATCHER_CHANCE_1: strcpy(upgradeText, "AUTO-Collect +1%"); break;
@@ -92,10 +92,10 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, M
         break;
       case WATCHER_LIGHT:
         strcpy(upgradeText, "LIGHT: ");
-        doneNotifyTxt = true;
+        doneFallThrough = true;
         // DELIBERATE FALL-TRHOUGH
       case WATCHER_VIBE:
-        if (doneNotifyTxt == false) {
+        if (doneFallThrough == false) {
           strcpy(upgradeText, "VIBE: ");
         }
         if (owned == NOTIFY_NONE) strcat(upgradeText, "Common+");
@@ -145,8 +145,8 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, M
     GRect ttlTextRect = GRect(MENU_X_OFFSET, 0,  size.w-MENU_X_OFFSET, size.h);
     // Change the name to ?s
     strcpy(getTempBuffer(), "");
-    for (uint8_t i = 0; (UPGRADE_NAME[context][location])[i] != 0; i++) {
-      if ((UPGRADE_NAME[context][location])[i] == ' ') strcat(getTempBuffer(), " ");
+    for (uint8_t i = 0; (UPGRADE_NAME[context][row])[i] != 0; ++i) {
+      if ((UPGRADE_NAME[context][row])[i] == ' ') strcat(getTempBuffer(), " ");
       else strcat(getTempBuffer(), "?");
     }
     graphics_draw_text(ctx, getTempBuffer(), fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
@@ -161,17 +161,17 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, M
     timeToString(priceNext, getTempBuffer(), TEXT_BUFFER_SIZE, true);
     strcpy(s_header, "COST: ");
     strcat(s_header, getTempBuffer());
-    if (maxLevel) strcpy(s_header, "COST: -");
+    if (maxLevel) strcpy(s_header, "COST: ---");
 
     snprintf(s_owned, TEXT_BUFFER_SIZE, "OWNED: %i", owned);
 
     strcpy(s_reward, upgradeText);
     if (context != WATCHER_ID) {
-      timeToString(UPGRADE_REWARD[context][location], getTempBuffer(), TEXT_BUFFER_SIZE, true);
+      timeToString(UPGRADE_REWARD[context][row], getTempBuffer(), TEXT_BUFFER_SIZE, true);
       strcat(s_reward, getTempBuffer());
     }
 
-    graphics_draw_text(ctx, UPGRADE_NAME[context][location], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
+    graphics_draw_text(ctx, UPGRADE_NAME[context][row], fonts_get_system_font(FONT_KEY_GOTHIC_24_BOLD), ttlTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
     graphics_draw_text(ctx, s_header, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), topTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
     graphics_draw_text(ctx, s_owned, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), medTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
     graphics_draw_text(ctx, s_reward, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
@@ -180,33 +180,40 @@ static void sub_menu_draw_row_callback(GContext* ctx, const Layer* cell_layer, M
   graphics_context_set_stroke_color(ctx, GColorBlack);
 
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
-  graphics_draw_bitmap_in_rect(ctx, buyImage, GRect(3, 10,  22, 36));
+  drawBitmap(ctx, buyImage, GRect(3, 10,  22, 36));
 
 }
 
-static void buyClick(const uint32_t typeID, const uint32_t resourceID, const bool buyTen) {
+static void buyClick(const uint32_t typeID, const uint32_t resourceID, const bool buyAll) {
   uint8_t bought = 0;
   uint64_t paid = 0;
-  for (uint8_t i = 0; i < (buyTen ? 10 : 1); ++i) {
+  while (true) {
     const uint64_t price = doPurchase(typeID, resourceID);
     paid += price;
     if (price > 0) ++bought;
     else break;
+    if (buyAll == false) break;
   }
   GColor highlight = GColorBlack;
-  if (bought) updateDisplayTime( getUserTime() );
+
   snprintf(s_notifyTop, TEXT_BUFFER_SIZE, "Bought %i", (int)bought);
-  if (bought == 0) {
-    if (getIfAtMaxLevel(typeID, resourceID)) strcpy(s_notifyBottom, "Own Maximum!");
-    else strcpy(s_notifyBottom, "Insufficient Time!");
-    highlight = GColorRed;
-  } else {
+  strcpy(s_notifyMiddle, UPGRADE_NAME[typeID][resourceID]);
+
+  if (bought) {
+    updateDisplayTime( getUserTime() );
     timeToString(paid, getTempBuffer(), TEXT_BUFFER_SIZE, true);
     strcpy(s_notifyBottom, "For ");
     strcat(s_notifyBottom, getTempBuffer());
+  } else {
+    //I didn't buy any - but can i even see the name?
+    if (getUserTotalTime() < getPriceOfUpgrade(typeID, resourceID)) strcpy(s_notifyMiddle, "????");
+    // Had max or could not afford?
+    if (getIfAtMaxLevel(typeID, resourceID)) strcpy(s_notifyBottom, "Own Maximum!");
+    else strcpy(s_notifyBottom, "Insufficient Time!");
+    highlight = GColorRed;
   }
 
-  showNotify(highlight, s_notifyTop, UPGRADE_NAME[typeID][resourceID], s_notifyBottom);
+  showNotify(highlight, s_notifyTop, s_notifyMiddle, s_notifyBottom);
 }
 
 /**
@@ -219,16 +226,13 @@ static void sub_menu_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
 }
 
 /**
- * User is trying to buy 10. TODO imp this by making a getIsMaxLevel fn
+ * User is trying to buy 10.
  */
 static void sub_menu_long_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
   const int context = *((int*)data);
   buyClick(context, cell_index->row, true);
   layer_mark_dirty(menu_layer_get_layer(menu_layer));
 }
-
-
-
 
 ///
 /// SETUP
@@ -253,8 +257,8 @@ static void sub_window_load(Window* parentWindow) {
   menu_layer_set_normal_colors(s_subMenuLayer, MENU_BACK_GREEN_ODD, GColorBlack);
   menu_layer_set_click_config_onto_window(s_subMenuLayer, parentWindow);
   layer_add_child(window_get_root_layer(parentWindow), menu_layer_get_layer(s_subMenuLayer));
-
   layer_add_child(window_get_root_layer(parentWindow), getNotifyLayer());
+
   initBuyWindowRes(context);
 }
 

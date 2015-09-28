@@ -138,6 +138,7 @@ void doCatchup() {
       tries = nDay;
       unit = DAY_UNIT;
     }
+    APP_LOG(APP_LOG_LEVEL_INFO, "Catchup #%i checking %i tries", N, (int)tries);
     for (uint32_t t = 0; t < tries; ++t) {
       if (checkForItem(unit) == false) continue;
       if (getItemAutoCollect() == false) {
