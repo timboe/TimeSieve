@@ -97,7 +97,7 @@ static void settings_draw_header_callback(GContext* ctx, const Layer *cell_layer
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
   menu_cell_basic_header_draw(ctx, cell_layer, tempBuffer);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
+  graphics_draw_line(ctx, GPoint(0,size.h), GPoint(size.w, size.h) );
 }
 
 static int16_t settings_get_cell_height_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
@@ -268,7 +268,7 @@ static void settings_draw_row_callback(GContext* ctx, const Layer *cell_layer, M
   graphics_draw_text(ctx, subText2, fonts_get_system_font(FONT_KEY_GOTHIC_14_BOLD), botTextRect, GTextOverflowModeWordWrap, GTextAlignmentLeft, NULL);
 
   graphics_context_set_stroke_color(ctx, GColorBlack);
-  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
+  graphics_draw_line(ctx, GPoint(0,size.h), GPoint(size.w, size.h) );
 }
 
 static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, void *data) {
