@@ -10,8 +10,6 @@ static char s_timeBuffer[CLOCK_TEXT_SIZE];
 static char s_dateBuffer[CLOCK_TEXT_SIZE];
 
 static BatteryChargeState s_battery;
-static char s_weatherIcon[1];
-static char s_temperature[5];
 static bool s_bluetoothStatus;
 
 static GPoint s_spoogelet[N_SPOOGELET];
@@ -25,19 +23,6 @@ static uint8_t s_clockPixelOffset = 2;
 static bool s_flashMainFace = false;
 
 #define CLOCK_OFFSET 16
-
-#define WEATHER_CLEAR_DAY "1"
-#define WEATHER_CLEAR_NIGHT "2"
-#define WEATHER_LOW_CLOUD_DAY "3"
-#define WEATHER_LOW_CLOUD_NIGHT "4"
-#define WEATHER_MED_CLOUD "5"
-#define WEATHER_HGH_CLOUD "%"
-#define WEATHER_LOW_RAIN "7"
-#define WEATHER_HGH_RAIN "8"
-#define WEATHER_THUNDER "6"
-#define WEATHER_SNOW "$"
-#define WEATHER_MIST "M"
-#define WEATHER_NA ")"
 
 void setClockPixelOffset(uint8_t offset) {
   s_clockPixelOffset = offset;
@@ -192,43 +177,14 @@ void updateBluetooth(bool bluetooth) {
   updateClockLayer();
 }
 
-void updateWeatherBuffer() {
-
-  int16_t temp = -30 + rand()%80; // TODO load from internet
-  if (getUserOpt(OPT_CELSIUS) == false) {
-    temp = ((temp*5)/9) + 32; // Convert to F
-  }
-  snprintf(s_temperature, CLOCK_TEXT_SIZE*sizeof(char), "%i", temp);
-  if (getUserOpt(OPT_CELSIUS) == false) strcat(s_temperature, "F");
-  else  strcat(s_temperature, "C");
-
-  //TODO load weather from internet
-  static uint8_t randW = 11;
-  if (++randW == 12) randW = 0;
-  switch (randW) {
-    case 0: strcpy(s_weatherIcon, WEATHER_CLEAR_DAY); break;
-    case 1: strcpy(s_weatherIcon, WEATHER_CLEAR_NIGHT); break;
-    case 2: strcpy(s_weatherIcon, WEATHER_HGH_CLOUD); break;
-    case 3: strcpy(s_weatherIcon, WEATHER_HGH_RAIN); break;
-    case 4: strcpy(s_weatherIcon, WEATHER_LOW_CLOUD_DAY); break;
-    case 5: strcpy(s_weatherIcon, WEATHER_LOW_CLOUD_NIGHT); break;
-    case 6: strcpy(s_weatherIcon, WEATHER_LOW_RAIN); break;
-    case 7: strcpy(s_weatherIcon, WEATHER_MED_CLOUD); break;
-    case 8: strcpy(s_weatherIcon, WEATHER_MIST); break;
-    case 9: strcpy(s_weatherIcon, WEATHER_NA); break;
-    case 10: strcpy(s_weatherIcon, WEATHER_SNOW); break;
-    case 11: strcpy(s_weatherIcon, WEATHER_THUNDER); break;
-  }
-  updateClockLayer();
-
-}
 
 static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   GRect b = layer_get_bounds(this_layer);
   const int clockUpgrade = getUserSetting(SETTING_TECH);
 
+  // TODO charge status
   // BATTERY + BT
-  if (1 || clockUpgrade >= TECH_BATTERY) {
+  if (clockUpgrade >= TECH_BATTERY) {
     graphics_context_set_stroke_color(ctx, GColorWhite);
     graphics_context_set_fill_color(ctx, getLiquidTimeHighlightColour());
     graphics_draw_rect(ctx, GRect(119,9,18,7));
@@ -243,22 +199,13 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
   }
 
   // DATE
-  if (1 || clockUpgrade >= TECH_MONTH) {
+  if (clockUpgrade >= TECH_MONTH) {
     GRect dateRect = GRect(b.origin.x, b.origin.y, b.size.w, 30);
     draw3DText(ctx, dateRect, getClockSmallFont(), s_dateBuffer, 1, false, GColorBlack, GColorBlack);
   }
 
-  // WEATHER
-  if (1 || clockUpgrade >= TECH_WEATHER) {
-    GRect wRect = GRect(-7, 60, 35, 25);
-    draw3DText(ctx, wRect, getWeatherFont(), s_weatherIcon, 1, true, getLiquidTimeHighlightColour(), getLiquidTimeColour());
-    wRect.origin.y += 5;
-    wRect.origin.x += 17;
-    draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorWhite, GColorBlack);
-  }
-
   int makeRoomForTheDateOffset = 0;
-  //if (clockUpgrade == 0) makeRoomForTheDateOffset = -10;
+  if (clockUpgrade == 0) makeRoomForTheDateOffset = -10;
   GRect timeRect = GRect(b.origin.x, b.origin.y + CLOCK_OFFSET + makeRoomForTheDateOffset, b.size.w, b.size.h - CLOCK_OFFSET - makeRoomForTheDateOffset);
 
   draw3DText(ctx, timeRect, getClockFont(), s_timeBuffer, s_clockPixelOffset, false, GColorBlack, GColorBlack);
@@ -275,8 +222,6 @@ static void clock_update_proc(Layer *this_layer, GContext *ctx) {
     graphics_fill_circle(ctx, p, r);
     graphics_draw_circle(ctx, p, r);
   }
-  //graphics_context_set_fill_color(ctx, GColorGreen);
-  //graphics_fill_circle(ctx, s_attractor, 3);
 
 }
 
@@ -295,7 +240,6 @@ void create_clock_layer(Window* parentWindow) {
   s_bluetoothStatus = bluetooth_connection_service_peek();
   updateTimeBuffer();
   updateDateBuffer();
-  updateWeatherBuffer();
 }
 
 
@@ -303,4 +247,5 @@ void destroy_clock_layer() {
   layer_destroy(s_clockLayer);
   s_clockLayer = 0;
   battery_state_service_unsubscribe();
+  bluetooth_connection_service_unsubscribe();
 }

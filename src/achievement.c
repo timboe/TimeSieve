@@ -49,32 +49,29 @@ uint16_t getTotalItemWorkers() {
 }
 
 int8_t checkAchievementsInternal() {
-
   if (getTotalChevos() == MAX_CHEVOS) return -1;
-
   for (uint8_t a = 0; a < MAX_CHEVOS; ++a) {
     if (getUserChevo(a) == true) continue;
     switch (a) {
-      case ACHIEVEMENT_INCOME_1: if (getTimePerMin() >= SEC_IN_HOUR) return a;
-      case ACHIEVEMENT_INCOME_2: if (getTimePerMin() >= 7000*SEC_IN_YEAR) return a;
-      case ACHIEVEMENT_TANK_1: if (getUserTime() >= SEC_IN_DAY) return a;
-      case ACHIEVEMENT_TANK_2: if (getUserTime() >= SEC_IN_AGE) return a;
-      case ACHIEVEMENT_PACK_RAT: if (getUserGrandTotalItems() >= PACK_RAT_ACHIEVEMENT) return a;
-      case ACHIEVEMENT_ITEM_VALUE: if (currentTotalSellPrice() >= SEC_IN_EPOCH) return a;
-      case ACHIEVEMENT_TANKUP_1: if (getUserTotalUpgrades(TANK_ID) >= 200) return a;
-      case ACHIEVEMENT_TANKUP_2: if (getUserTotalUpgrades(TANK_ID) >= 800) return a;
-      case ACHIEVEMENT_REFINARYUP_1: if (getUserTotalUpgrades(REFINERY_ID) >= 100) return a;
-      case ACHIEVEMENT_REFINARYUP_2: if (getUserTotalUpgrades(REFINERY_ID) >= 900) return a;
-      case ACHIEVEMENT_WORKERS_1: if (getTotalUnlockWorkers() >= 20) return a;
-      case ACHIEVEMENT_WORKERS_2: if (getTotalItemWorkers() >= 50) return a;
+      case ACHIEVEMENT_INCOME_1: if (getTimePerMin() >= SEC_IN_HOUR) return a; break;
+      case ACHIEVEMENT_INCOME_2: if (getTimePerMin() >= 7000*SEC_IN_YEAR) return a; break;
+      case ACHIEVEMENT_TANK_1: if (getUserTime() >= SEC_IN_DAY) return a; break;
+      case ACHIEVEMENT_TANK_2: if (getUserTime() >= SEC_IN_AGE) return a; break;
+      case ACHIEVEMENT_PACK_RAT: if (getUserGrandTotalItems() >= PACK_RAT_ACHIEVEMENT) return a; break;
+      case ACHIEVEMENT_ITEM_VALUE: if (currentTotalSellPrice() >= SEC_IN_EPOCH) return a; break;
+      case ACHIEVEMENT_TANKUP_1: if (getUserTotalUpgrades(TANK_ID) >= 200) return a; break;
+      case ACHIEVEMENT_TANKUP_2: if (getUserTotalUpgrades(TANK_ID) >= 800) return a; break;
+      case ACHIEVEMENT_REFINARYUP_1: if (getUserTotalUpgrades(REFINERY_ID) >= 100) return a; break;
+      case ACHIEVEMENT_REFINARYUP_2: if (getUserTotalUpgrades(REFINERY_ID) >= 900) return a; break;
+      case ACHIEVEMENT_WORKERS_1: if (getTotalUnlockWorkers() >= 20) return a; break;
+      case ACHIEVEMENT_WORKERS_2: if (getTotalItemWorkers() >= 50) return a; break;
       case ACHIEVEMENT_13: break; //?
       case ACHIEVEMENT_14: break; //?
-      case ACHIEVEMENT_FULL_TANK: if (getTankCapacity() == ULLONG_MAX) return a;
-      case ACHIEVEMENT_FULL_HISTORY: if (getUserTime() == ULLONG_MAX) return a;
+      case ACHIEVEMENT_FULL_TANK: if (getTankCapacity() == ULLONG_MAX) return a; break;
+      case ACHIEVEMENT_FULL_HISTORY: if (getUserTime() == ULLONG_MAX) return a; break;
       default: break;
     }
   }
-
   return -1;
 }
 

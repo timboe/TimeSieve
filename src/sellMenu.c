@@ -162,10 +162,13 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
     else if (row%2==0) backColor = MENU_BACK_PURPLE_EVEN;
     else backColor = MENU_BACK_PURPLE_ODD;
   } else {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "SlMnuUnwnTsrId");
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "SlMnu Unwn TsrId");
   }
   graphics_context_set_fill_color(ctx, backColor);
   graphics_fill_rect(ctx, GRect(0, 0, size.w, size.h), 0, GCornersAll);
+
+  if (selected) graphics_context_set_text_color(ctx, GColorWhite);
+  else graphics_context_set_text_color(ctx, GColorBlack);
 
   static char subText1[TEXT_BUFFER_SIZE];
   static char subText2[TEXT_BUFFER_SIZE];
@@ -243,10 +246,7 @@ static void sell_draw_row_callback(GContext* ctx, const Layer *cell_layer, MenuI
   GRect imageRect = GRect(3, 4,  22, 36);
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
   drawBitmap(ctx, getSellItemImage(treasureID, itemID), imageRect);
-
-  graphics_draw_line(ctx, GPoint(0,0), GPoint(size.w, 0) );
 }
-
 
 void doSell(const uint16_t section, const uint16_t row, bool sellAll) {
   // get type

@@ -103,7 +103,8 @@ GColor getSpoogicalColourB() {
   }
 }
 
-GColor getTrasureColour(uint8_t treasureID) {
+GColor getTreasureColor(uint8_t treasureID) {
+  if (treasureID >= ITEM_CATEGORIES) return GColorBlack;
   return (GColor) ITEM_COLOURS[treasureID];
 }
 

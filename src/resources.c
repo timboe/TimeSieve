@@ -20,9 +20,6 @@ static GBitmap* s_legendaryItem[MAX_UNIQUE] = {NULL};
 
 static GBitmap* s_resourceImage[UPGRADE_CATEGORIES][MAX_UPGRADES] = {{NULL},{NULL}};
 
-//#define GRAPHICS_ON
-#define GRAPHICS_OFF
-
 //////////////////////////
 
 /**
@@ -154,10 +151,17 @@ GBitmap* getBluetoothImage() { return s_bluetoothImage; }
 
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID) {
   #ifdef GRAPHICS_ON
-  gbitmap_destroy( s_singleItemImage );
+  clearSingleItemImage();
   s_singleItemImage = loadItemImage(treasureID, itemID);
   #endif
   return s_singleItemImage;
+}
+
+void clearSingleItemImage() {
+  if (s_singleItemImage != NULL) {
+    gbitmap_destroy( s_singleItemImage );
+    s_singleItemImage = NULL;
+  }
 }
 
 GBitmap* getGemImage(uint8_t treasureID) { return s_gem[treasureID]; }

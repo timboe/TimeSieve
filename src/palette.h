@@ -13,7 +13,7 @@ GColor getLiquidTimeHighlightColour();
 GColor getSpoogicalColourA();
 GColor getSpoogicalColourB();
 
-GColor getTrasureColour(uint8_t treasureID);
+GColor getTreasureColor(uint8_t treasureID);
 GColor getBGFlashColour(uint8_t colourID);
 
 void colourOverride(int8_t palette);

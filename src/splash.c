@@ -186,7 +186,7 @@ void doCatchup() {
       strcpy(s_splashText[s_splashTextLines], ITEM_CATEGORIE_NAME[i]);
       strcat(s_splashText[s_splashTextLines], ": ");
       strcat(s_splashText[s_splashTextLines], getTempBuffer());
-      s_splashTextCol[s_splashTextLines] = getTrasureColour(i);
+      s_splashTextCol[s_splashTextLines] = getTreasureColor(i);
     }
   }
 

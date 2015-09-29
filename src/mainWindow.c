@@ -11,6 +11,7 @@
 #include "items.h"
 #include "achievement.h"
 #include "resources.h"
+#include "communication.h"
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed); //rm me later
 
@@ -104,8 +105,6 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
     window_stack_push(s_settings_window, true);
   } else if (BUTTON_ID_DOWN == button) {
     window_stack_push(s_sell_window, true);
-  } else if (IS_DEBUG && BUTTON_ID_BACK == button) {
-    tick_handler(NULL, SECOND_UNIT|MINUTE_UNIT|HOUR_UNIT|DAY_UNIT);
   }
 }
 
@@ -149,18 +148,18 @@ void doSecond() {
  * sustaining until all animations have played out
  **/
 void tick_handler(struct tm* tick_time, TimeUnits units_changed) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "TICK"); memRep(NULL);
 
   if (getUserOpt(OPT_SHOW_SECONDS) == true) doSecond();
   updateTimeBuffer();
 
   if ((units_changed & MINUTE_UNIT) == 0) return; // If no min change then stop here
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "MIN TICK"); memRep(NULL);
 
   // Change of day?
   if ((units_changed & DAY_UNIT) > 0) updateDateBuffer();
 
   // For everthing else, we take midday as a new 'day' as well
-  if (tick_time->tm_hour == 12) {
+  if (tick_time->tm_hour == 12 && tick_time->tm_min == 0) {
     units_changed = units_changed | DAY_UNIT; // Add day unit
     // Remove second unit - this is used internally to tell true day boundaries from midday ones
     units_changed = units_changed & (MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT|YEAR_UNIT);
@@ -181,9 +180,6 @@ void tick_handler(struct tm* tick_time, TimeUnits units_changed) {
   // Update prices
   modulateSellPrices();
 
-  // TODO this is only temp for debug!
-  updateWeatherBuffer();
-
   // Found treasure? -1 for no
   int8_t itemFoundQuality = checkForItem( units_changed );
 
@@ -192,9 +188,9 @@ void tick_handler(struct tm* tick_time, TimeUnits units_changed) {
   if (itemFoundQuality == -1) achievementEarned = checkAchievements();
 
   // Notify user
-  uint8_t light = getUserSetting(SETTING_LIGHT);
-  uint8_t vibe = getUserSetting(SETTING_VIBE);
-  if ((itemFoundQuality >= 0 || achievementEarned >= 0) && (light > 0 || vibe > 0)) {
+  if (itemFoundQuality >= 0 || achievementEarned >= 0) {
+    uint8_t light = getUserSetting(SETTING_LIGHT);
+    uint8_t vibe = getUserSetting(SETTING_VIBE);
     uint16_t minsOfDay = (tick_time->tm_hour * 60) + tick_time->tm_min;
     bool zzzTime = false;
     if ( getUserSetting(SETTING_ZZZ_END) >= getUserSetting(SETTING_ZZZ_START)) {
@@ -223,6 +219,13 @@ void tick_handler(struct tm* tick_time, TimeUnits units_changed) {
   } else {
     animEnd(); // Just redraw
   }
+
+  // Save on the hour, and push this save to the phone
+  if ((units_changed & HOUR_UNIT) > 0) {
+    saveState();
+    sendStateToPhone();
+  }
+
   APP_LOG(APP_LOG_LEVEL_DEBUG, "TICK_E"); memRep(NULL);
 }
 
@@ -273,10 +276,15 @@ void init_mainWindow() {
   if (s_settings_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "SettingsWin FAIL!");
   if (s_sell_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "SellWin FAIL!");
 
+  // We can now accept communications with the phone - make sure it has a copy of the save file
+  registerCommunication();
+  sendStateToPhone();
+
   window_stack_push(s_main_window, true);
 }
 
 void destroy_mainWindow() {
+  destroyCommunication();
   accel_tap_service_unsubscribe();
   window_destroy(s_main_window);
   window_destroy(s_buy_window);

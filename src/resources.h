@@ -1,6 +1,9 @@
 #pragma once
 #include <pebble.h>
 
+// Global compile time switch to replace all images with ugly pink boxes if omitted
+#define GRAPHICS_ON
+
 char* getTempBuffer();
 
 void memRep(void* data);
@@ -29,6 +32,7 @@ GFont* getTemperatureFont();
 
 GBitmap* loadItemImage(const uint8_t treasureID, const uint8_t itemID); // Internal
 GBitmap* getSingleItemImage(uint8_t treasureID, uint8_t itemID);
+void     clearSingleItemImage();
 GBitmap* getGemImage(uint8_t treasureID);
 GBitmap* getBluetoothImage();
 

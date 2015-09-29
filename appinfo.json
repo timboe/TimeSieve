@@ -1,6 +1,7 @@
 {
     "capabilities": [
-      "configurable"
+      "configurable",
+      "location"
     ],
     "companyName": "timboe@gmail.com",
     "longName": "TimeSink",
@@ -11,7 +12,12 @@
       "KEY_SHOW_SEC": 2,
       "KEY_QUIET_START": 3,
       "KEY_QUIET_END": 4,
-      "KEY_RESET": 5
+      "KEY_RESET": 5,
+      "KEY_SAVE_DATA": 6,
+      "KEY_SAVE_VERSION": 7,
+      "KEY_WEATHER_ON": 8,
+      "KEY_WEATHER_TEMP": 9,
+      "KEY_WEATHER_ICON": 10
     },
     "resources": {
         "media": [

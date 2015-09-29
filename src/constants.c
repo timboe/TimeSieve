@@ -19,9 +19,9 @@ const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   500*SEC_IN_YEAR,
   2*SEC_IN_MILLENIUM,
   10*SEC_IN_MILLENIUM,
-  0,
-  0,
-  0
+  0,//UNUSED
+  0,//UNUSED
+  0//UNUSED
   }, {
   SEC_IN_MIN, // TANK
   30*SEC_IN_MIN,
@@ -36,26 +36,26 @@ const uint64_t UPGRADE_PRICE[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {
   1*SEC_IN_EPOCH,
   3*SEC_IN_EPOCH,
   1*SEC_IN_ERA,
-  0,
-  0,
-  0
+  0,//UNUSED
+  0,//UNUSED
+  0//UNUSED
   }, {
   1, // WATCHER
   1,
   1,
   1,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0,
-  0
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  1,
+  0,//UNUSED
+  0,//UNUSED
+  0,//UNUSED
+  0,//UNUSED
+  0//UNUSED
   } };
 
 const uint64_t UPGRADE_REWARD[UPGRADE_CATEGORIES][MAX_UPGRADES] = { {

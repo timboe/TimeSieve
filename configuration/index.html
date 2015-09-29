@@ -76,8 +76,20 @@
       </div>
       <!---->
       <div class="item-container">
-        Reset Game
-        <div class="item-subtitle">To start again, type 'restart' into this box and sumbit. This <em>cannot be undone</em>.</div>
+        Backup Game
+        <div class="item-subtitle">Your most recent save is backed up on your phone and is displayed below.</div>
+        <div class="item-container-content">
+          <label class="item">
+            <div class="item-input-wrapper">
+              <input type="text" class="item-input" name="backup-textbox" id="id-backup" placeholder="" readonly>
+            </div>
+          </label>
+        </div>
+      </div>
+      <!---->
+      <div class="item-container">
+        Reset/Load Game
+        <div class="item-subtitle">To restore a save, paste it into this box. Or, to start again type '<b>reset</b>' into the box.</div>
         <div class="item-container-content">
           <label class="item">
             <div class="item-input-wrapper">
@@ -101,10 +113,12 @@
 function getConfigData() {
 
   var resetVar = false;
-  if (document.getElementById('id-reset').value == "restart") resetVar = true;
+  if (document.getElementById('id-reset').value == "reset") resetVar = true;
+  else var loadSave = document.getElementById('id-reset').value;
 
   var options = {
     'op_reset':      resetVar,
+    'op_loadSave':   loadSave,
     'op_animation':  document.getElementById('id-anim').checked,
     'op_quietStart': document.getElementById('id-start').value,
     'op_quietEnd':   document.getElementById('id-end').value,
@@ -147,7 +161,24 @@ submitButton.addEventListener('click', function() {
   document.location = return_to + encodeURIComponent(JSON.stringify(getConfigData()));
 });
 
+function getValueFromURL(val) {
+  var result = "", tmp = [];
+  location.search
+    .substr(1)
+    .split("&")
+    .forEach(function (item) {
+      tmp = item.split("=");
+      if (tmp[0] === val) result = decodeURIComponent(tmp[1]);
+    });
+  return result;
+}
+
 (function() {
+
+  // See if there was a save file passed from the pebble app
+  var backup = getValueFromURL("backup");
+  document.getElementById('id-backup').value = backup;
+
   // Load any previously saved configuration, if available
   if(typeof localStorage['op_animation'] !== 'undefined') {
     console.log('JS: Load prev saved');
@@ -164,5 +195,6 @@ submitButton.addEventListener('click', function() {
     console.log('JS: No prev to save');
   }
 })();
+
 </script>
 </html>

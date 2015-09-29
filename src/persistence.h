@@ -21,10 +21,11 @@ struct userData_v1 {
 };
 
 void init_persistence(); // Load
-void destroy_persistence(); // Save
+void destroy_persistence(); // Save and exit
+void saveState(); // Save
 void resetUserData(); // Reset
 void DEVMODE();
-void inboxReceivedHandler(DictionaryIterator *iter, void *context);
+const struct userData_v1* getData();
 
 uint16_t getUserItems(const uint32_t treasureID, const uint32_t itemID);
 uint32_t getUserTotalItems(const uint32_t treasureID);

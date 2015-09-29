@@ -7,6 +7,7 @@
 #include "palette.h"
 #include "resources.h"
 #include "timeStore.h"
+#include "clock.h"
 
 static Layer* s_timeSieveLayer;
 static uint8_t s_sieveTickCount;
@@ -49,6 +50,15 @@ static const GPathInfo FLAIR_PATH = {
 static GPath* s_flairPath = NULL;
 static int32_t s_flairAngle = 0;
 
+static char s_weatherIcon[1];
+static char s_temperature[5];
+static int8_t s_tempValue;
+static weatherType s_weatherCode;
+
+void updateSieveLayer() {
+  if (s_timeSieveLayer) layer_mark_dirty(s_timeSieveLayer);
+}
+
 void sieveAnimReset(TimeUnits units_changed) {
   s_sieveTickCount = 0;
   s_treasureRect = GRect(94, 18, 20, 20);
@@ -82,6 +92,43 @@ bool sieveAnimCallback(TimeUnits units_changed) {
   }
 }
 
+void updateWeather(int16_t temp, weatherType weatherCode) {
+  s_tempValue = temp;
+  s_weatherCode = weatherCode;
+  updateWeatherBuffer();
+}
+
+void updateWeatherBuffer() {
+  int8_t temp = s_tempValue;
+  if (temp == -99) {
+    strcpy(s_temperature, "");
+  } else {
+    if (getUserOpt(OPT_CELSIUS) == false) {
+      temp = ((temp*5)/9) + 32; // Convert to F
+    }
+    snprintf(s_temperature, CLOCK_TEXT_SIZE*sizeof(char), "%i", temp);
+    if (getUserOpt(OPT_CELSIUS) == false) strcat(s_temperature, "F");
+    else  strcat(s_temperature, "C");
+  }
+
+  // These characters correspond to characters in the weather font
+  switch (s_weatherCode) {
+    case CLEAR_DAY: strcpy(s_weatherIcon, "1"); break;
+    case CLEAR_NIGHT: strcpy(s_weatherIcon, "2"); break;
+    case LOW_CLOUD_DAY: strcpy(s_weatherIcon, "3"); break;
+    case LOW_CLOUD_NIGHT: strcpy(s_weatherIcon, "4"); break;
+    case MED_CLOUD: strcpy(s_weatherIcon, "5"); break;
+    case HIGH_CLOUD: strcpy(s_weatherIcon, "%"); break;
+    case LOW_RAIN: strcpy(s_weatherIcon, "7"); break;
+    case HIGH_RAIN: strcpy(s_weatherIcon, "8"); break;
+    case THUNDER: strcpy(s_weatherIcon, "6"); break;
+    case SNOW: strcpy(s_weatherIcon, "$"); break;
+    case MIST: strcpy(s_weatherIcon, "M"); break;
+    case WEATHER_NA: strcpy(s_weatherIcon, ")"); break;
+  }
+  updateSieveLayer();
+}
+
 static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
 
@@ -97,14 +144,35 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   graphics_context_set_stroke_color(ctx, GColorWhite);
   graphics_draw_line(ctx, GPoint(tank_bounds.origin.x + 20, tank_bounds.origin.y), GPoint(tank_bounds.size.w - 20, tank_bounds.origin.y) );
 
+  const int clockUpgrade = getUserSetting(SETTING_TECH);
+  if (clockUpgrade >= TECH_WEATHER) {
+    GRect wRect = GRect(-7, tank_bounds.origin.y + 4, 35, 25);
+    draw3DText(ctx, wRect, getWeatherFont(), s_weatherIcon, 1, true, getLiquidTimeHighlightColour(), getLiquidTimeColour());
+    wRect.origin.y += 5;
+    wRect.origin.x += 17;
+    draw3DText(ctx, wRect, getTemperatureFont(), s_temperature, 1, true, GColorWhite, GColorBlack);
+  }
+
   // Halo
-  graphics_context_set_stroke_color(ctx, getTrasureColour(s_treasureID));
+  if (s_treasureID != -1) graphics_context_set_stroke_color(ctx, getTreasureColor(s_treasureID));
   graphics_context_set_stroke_width(ctx, 3);
   uint8_t r = 9;
   for (uint8_t h = 0; h < s_haloRings; ++h) {
     graphics_draw_circle(ctx, s_halo, r);
     r +=5;
   }
+
+  // Legs
+  graphics_context_set_fill_color(ctx, GColorDarkGray);
+  graphics_fill_rect(ctx, GRect(13    , 48    , 4 + 2 , 15), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(54    , 48    , 4 + 2 , 15), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(95    , 48    , 4 + 2 , 15), 2, GCornersAll);
+
+  graphics_context_set_fill_color(ctx, GColorLightGray);
+  graphics_fill_rect(ctx, GRect(13 + 1, 48 + 1, 4     , 15), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(54 + 1, 48 + 1, 4     , 15), 2, GCornersAll);
+  graphics_fill_rect(ctx, GRect(95 + 1, 48 + 1, 4     , 15), 2, GCornersAll);
+
 
   graphics_context_set_compositing_mode(ctx, GCompOpSet);
 
@@ -122,7 +190,7 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
 }
 
 /**
- * Show notify layer. Note that image overlay is done by another gbitmap layer to get transparency
+ * Show notify layer.
  **/
 static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   if (s_notifyTreasureID == -1 && s_notifyAchievementID == -1) return; // Nothing to show
@@ -132,7 +200,7 @@ static void notifyUpdateProc(Layer *this_layer, GContext *ctx) {
   uint8_t offset = 0;
   GBitmap* image = NULL;
   if (s_notifyTreasureID >= 0) {
-    border = getTrasureColour(s_notifyTreasureID);
+    border = getTreasureColor(s_notifyTreasureID);
     strcpy(notifyTxtTop, "Treasure");
     if (s_multipleTreasures) strcpy(notifyTxtTop, " x2");
     strcat(notifyTxtTop, "!");
@@ -165,6 +233,7 @@ bool stopNotify() {
   s_notifyTreasureID = -1;
   s_notifyAchievementID = -1;
   layer_mark_dirty(s_notifyLayer);
+  clearSingleItemImage();
   return true;
 }
 
@@ -213,6 +282,8 @@ void create_timeSieve_layer(Window* parentWindow) {
 
   s_flairPath = gpath_create(&FLAIR_PATH);
   gpath_move_to(s_flairPath, GPoint(72, -18));
+
+  updateWeather(-99, WEATHER_NA);
 
   // Create layer for the tank
   s_notifyLayer = layer_create( GRect(4, 4, layerBounds.size.w-8, 48) ); // border 4 top and bottom

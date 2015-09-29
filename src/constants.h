@@ -57,9 +57,9 @@
 #define ITEM_CATEGORIES 5
 
 #define TREASURE_DISPLAY_TIME 50000
-#define NOTIFY_TREASURE_DISPLAY_TIME 3000
+#define NOTIFY_TREASURE_DISPLAY_TIME 5000
 #define NOTIFY_ACHIEVEMENT_DISPLAY_TIME 50000
-#define NOTIFY_DISPLAY_TIME 3000
+#define NOTIFY_DISPLAY_TIME 2000
 #define SPLASH_DISPLAY_TIME 5000
 
 #define N_REFINERY_UPGRADES 13
@@ -79,7 +79,6 @@ extern const uint64_t SELL_PRICE[SELLABLE_CATEGORIES][MAX_TREASURES];
 
 extern const uint8_t ITEM_COLOURS[ITEM_CATEGORIES];
 extern const char* const ITEM_CATEGORIE_NAME[ITEM_CATEGORIES];
-
 
 typedef enum {WATCHER_FREQUENCY_1,
               WATCHER_TECH,
@@ -106,6 +105,11 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define KEY_QUIET_START 3
 #define KEY_QUIET_END 4
 #define KEY_RESET 5
+#define KEY_SAVE_DATA 6
+#define KEY_SAVE_VERSION 7
+#define KEY_WEATHER_ON 8
+#define KEY_WEATHER_TEMP 9
+#define KEY_WEATHER_ICON 10
 
 // TREASURE SETTINGS
 
@@ -121,7 +125,7 @@ typedef enum {WATCHER_FREQUENCY_1,
 // Basic finders have a 0.5% chance to find an item
 #define FREQUENCY_1_CHANCE 5
 // Advanced finders have a 3% chance to find an item
-#define FREQUENCY_2_CHANCE 30
+#define FREQUENCY_2_CHANCE 20
 
 // Basic archeologists increase the chance by 1%
 #define QUALITY_1_CHANCE 10
@@ -232,8 +236,11 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define WIN_SIZE_X 144
 #define WIN_SIZE_Y 168
 
+// Storage ID for the schema
 #define PERSISTENT_VERSION_KEY 0
+// Storage ID for the save blob
 #define PERSISTENT_USERDATA_KEY 1
+// Current schema
 #define SCHEMA_VERSION 1
 
 #define ANIM_FPS 25
@@ -243,6 +250,19 @@ typedef enum {WATCHER_FREQUENCY_1,
 #define ANIM_FRAMES ANIM_FPS*ANIM_DURATION
 #define ANIM_DELAY MS_IN_SEC/ANIM_FPS
 
+typedef enum {
+  CLEAR_DAY,
+  CLEAR_NIGHT,
+  LOW_CLOUD_DAY,
+  LOW_CLOUD_NIGHT,
+  MED_CLOUD,
+  HIGH_CLOUD,
+  LOW_RAIN,
+  HIGH_RAIN,
+  THUNDER,
+  SNOW,
+  MIST,
+  WEATHER_NA} weatherType;
 
 typedef enum {ITEM_MISSBONUS, // done
               TANKCAP_5PERC, //done

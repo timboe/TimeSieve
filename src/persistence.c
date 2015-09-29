@@ -3,6 +3,7 @@
 #include "constants.h"
 #include "clock.h"
 #include "timeStore.h"
+#include "timeSieve.h"
 #include "mainWindow.h"
 #include "resources.h"
 
@@ -37,28 +38,12 @@ void DEVMODE() {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "DEV MODE");
 }
 
-void inboxReceivedHandler(DictionaryIterator *iter, void *context) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "gotMsg");
-
-  Tuple* reset = dict_find(iter, KEY_RESET);
-  if (reset && reset->value->int32 > 0) resetUserData();
-
-  Tuple* animation = dict_find(iter, KEY_ANIMATION);
-  if (animation) setUserOpt(OPT_ANIMATE, (animation->value->int32 > 0));
-
-  Tuple* show_seconds = dict_find(iter, KEY_SHOW_SEC);
-  if (show_seconds) setUserOpt(OPT_SHOW_SECONDS, (show_seconds->value->int32 > 0));
-
-  Tuple* temp_celsius = dict_find(iter, KEY_TEMP_CELSIUS);
-  if (temp_celsius) setUserOpt(OPT_CELSIUS, (temp_celsius->value->int32 > 0));
-
-  Tuple* quiet_start = dict_find(iter, KEY_QUIET_START);
-  if (quiet_start) setUserSetting(SETTING_ZZZ_START, quiet_start->value->int32);
-
-  Tuple* quiet_end = dict_find(iter, KEY_QUIET_END);
-  if (quiet_end) setUserSetting(SETTING_ZZZ_END, quiet_end->value->int32);
-
-}
+/**
+ * Get a readonly pointer to the data, for serialisation
+ */
+ const struct userData_v1* getData() {
+   return s_userData;
+ }
 
 /**
  * Make sure all settings which need to be enacted elsewhere are
@@ -103,10 +88,6 @@ void init_persistence() {
     // todo return an error
   }
 
-  // Start listening for app message settings updates
-  app_message_register_inbox_received(inboxReceivedHandler);
-  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
-
 }
 
 void addUpgrade(const uint32_t typeID, const uint32_t resourceID, const int32_t n) {
@@ -132,13 +113,18 @@ void removeItem(const uint32_t treasureID, const uint32_t itemID, const int32_t 
   addItem(treasureID, itemID, -n);
 }
 
-void destroy_persistence() { // Save
+void saveState() {
   s_userData->timeOfSave = time(NULL);
   int dataResult = persist_write_data(PERSISTENT_USERDATA_KEY, s_userData, sizeof(struct userData_v1));
+  int versionResult = persist_write_int(PERSISTENT_VERSION_KEY, SCHEMA_VERSION);
+  APP_LOG(APP_LOG_LEVEL_DEBUG, "SAVE STATE: Wrote %i bytes for schema %i (%i b)", dataResult, SCHEMA_VERSION, versionResult);
+}
+
+void destroy_persistence() {
+  saveState();
   free(s_userData);
   s_userData = 0;
-  int versionResult = persist_write_int(PERSISTENT_VERSION_KEY, SCHEMA_VERSION);
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "destroy_persistence save code data %i bytes schema (%i) %i bytes", dataResult, SCHEMA_VERSION, versionResult);
+
 }
 
 time_t getUserTimeOfSave() {
