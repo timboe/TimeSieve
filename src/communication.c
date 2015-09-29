@@ -2,7 +2,7 @@
 #include "communication.h"
 #include "persistence.h"
 #include "constants.h"
-#include "timeSieve.h"
+#include "timeSink.h"
 
 void inboxReceiveHandler(DictionaryIterator *iter, void *context) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "gotMsg");

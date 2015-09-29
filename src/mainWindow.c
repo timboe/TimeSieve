@@ -1,7 +1,7 @@
 #include <pebble.h>
 #include "mainWindow.h"
 #include "clock.h"
-#include "timeSieve.h"
+#include "timeSink.h"
 #include "timeTank.h"
 #include "timeStore.h"
 #include "buyMenu.h"
@@ -25,7 +25,7 @@ static TimeUnits s_units_changed; // Used in anim
 
 // Hold if the animation routine is still in progress and is requesting more frames.
 static bool s_clockAnimRequest;
-static bool s_sieveAnimRequest;
+static bool s_sinkAnimRequest;
 static bool s_tankAnimRequest;
 
 void animEnd() {
@@ -43,7 +43,7 @@ void animEnd() {
  */
 void animCallback(void* data) {
   if (s_tankAnimRequest)  s_tankAnimRequest  = tankAnimCallback(s_units_changed);
-  if (s_sieveAnimRequest) s_sieveAnimRequest = sieveAnimCallback(s_units_changed);
+  if (s_sinkAnimRequest)  s_sinkAnimRequest  = sinkAnimCallback(s_units_changed);
   if (s_clockAnimRequest) s_clockAnimRequest = clockAnimCallback(s_units_changed);
   if (s_clockAnimRequest || s_tankAnimRequest || s_clockAnimRequest) {
     app_timer_register(ANIM_DELAY, animCallback, NULL);
@@ -57,10 +57,10 @@ void animCallback(void* data) {
  */
 void animBegin() {
   clockAnimReset(s_units_changed);
-  sieveAnimReset(s_units_changed);
+  sinkAnimReset(s_units_changed);
   tankAnimReset(s_units_changed);
   s_clockAnimRequest = true;
-  s_sieveAnimRequest = true;
+  s_sinkAnimRequest = true;
   s_tankAnimRequest = true;
   animCallback(NULL);
 }
@@ -72,7 +72,7 @@ TimeUnits getLastTimeUnit() {
 // Main window initialisation
 void main_window_load(Window *window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW load");
-  create_timeSieve_layer(window);
+  create_timeSink_layer(window);
   create_clock_layer(window);
   create_timeTank_layer(window);
   initMainWindowRes();
@@ -83,7 +83,7 @@ void main_window_load(Window *window) {
 // Main window destructiom
 void main_window_unload(Window *window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW Uload");
-  destroy_timeSieve_layer();
+  destroy_timeSink_layer();
   destroy_clock_layer();
   destroy_timeTank_layer();
   deinitMainWindowRes();

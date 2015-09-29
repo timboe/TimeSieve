@@ -1,6 +1,6 @@
 #include <pebble.h>
 #include <limits.h> // ULLONG_MAX
-#include "timeSieve.h"
+#include "timeSink.h"
 #include "constants.h"
 #include "persistence.h"
 #include "items.h"
@@ -9,13 +9,13 @@
 #include "timeStore.h"
 #include "clock.h"
 
-static Layer* s_timeSieveLayer;
-static uint8_t s_sieveTickCount;
+static Layer* s_timeSinkLayer;
+static uint8_t s_sinkTickCount;
 
 static GBitmap *s_convTopBitmap = NULL;
 static GBitmap *s_convBotBitmap = NULL;
 static GBitmap* s_convCap = NULL;
-static GBitmap* s_sieveBasic = NULL;
+static GBitmap* s_sinkBasic = NULL;
 static GBitmap* s_gem = NULL;
 
 static uint8_t s_convOffset = 0;
@@ -55,19 +55,19 @@ static char s_temperature[5];
 static int8_t s_tempValue;
 static weatherType s_weatherCode;
 
-void updateSieveLayer() {
-  if (s_timeSieveLayer) layer_mark_dirty(s_timeSieveLayer);
+void updateSinkLayer() {
+  if (s_timeSinkLayer) layer_mark_dirty(s_timeSinkLayer);
 }
 
-void sieveAnimReset(TimeUnits units_changed) {
-  s_sieveTickCount = 0;
+void sinkAnimReset(TimeUnits units_changed) {
+  s_sinkTickCount = 0;
   s_treasureRect = GRect(94, 18, 20, 20);
   s_halo = GPoint(104,30);
   s_haloRings = 0;
   s_flairAngle = 0;
 }
 
-bool sieveAnimCallback(TimeUnits units_changed) {
+bool sinkAnimCallback(TimeUnits units_changed) {
   // No animation if we are not moving a gem into place or doing BG flair
   if (s_treasureID == -1 && (units_changed & DAY_UNIT) == 0) return false;
 
@@ -75,7 +75,7 @@ bool sieveAnimCallback(TimeUnits units_changed) {
     if (++s_convOffset == 7) s_convOffset = 0; // Degenerency, 7 not 8 to avoid single-frame with no movement
     --s_treasureRect.origin.x;
     --s_halo.x;
-    if (s_sieveTickCount % 14 == 0) ++s_haloRings;
+    if (s_sinkTickCount % 14 == 0) ++s_haloRings;
   }
 
   // Day+ spec
@@ -83,7 +83,7 @@ bool sieveAnimCallback(TimeUnits units_changed) {
     s_flairAngle += TRIG_MAX_ANGLE/ANIM_FPS/2;
   }
 
-  if (++s_sieveTickCount == ANIM_FRAMES) {
+  if (++s_sinkTickCount == ANIM_FRAMES) {
     if (s_treasureID != -1) itemCanBeCollected();
     s_flairAngle = 0;
     return false;
@@ -126,10 +126,10 @@ void updateWeatherBuffer() {
     case MIST: strcpy(s_weatherIcon, "M"); break;
     case WEATHER_NA: strcpy(s_weatherIcon, ")"); break;
   }
-  updateSieveLayer();
+  updateSinkLayer();
 }
 
-static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
+static void timeSink_update_proc(Layer *this_layer, GContext *ctx) {
   GRect tank_bounds = layer_get_bounds(this_layer);
 
   // Backmost - FLAIR should only be drawn on DAY boundary
@@ -186,7 +186,7 @@ static void timeSieve_update_proc(Layer *this_layer, GContext *ctx) {
   drawBitmap(ctx, s_convCap, convCapBound);
 
   drawBitmap(ctx, s_gem, s_treasureRect);
-  drawBitmap(ctx, s_sieveBasic, GRect(89, 7, 45, 45));
+  drawBitmap(ctx, s_sinkBasic, GRect(89, 7, 45, 45));
 }
 
 /**
@@ -254,23 +254,23 @@ void showNotifyTreasure(uint8_t treasureID, uint8_t itemID) {
   layer_mark_dirty(s_notifyLayer);
 }
 
-void create_timeSieve_layer(Window* parentWindow) {
+void create_timeSink_layer(Window* parentWindow) {
   // Create the clock layer in the top 1/3 of the screen
   Layer* window_layer = window_get_root_layer(parentWindow);
   GRect window_bounds = layer_get_bounds(window_layer);
   GRect layerBounds = GRect(0, window_bounds.size.h/3, window_bounds.size.w, window_bounds.size.h/3);
-  s_timeSieveLayer = layer_create( layerBounds );
+  s_timeSinkLayer = layer_create( layerBounds );
   // Add as child of the main window layer and set callback
-  layer_add_child(window_layer, s_timeSieveLayer);
-  layer_set_update_proc(s_timeSieveLayer, timeSieve_update_proc);
-  layer_set_clips(s_timeSieveLayer, false);
+  layer_add_child(window_layer, s_timeSinkLayer);
+  layer_set_update_proc(s_timeSinkLayer, timeSink_update_proc);
+  layer_set_clips(s_timeSinkLayer, false);
 
   //TODO move this into resources
   #ifdef GRAPHICS_ON
   s_convTopBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_TOP);
   s_convBotBitmap = gbitmap_create_with_resource(RESOURCE_ID_CONV_BOT);
   s_convCap = gbitmap_create_with_resource(RESOURCE_ID_CONV_CAP);
-  s_sieveBasic = gbitmap_create_with_resource(RESOURCE_ID_SIEVE_BASIC);
+  s_sinkBasic = gbitmap_create_with_resource(RESOURCE_ID_SINK);
   #endif
 
   s_gem = NULL;
@@ -288,7 +288,7 @@ void create_timeSieve_layer(Window* parentWindow) {
   // Create layer for the tank
   s_notifyLayer = layer_create( GRect(4, 4, layerBounds.size.w-8, 48) ); // border 4 top and bottom
   layer_set_update_proc(s_notifyLayer, notifyUpdateProc);
-  layer_add_child(s_timeSieveLayer, s_notifyLayer);
+  layer_add_child(s_timeSinkLayer, s_notifyLayer);
 }
 
 void stopDisplayItem(void* data) {
@@ -352,14 +352,14 @@ bool collectItem(bool autoCollect) {
   return true;
 }
 
-void destroy_timeSieve_layer() {
-  layer_destroy(s_timeSieveLayer);
+void destroy_timeSink_layer() {
+  layer_destroy(s_timeSinkLayer);
 
   #ifdef GRAPHICS_ON
   gbitmap_destroy(s_convTopBitmap);
   gbitmap_destroy(s_convBotBitmap);
   gbitmap_destroy(s_convCap);
-  gbitmap_destroy(s_sieveBasic);
+  gbitmap_destroy(s_sinkBasic);
   #endif
 
   free(s_flairPath);

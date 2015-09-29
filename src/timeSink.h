@@ -2,11 +2,11 @@
 #include <pebble.h>
 #include <constants.h>
 
-void create_timeSieve_layer(Window* parentWindow);
-void destroy_timeSieve_layer();
+void create_timeSink_layer(Window* parentWindow);
+void destroy_timeSink_layer();
 
-void sieveAnimReset(TimeUnits units_changed);
-bool sieveAnimCallback(TimeUnits units_changed);
+void sinkAnimReset(TimeUnits units_changed);
+bool sinkAnimCallback(TimeUnits units_changed);
 
 void displyItem(uint8_t treasureID, uint8_t itemID);
 void itemCanBeCollected();

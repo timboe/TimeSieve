@@ -3,7 +3,7 @@
 #include "constants.h"
 #include "clock.h"
 #include "timeStore.h"
-#include "timeSieve.h"
+#include "timeSink.h"
 #include "mainWindow.h"
 #include "resources.h"
 
