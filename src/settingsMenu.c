@@ -6,9 +6,8 @@
 #include "sellMenu.h"
 #include "resources.h"
 #include "items.h"
+#include "windowManager.h"
 
-#define CHEVO_CONTEXT_ID 0
-#define UNIQUE_CONTEXT_ID 1
 
 #define STAT_SECTION_ID 0
 #define CHEVO_SECTION_ID 1
@@ -23,12 +22,6 @@
 
 static MenuLayer* s_settings_layer = NULL;
 static MenuLayer* s_settingsSubLayer = NULL;
-
-static Window* s_chevo_window = NULL;
-static Window* s_unique_window = NULL;
-
-static int s_chevo_context = CHEVO_CONTEXT_ID;
-static int s_unique_context = UNIQUE_CONTEXT_ID;
 
 static char tempBuffer[TEXT_BUFFER_SIZE];
 
@@ -286,9 +279,9 @@ static void settings_select_callback(MenuLayer *menu_layer, MenuIndex *cell_inde
   } else if (section == CHEVO_SECTION_ID) {
 
     if (row == CHEVO_CONTEXT_ID && getTotalChevos()) {
-      window_stack_push(s_chevo_window, true);
+      pushWindow(WINDOW_ACHIEVEMENT, true);
     } else if (row == UNIQUE_CONTEXT_ID && getUserTotalItems(LEGENDARY_ID)) {
-      window_stack_push(s_unique_window, true);
+      pushWindow(WINDOW_LEGENDARIES, true);
     }
 
   } else if (section == UNLOCK_SECTION_ID) {
@@ -394,8 +387,8 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
     nameText = NAME_ACHIEVEMENT[itemID];
     descText = DESC_ACHIEVEMENT[itemID];
     image = NULL;
-    ttlTextRect = GRect(3, -6, size.w-3, size.h);
-    topTextRect = GRect(3, 16, size.w-3, size.h-22);
+    ttlTextRect = GRect(3, -6, size.w-6, size.h);
+    topTextRect = GRect(3, 16, size.w-6, size.h-22);
   } else {
     return;
   }
@@ -422,7 +415,7 @@ static void settings_sub_menu_draw_row_callback(GContext* ctx, const Layer *cell
 /// SETUP
 ///
 
-void settings_sub_window_load(Window* parentWindow) {
+void settingsSubWindowLoad(Window* parentWindow) {
 
   // Now we prepare to initialize the menu layer
   s_settingsSubLayer = menu_layer_create(layer_get_frame(window_get_root_layer(parentWindow)));
@@ -445,7 +438,7 @@ void settings_sub_window_load(Window* parentWindow) {
   layer_add_child(window_get_root_layer(parentWindow), menu_layer_get_layer(s_settingsSubLayer));
 }
 
-void settings_sub_window_unload(Window* parentWindow) {
+void settingsSubWindowUnload(Window* parentWindow) {
   const int context = *((int*) window_get_user_data(parentWindow));
   APP_LOG(APP_LOG_LEVEL_DEBUG,"StngSubW%iDEST", context);
   menu_layer_destroy(s_settingsSubLayer);
@@ -455,17 +448,7 @@ void settings_sub_window_unload(Window* parentWindow) {
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void createSettingsSubWin(Window** w, int* context) {
-  *w = window_create();
-  window_set_user_data(*w, context);
-  window_set_background_color(*w, MENU_BACK_BLUE_ODD);
-  window_set_window_handlers(*w, (WindowHandlers) {
-    .load = settings_sub_window_load,
-    .unload = settings_sub_window_unload
-  });
-}
-
-void settings_window_load(Window* parentWindow) {
+void settingsWindowLoad(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWLd");
 
   // Now we prepare to initialize the menu layer
@@ -492,18 +475,11 @@ void settings_window_load(Window* parentWindow) {
   menu_layer_pad_bottom_enable(s_settings_layer, false);
   layer_add_child(window_layer, menu_layer_get_layer(s_settings_layer));
 
-  // Setup sub-windows that we might want to jump to
-  createSettingsSubWin(&s_chevo_window, &s_chevo_context);
-  createSettingsSubWin(&s_unique_window, &s_unique_context);
 }
 
-void settings_window_unload() {
+void settingsWindowUnload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWinDstry");
   menu_layer_destroy(s_settings_layer);
   s_settings_layer = NULL;
-  window_destroy(s_chevo_window);
-  window_destroy(s_unique_window);
-  s_chevo_window = NULL;
-  s_unique_window = NULL;
   APP_LOG(APP_LOG_LEVEL_DEBUG,"StngWinDstryDone");
 }

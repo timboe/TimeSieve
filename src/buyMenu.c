@@ -1,19 +1,11 @@
 #include <pebble.h>
+#include "windowManager.h"
 #include "buyMenu.h"
 #include "buyMenuSub.h"
 #include "constants.h"
 
 // Menu layers for my window
 static MenuLayer* s_menuLayer = NULL;
-
-// My sub-windows
-static Window* s_refineryWindow;
-static Window* s_tankWindow;
-static Window* s_watcherWindow;
-
-static int s_refineryContext = REFINERY_ID;
-static int s_tankContext = TANK_ID;
-static int s_watcherContext = WATCHER_ID;
 
 void updateBuyLayer() {
   if (s_menuLayer != NULL) layer_mark_dirty(menu_layer_get_layer(s_menuLayer));
@@ -55,20 +47,20 @@ static void buyMenuSelectCallback(MenuLayer* menu_layer, MenuIndex* cell_index, 
   const int row = cell_index->row;
   if (row == REFINERY_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH REFINERY");
-    window_stack_push(s_refineryWindow, true);
+    pushWindow(WINDOW_REFINARY, true);
   } else if (row == TANK_ID) {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH TANK");
-    window_stack_push(s_tankWindow, true);
+    pushWindow(WINDOW_TANK, true);
   } else if (row == WATCHER_ID) {
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH WATCHER");
-    window_stack_push(s_watcherWindow, true);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "PUSH EMPLYEE");
+    pushWindow(WINDOW_EMPLOYEE, true);
   }
 
 }
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-void buy_window_load(Window* parentWindow) {
+void buyWindowLoad(Window* parentWindow) {
 
   // Create the menu layer
   s_menuLayer = menu_layer_create(layer_get_frame(window_get_root_layer(parentWindow)));
@@ -85,24 +77,12 @@ void buy_window_load(Window* parentWindow) {
   menu_layer_set_normal_colors(s_menuLayer, MENU_BACK_GREEN_ODD, GColorBlack);
   layer_add_child(window_get_root_layer(parentWindow), menu_layer_get_layer(s_menuLayer));
 
-  // Setup sub-windows that we might want to jump to
-  createSubWin(&s_refineryWindow, &s_refineryContext);
-  createSubWin(&s_tankWindow, &s_tankContext);
-  createSubWin(&s_watcherWindow, &s_watcherContext);
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN LOAD");
 
 }
 
-void buy_window_unload() {
+void buyWindowUnload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"BUY WIN DESTROY");
-
-  // Destroy sub-windows
-  window_destroy(s_refineryWindow);
-  window_destroy(s_tankWindow);
-  window_destroy(s_watcherWindow);
-  s_refineryWindow = NULL;
-  s_tankWindow = NULL;
-  s_watcherWindow = NULL;
 
   menu_layer_destroy(s_menuLayer);
   s_menuLayer = NULL;

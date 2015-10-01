@@ -77,6 +77,9 @@ void requestWeatherUpdate() {
 }
 
 void registerCommunication() {
+  static bool isDone = false;
+  if (isDone == true) return;
+
   app_message_register_inbox_received(inboxReceiveHandler);
   app_message_register_inbox_dropped(inboxRecieveFailed);
   app_message_register_outbox_sent(outboxSendOK);
@@ -84,6 +87,7 @@ void registerCommunication() {
 
   // TODO bring this down to save space
   app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  isDone = true;
 }
 
 void destroyCommunication() {

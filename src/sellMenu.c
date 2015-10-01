@@ -288,7 +288,7 @@ static void sell_select_callback(MenuLayer *menu_layer, MenuIndex *cell_index, v
 /// SETUP
 ///
 
-void sell_window_load(Window* parentWindow) {
+void sellWindowLoad(Window* parentWindow) {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinLd");
 
   initSellWindowRes();
@@ -327,7 +327,7 @@ void sell_window_load(Window* parentWindow) {
 
 }
 
-void sell_window_unload() {
+void sellWindowUnload() {
   APP_LOG(APP_LOG_LEVEL_DEBUG,"SelWinULd");
   menu_layer_destroy(s_sellLayer);
   destroyNotifyLayer();

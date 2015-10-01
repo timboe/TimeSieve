@@ -3,6 +3,10 @@
 
 bool getNeedSplashScreen();
 
+void splashWindowLoad(Window* window);
+void splashWindowUnload();
+
 void doCatchup();
-void showSplash();
 void finishSplash();
+
+void splashClickConfProvider(Window* window);

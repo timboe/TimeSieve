@@ -120,7 +120,8 @@
     "sdkVersion": "3",
     "shortName": "TimeSink",
     "targetPlatforms": [
-        "basalt"
+        "basalt",
+        "chalk"
     ],
     "uuid": "77551ac3-30ef-444e-b3fd-0b57418919de",
     "versionCode": 1,

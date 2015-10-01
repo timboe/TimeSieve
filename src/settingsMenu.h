@@ -1,7 +1,10 @@
 #pragma once
 #include <pebble.h>
 
-void settings_window_load(Window* parentWindow);
-void settings_window_unload();
+void settingsWindowLoad(Window* parentWindow);
+void settingsWindowUnload();
+
+void settingsSubWindowLoad(Window* parentWindow);
+void settingsSubWindowUnload(Window* parentWindow);
 
 void updateSettingsLayer();

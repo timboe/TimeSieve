@@ -1,10 +1,11 @@
 #pragma once
+#include <pebble.h>
 
-void init_mainWindow();
-void destroy_mainWindow();
+void mainWindowLoad(Window *window);
+void mainWindowUnload(Window *window);
 
-void main_window_load(Window *window);
-void main_window_unload(Window *window);
+void mainWindowClickConfigProvider(Window *window);
+void tapHandle(AccelData *data, uint32_t num_samples);
 
 void animBegin();
 

@@ -12,14 +12,9 @@
 #include "achievement.h"
 #include "resources.h"
 #include "communication.h"
+#include "windowManager.h"
 
 void tick_handler(struct tm *tick_time, TimeUnits units_changed); //rm me later
-
-// Static pointer to primary windows
-static Window* s_main_window;
-static Window* s_buy_window;
-static Window* s_settings_window;
-static Window* s_sell_window;
 
 static TimeUnits s_units_changed; // Used in anim
 
@@ -70,24 +65,27 @@ TimeUnits getLastTimeUnit() {
 }
 
 // Main window initialisation
-void main_window_load(Window *window) {
+void mainWindowLoad(Window *window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW load");
   create_timeSink_layer(window);
   create_clock_layer(window);
   create_timeTank_layer(window);
   initMainWindowRes();
   update_tick_handler(); // Get 1s or 1m callbacks
+  registerCommunication();
+  accel_tap_service_subscribe( (AccelTapHandler) tapHandle );
   APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW load done");
 }
 
 // Main window destructiom
-void main_window_unload(Window *window) {
+void mainWindowUnload(Window *window) {
   APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW Uload");
   destroy_timeSink_layer();
   destroy_clock_layer();
   destroy_timeTank_layer();
   deinitMainWindowRes();
   tick_timer_service_unsubscribe();
+  accel_tap_service_unsubscribe();
   APP_LOG(APP_LOG_LEVEL_DEBUG, "mainW Uload done");
 }
 
@@ -100,15 +98,15 @@ void main_window_single_click_handler(ClickRecognizerRef recognizer, void *conte
   if (stopNotify() == true) return; // Second see if there is a notify window to dismiss
 
   if (BUTTON_ID_UP == button) {
-    window_stack_push(s_buy_window, true);
+    pushWindow(WINDOW_BUY, true);
   } else if (BUTTON_ID_SELECT == button) {
-    window_stack_push(s_settings_window, true);
+    pushWindow(WINDOW_SETTINGS, true);
   } else if (BUTTON_ID_DOWN == button) {
-    window_stack_push(s_sell_window, true);
+    pushWindow(WINDOW_SELL, true);
   }
 }
 
-void click_config_provider(Window *window) {
+void mainWindowClickConfigProvider(Window *window) {
  // single click / repeat-on-hold config:
   window_single_click_subscribe(BUTTON_ID_DOWN, main_window_single_click_handler);
   window_single_click_subscribe(BUTTON_ID_SELECT, main_window_single_click_handler);
@@ -236,58 +234,4 @@ void update_tick_handler() {
     tick_timer_service_subscribe(MINUTE_UNIT|HOUR_UNIT|DAY_UNIT|MONTH_UNIT|YEAR_UNIT, tick_handler);
   }
   updateClockLayer();
-}
-
-
-
-void init_mainWindow() {
-  // Create main window and set load/unload
-  s_main_window = window_create();
-  window_set_window_handlers(s_main_window, (WindowHandlers) {
-    .load = main_window_load,
-    .unload = main_window_unload
-  });
-  window_set_background_color(s_main_window, GColorBlack);
-  window_set_click_config_provider(s_main_window, (ClickConfigProvider) click_config_provider);
-  // Get taps to be able to collect items
-  accel_tap_service_subscribe( (AccelTapHandler) tapHandle );
-
-  // Create the menu windows
-  s_buy_window = window_create();
-  window_set_window_handlers(s_buy_window, (WindowHandlers) {
-    .load = buy_window_load,
-    .unload = buy_window_unload
-  });
-
-  s_settings_window = window_create();
-  window_set_window_handlers(s_settings_window, (WindowHandlers) {
-    .load = settings_window_load,
-    .unload = settings_window_unload
-  });
-
-  s_sell_window = window_create();
-  window_set_window_handlers(s_sell_window, (WindowHandlers) {
-    .load = sell_window_load,
-    .unload = sell_window_unload
-  });
-
-  if (s_main_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "MainWin FAIL!");
-  if (s_buy_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "BuyWin FAIL!");
-  if (s_settings_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "SettingsWin FAIL!");
-  if (s_sell_window == NULL) APP_LOG(APP_LOG_LEVEL_DEBUG, "SellWin FAIL!");
-
-  // We can now accept communications with the phone - make sure it has a copy of the save file
-  registerCommunication();
-  sendStateToPhone();
-
-  window_stack_push(s_main_window, true);
-}
-
-void destroy_mainWindow() {
-  destroyCommunication();
-  accel_tap_service_unsubscribe();
-  window_destroy(s_main_window);
-  window_destroy(s_buy_window);
-  window_destroy(s_settings_window);
-  window_destroy(s_sell_window);
 }

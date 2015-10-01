@@ -238,7 +238,7 @@ static void sub_menu_long_callback(MenuLayer *menu_layer, MenuIndex *cell_index,
 /// SETUP
 ///
 
-static void sub_window_load(Window* parentWindow) {
+void buySubWindowLoad(Window* parentWindow) {
   // Now we prepare to initialize the menu layer
   s_subMenuLayer = menu_layer_create(layer_get_frame(window_get_root_layer(parentWindow)));
   const int context = *((int*) window_get_user_data(parentWindow));
@@ -262,7 +262,7 @@ static void sub_window_load(Window* parentWindow) {
   initBuyWindowRes(context);
 }
 
-static void sub_window_unload(Window* parentWindow) {
+void buySubWindowUnload(Window* parentWindow) {
   destroyNotifyLayer();
   const int context = *((int*) window_get_user_data(parentWindow));
   deinitBuyWindowRes(context);
@@ -271,15 +271,15 @@ static void sub_window_unload(Window* parentWindow) {
   s_subMenuLayer = NULL;
 }
 
-
-void createSubWin(Window** w, int* context) {
-  *w = window_create();
-  window_set_user_data(*w, context);
-  window_set_window_handlers(*w, (WindowHandlers) {
-    .load = sub_window_load,
-    .unload = sub_window_unload
-  });
-}
+//
+// void createSubWin(Window** w, int* context) {
+//   *w = window_create();
+//   window_set_user_data(*w, context);
+//   window_set_window_handlers(*w, (WindowHandlers) {
+//     .load = sub_window_load,
+//     .unload = sub_window_unload
+//   });
+// }
 
 void updateBuyMenuSubLayer() {
   if (s_subMenuLayer != NULL) layer_mark_dirty(menu_layer_get_layer(s_subMenuLayer));

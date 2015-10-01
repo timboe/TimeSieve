@@ -224,6 +224,9 @@ typedef enum {WATCHER_FREQUENCY_1,
 
 #define CLOCK_TEXT_SIZE 9
 
+#define CHEVO_CONTEXT_ID 0
+#define UNIQUE_CONTEXT_ID 1
+
 // Bits in the liquid
 #define N_LIQUID_BITS 20
 #define N_WATERFALL_BITS 2

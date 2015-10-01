@@ -1,4 +1,5 @@
 #include "splash.h"
+#include "windowManager.h"
 #include "persistence.h"
 #include "timeStore.h"
 #include "mainWindow.h"
@@ -8,11 +9,10 @@
 #include "palette.h"
 #include "clock.h"
 
-static Window* s_splashWindow;
 static Layer* s_splashLayer;
 static AppTimer* s_splashTimer;
 char* s_splashText[ITEM_CATEGORIES + 2];
-static char s_title[TEXT_BUFFER_SIZE];
+static char s_title[TEXT_BUFFER_SIZE] = "Catching up...";
 static GColor s_splashTextCol[ITEM_CATEGORIES + 2];
 int8_t s_splashTextLines = -1;
 static bool s_doSplash;
@@ -31,6 +31,7 @@ bool getNeedSplashScreen() {
 }
 
 void splashClick(ClickRecognizerRef recognizer, void *context) {
+  if (s_splashTimer == NULL) return; // Not done yet
   finishSplash();
 }
 
@@ -64,31 +65,15 @@ void splashWindowUnload() {
 void finishSplash(void* data) {
   app_timer_cancel(s_splashTimer);
   s_splashTimer = NULL;
-  window_stack_remove(s_splashWindow, true);
-  window_destroy(s_splashWindow);
-  s_splashWindow = NULL;
   for (uint8_t i = 0; i <= s_splashTextLines; ++i) {
     free(s_splashText[i]);
   }
   // Invoke the main window
-  init_mainWindow();
+  popPushWindow(WINDOW_MAIN, false); // No animation
 }
 
 void newLine() {
   s_splashText[++s_splashTextLines] = malloc(TEXT_BUFFER_SIZE*sizeof(char));
-}
-
-void showSplash() {
-  // show the splash
-  s_splashWindow = window_create();
-  window_set_window_handlers(s_splashWindow, (WindowHandlers) {
-    .load = splashWindowLoad,
-    .unload = splashWindowUnload
-  });
-
-  window_set_background_color(s_splashWindow, GColorDarkGray);
-  window_stack_push(s_splashWindow, true);
-  strcpy(s_title, "Catching Up...");
 }
 
 void giveCatchupItems(TimeUnits units, uint32_t n, uint16_t* counterPointer) {
@@ -191,7 +176,6 @@ void doCatchup() {
   }
 
   s_splashTimer = app_timer_register(SPLASH_DISPLAY_TIME, finishSplash, NULL);
-  window_set_click_config_provider(s_splashWindow, (ClickConfigProvider) splashClickConfProvider); // Alow to click thru
   layer_mark_dirty(s_splashLayer);
 
   APP_LOG(APP_LOG_LEVEL_INFO, "Catchup END");
