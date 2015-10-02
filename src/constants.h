@@ -246,6 +246,9 @@ typedef enum {WATCHER_FREQUENCY_1,
 // Current schema
 #define SCHEMA_VERSION 1
 
+// Schema 1 save is 176 bytes, plus leave room for the rest
+#define MAX_MESSAGE_SIZE 256
+
 #define ANIM_FPS 25
 #define ANIM_DURATION 2
 #define ANIM_MIN_V 100

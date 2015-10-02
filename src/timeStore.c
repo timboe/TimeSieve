@@ -183,7 +183,7 @@ void currentSellPricePercentage(char* buffer, const size_t buffer_size, unsigned
 }
 
 /**
- * Get the face value for all items of a given category. Won't overflow
+ * Get the face value for all items of a given category. Won't overflow //TODO this is wrong! want the sum of the sell prices of the owned items
  **/
 uint64_t currentCategorySellPrice(const uint32_t treasureID) {
   uint64_t sellPrice = 0;

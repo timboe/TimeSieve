@@ -53,7 +53,7 @@ void outboxSendFailed(DictionaryIterator *iterator, AppMessageResult reason, voi
  * Send the current save to the phone where it may be displayed to the user.
  */
 void sendStateToPhone() {
-  DictionaryIterator *iter;
+  DictionaryIterator* iter;
 
   app_message_outbox_begin(&iter);
   DictionaryResult resultD = dict_write_data(iter, KEY_SAVE_DATA, (const uint8_t*) getData(), sizeof(struct userData_v1));
@@ -65,7 +65,7 @@ void sendStateToPhone() {
     APP_LOG(APP_LOG_LEVEL_DEBUG, "Dict cr failed. Codes d:%i v:%i w:%i", (int)resultD, (int)resultV, (int)resultW);
   } else {
     app_message_outbox_send(); // Bon voyage!
-    APP_LOG(APP_LOG_LEVEL_DEBUG, "save sent to phone! %i bytes", (int)bytesToWrite);
+    APP_LOG(APP_LOG_LEVEL_DEBUG, "save sent to phone! %i bytes sent, dictSize was %i", (int)bytesToWrite, (int)dict_size(iter));
   }
 }
 
@@ -86,7 +86,7 @@ void registerCommunication() {
   app_message_register_outbox_failed(outboxSendFailed);
 
   // TODO bring this down to save space
-  app_message_open(app_message_inbox_size_maximum(), app_message_outbox_size_maximum());
+  app_message_open(MAX_MESSAGE_SIZE, MAX_MESSAGE_SIZE);
   isDone = true;
 }
 

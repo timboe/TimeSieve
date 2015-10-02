@@ -110,19 +110,19 @@ Pebble.addEventListener('webviewclosed', function(e) {
   dict['KEY_RESET']        = configData['op_reset'];
 
   // Did we get a save to load?
-  if (configData['op_animation'] != "") {
-    var load = configData['op_animation'];
+  if ('op_loadSave' in configData && configData['op_loadSave'] != "") {
+    var loadData = configData[op_loadSave];
     //Check is hex
-    if (load.matches("[0-9A-F]+") == true) {
-      var decodedSave = hexToBytes(load);
-      var decodedSchema = hexToSchema(load);
+    if (loadData.matches("[0-9A-F]+") == true) {
+      var decodedSave = hexToBytes(loadData);
+      var decodedSchema = hexToSchema(loadData);
       if (decodedSchema == 1) {
-        if (load.length == 354) {
+        if (loadData.length == 354) {
           // OK! we load the save
           dict['KEY_SAVE_VERSION'] = 1;
           dict['KEY_SAVE_DATA'] = crypt(decodedSave);
         } else {
-          console.log('JS: ERROR: Wrong size for schema 1:' + load.length);
+          console.log('JS: ERROR: Wrong size for schema 1:' + loadData.length);
         }
       } else {
         console.log('JS: ERROR: Unknown schema ' + decodedSchema);
